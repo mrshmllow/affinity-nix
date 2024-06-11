@@ -67,7 +67,7 @@
           nativeBuildInputs = [pkgs.makeWrapper];
           installPhase = ''
             makeWrapper ${pkgs.lib.getExe' pkg name} $out/bin/${name} \
-              --set WINEPREFIX "/home/marsh/.local/share/affinity" \
+              --run 'export WINEPREFIX="$HOME/.local/share/affinity"' \
               --set LD_LIBRARY_PATH "${wineUnwrapped}/lib:$LD_LIBRARY_PATH" \
               --set WINESERVER "${pkgs.lib.getExe' wineUnwrapped "wineserver"}" \
               --set WINELOADER "${pkgs.lib.getExe' wineUnwrapped "wine"}" \
