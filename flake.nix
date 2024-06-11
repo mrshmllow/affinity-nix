@@ -117,7 +117,6 @@
         '';
     in {
       inherit winetricks wine wineboot;
-      _wine_unwrapped = wineUnstable;
 
       installPhoto = createInstaller photoSrc "Photo";
       photo = createRunner self.packages.${pkgs.system}.installPhoto "Photo";
