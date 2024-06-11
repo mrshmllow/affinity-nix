@@ -35,7 +35,7 @@
       src = winetricks-source;
     };
 
-    wrap = pkg: name:
+    wrapWithPrefix = pkg: name:
       pkgs.stdenv.mkDerivation {
         name = name;
         src = ./.;
@@ -52,18 +52,30 @@
         meta.mainProgram = name;
       };
 
-    winetricks = wrap winetricksUnwrapped "winetricks";
-    wine = wrap wineUnwrapped "wine";
-    wineboot = wrap wineUnwrapped "wineboot";
+    winetricks = wrapWithPrefix winetricksUnwrapped "winetricks";
+    wine = wrapWithPrefix wineUnwrapped "wine";
+    wineboot = wrapWithPrefix wineUnwrapped "wineboot";
 
-    src = pkgs.fetchurl {
+    photoSrc = pkgs.fetchurl {
       url = "https://archive.org/download/affinity-photo-msi-2.5.2/affinity-photo-msi-2.5.2.exe";
       sha256 = "0g58px4cx4wam6srvx6ymafj1ngv7igg7cgxzsqhf1gbxl7r1ixj";
       version = "2.5.2";
       name = "affinity-photo-msi-2.5.2.exe";
     };
+    designerSrc = pkgs.fetchurl {
+      url = "https://archive.org/download/affinity-designer-msi-2.5.2/affinity-designer-msi-2.5.2.exe";
+      sha256 = "0g58px4cx4wam6srvx6ymafj1ngv7igg7cgxzsqhf1gbxl7r1ixj";
+      version = "2.5.2";
+      name = "affinity-designer-msi-2.5.2.exe";
+    };
+    publisherSrc = pkgs.fetchurl {
+      url = "https://archive.org/download/affinity-publisher-msi-2.5.2/affinity-publisher-msi-2.5.2.exe";
+      sha256 = "0g58px4cx4wam6srvx6ymafj1ngv7igg7cgxzsqhf1gbxl7r1ixj";
+      version = "2.5.2";
+      name = "affinity-publisher-msi-2.5.2.exe";
+    };
 
-    photo = pkgs.writeScriptBin "photo" ''
+    check = pkgs.writeScriptBin "check" ''
       WINEDLLOVERRIDES="mscoree=" ${pkgs.lib.getExe wineboot} --init
       ${pkgs.lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
       ${pkgs.lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
@@ -80,18 +92,42 @@
         echo "---"
         exit 1
       fi
-
-      if [ ! -f "~/.local/share/affinity/drive_c/Program Files/Affinity/Photo 2/Photo.exe" ]; then
-          ${pkgs.lib.getExe wine} ${src}
-      fi
-
-      ${pkgs.lib.getExe wine} "~/.local/share/affinity/drive_c/Program Files/Affinity/Photo 2/Photo.exe"
     '';
+
+    createInstaller = src: name:
+      pkgs.writeScriptBin "install-${name}" ''
+        ${pkgs.lib.getExe check}
+
+        if [ ! -f "~/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
+            ${pkgs.lib.getExe wine} ${src}
+        fi
+      '';
+
+    createRunner = installer: name:
+      pkgs.writeScriptBin "run-${name}" ''
+        ${pkgs.lib.getExe installer}
+
+        ${pkgs.lib.getExe wine} "~/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
+      '';
+
+    installPhoto = createInstaller photoSrc "Photo";
+    installDesigner = createInstaller designerSrc "Designer";
+    installPublisher = createInstaller publisherSrc "Publisher";
+
+    photo = createRunner installPhoto "Photo";
+    designer = createRunner installDesigner "Designer";
+    publisher = createRunner installPublisher "Publisher";
   in {
     packages.x86_64-linux.wine = wine;
     packages.x86_64-linux.winetricks = winetricks;
     packages.x86_64-linux.wineboot = wineboot;
+
     packages.x86_64-linux.photo = photo;
+    packages.x86_64-linux.installPhoto = installPhoto;
+    packages.x86_64-linux.designer = designer;
+    packages.x86_64-linux.installDesigner = installDesigner;
+    packages.x86_64-linux.publisher = publisher;
+    packages.x86_64-linux.installPublisher = installPublisher;
 
     packages.x86_64-linux.default = self.packages.x86_64-linux.wine;
   };
