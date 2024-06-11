@@ -56,17 +56,30 @@
     wine = wrap wineUnwrapped "wine";
     wineboot = wrap wineUnwrapped "wineboot";
 
-    setup = pkgs.writeScriptBin "setup" ''
+    src = pkgs.fetchurl {
+      url = "https://archive.org/download/affinity-photo-msi-2.5.2/affinity-photo-msi-2.5.2.exe";
+      sha256 = "0g58px4cx4wam6srvx6ymafj1ngv7igg7cgxzsqhf1gbxl7r1ixj";
+      version = "2.5.2";
+      name = "affinity-photo-msi-2.5.2.exe";
+    };
+
+    photo = pkgs.writeScriptBin "photo" ''
       WINEDLLOVERRIDES="mscoree=" ${pkgs.lib.getExe wineboot} --init
       ${pkgs.lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
       ${pkgs.lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
       ${pkgs.lib.getExe wine} winecfg -v win11
+
+      if [ ! -f "~/.local/share/affinity/drive_c/Program Files/Affinity/Photo 2/Photo.exe" ]; then
+          ${pkgs.lib.getExe wine} ${src}
+      fi
+
+      ${pkgs.lib.getExe wine} "~/.local/share/affinity/drive_c/Program Files/Affinity/Photo 2/Photo.exe"
     '';
   in {
     packages.x86_64-linux.wine = wine;
     packages.x86_64-linux.winetricks = winetricks;
     packages.x86_64-linux.wineboot = wineboot;
-    packages.x86_64-linux.setup = setup;
+    packages.x86_64-linux.photo = photo;
 
     packages.x86_64-linux.default = self.packages.x86_64-linux.wine;
   };
