@@ -1,14 +1,12 @@
 # affinity-nix
 
-An attempt at packaging affinity applications with nix.
+Affinity Photo, Designer, and Publisher applications with packaged with nix.
 
-Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs.
-
-Uses ElementalWarrior's wine https://gitlab.winehq.org/ElementalWarrior/wine
+Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
 ## Usage Instructions
 
-**Cached with garnix. Read https://garnix.io/docs/caching for instructions to add it as a subsitutor.**
+**Cached with garnix. Add it as a nix subsitutor! Read https://garnix.io/docs/caching for instructions.**
 
 Perform the first time setup which will manipluate `~/.local/share/affinity/`.
 
