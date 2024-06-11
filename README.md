@@ -2,7 +2,9 @@
 
 An attempt at packaging affinity applications with nix.
 
-Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs
+Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs.
+
+Uses ElementalWarrior's wine https://gitlab.winehq.org/ElementalWarrior/wine
 
 ## Usage Instructions
 
