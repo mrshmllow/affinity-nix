@@ -86,14 +86,14 @@
         ${pkgs.lib.getExe wine} winecfg -v win11
 
         if [ ! -d "~/.local/share/affinity/drive_c/windows/system32/WinMetadata/" ]; then
-          echo "---"
+          echo "------------------------------------------------------"
           echo
           echo "Please copy the WinMetadata folder from a windows installation!"
           echo "Example: cp -r ~/Documents/WinMetadata ~/.local/share/affinity/drive_c/windows/system32/WinMetadata/"
           echo
           echo "Then, restart this application."
           echo
-          echo "---"
+          echo "------------------------------------------------------"
           exit 1
         fi
       '';
