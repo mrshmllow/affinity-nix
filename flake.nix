@@ -100,7 +100,7 @@
 
       createInstaller = src: name:
         pkgs.writeScriptBin "install-${name}" ''
-          ${pkgs.lib.getExe check}
+          ${pkgs.lib.getExe check} || exit 1
 
           if [ ! -f "~/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
               ${pkgs.lib.getExe wine} ${src}
@@ -109,7 +109,7 @@
 
       createRunner = installer: name:
         pkgs.writeScriptBin "run-${name}" ''
-          ${pkgs.lib.getExe installer}
+          ${pkgs.lib.getExe installer} || exit 1
 
           ${pkgs.lib.getExe wine} "~/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
         '';
