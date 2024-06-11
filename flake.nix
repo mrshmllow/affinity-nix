@@ -27,14 +27,16 @@
   in {
     packages = forAllSystems (pkgs: let
       symlink = pkgs.callPackage ./symlink.nix {};
-      wineUnstable = pkgs.wineWow64Packages.full.override (old: {
-        wineRelease = "unstable";
-      });
-      wineUnwrapped = symlink {
-        wine = wineUnstable.overrideAttrs {
+      wineUnstable =
+        (pkgs.wineWow64Packages.full.override (old: {
+          wineRelease = "unstable";
+        }))
+        .overrideAttrs {
           src = elemental-wine-source;
           version = "8.14";
         };
+      wineUnwrapped = symlink {
+        wine = wineUnstable;
       };
       winetricksUnwrapped = pkgs.winetricks.overrideAttrs {
         src = winetricks-source;
@@ -115,6 +117,7 @@
         '';
     in {
       wine = wine;
+      _wine_unwrapped = wineUnstable;
       winetricks = winetricks;
       wineboot = wineboot;
 
