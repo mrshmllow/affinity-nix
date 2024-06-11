@@ -124,8 +124,6 @@
       designer = createRunner self.packages.${pkgs.system}.installDesigner "Designer";
       installPublisher = createInstaller publisherSrc "Publisher";
       publisher = createRunner self.packages.${pkgs.system}.installPublisher "Publisher";
-
-      default = self.packages.x86_64-linux.wine;
     });
   };
 }
