@@ -1,6 +1,6 @@
 # affinity-nix
 
-Affinity Photo, Designer, and Publisher applications with packaged with nix.
+Affinity Photo, Designer, and Publisher applications packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
