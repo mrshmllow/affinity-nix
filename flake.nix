@@ -113,25 +113,17 @@
 
           ${pkgs.lib.getExe wine} "~/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
         '';
-
-      installPhoto = createInstaller photoSrc "Photo";
-      installDesigner = createInstaller designerSrc "Designer";
-      installPublisher = createInstaller publisherSrc "Publisher";
-
-      photo = createRunner installPhoto "Photo";
-      designer = createRunner installDesigner "Designer";
-      publisher = createRunner installPublisher "Publisher";
     in {
       wine = wine;
       winetricks = winetricks;
       wineboot = wineboot;
 
-      photo = photo;
-      installPhoto = installPhoto;
-      designer = designer;
-      installDesigner = installDesigner;
-      publisher = publisher;
-      installPublisher = installPublisher;
+      installPhoto = createInstaller photoSrc "Photo";
+      photo = createRunner self.packages.${pkgs.system}.installPhoto "Photo";
+      installDesigner = createInstaller designerSrc "Designer";
+      designer = createRunner self.packages.${pkgs.system}.installDesigner "Designer";
+      installPublisher = createInstaller publisherSrc "Publisher";
+      publisher = createRunner self.packages.${pkgs.system}.installPublisher "Publisher";
 
       default = self.packages.x86_64-linux.wine;
     });
