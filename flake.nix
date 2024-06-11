@@ -28,9 +28,9 @@
     packages = forAllSystems (pkgs: let
       symlink = pkgs.callPackage ./symlink.nix {};
       wineUnstable =
-        (pkgs.wineWow64Packages.full.override (old: {
+        (pkgs.wineWow64Packages.full.override {
           wineRelease = "unstable";
-        }))
+        })
         .overrideAttrs {
           src = elemental-wine-source;
           version = "8.14";
@@ -62,7 +62,7 @@
 
       wrapWithPrefix = pkg: name:
         pkgs.stdenv.mkDerivation {
-          name = name;
+          inherit name;
           src = ./.;
           nativeBuildInputs = [pkgs.makeWrapper];
           installPhase = ''
@@ -116,10 +116,8 @@
           ${pkgs.lib.getExe wine} "$HOME/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
         '';
     in {
-      wine = wine;
+      inherit winetricks wine wineboot;
       _wine_unwrapped = wineUnstable;
-      winetricks = winetricks;
-      wineboot = wineboot;
 
       installPhoto = createInstaller photoSrc "Photo";
       photo = createRunner self.packages.${pkgs.system}.installPhoto "Photo";
