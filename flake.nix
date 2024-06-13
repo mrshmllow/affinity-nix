@@ -60,6 +60,8 @@
         name = "affinity-publisher-msi-2.5.2.exe";
       };
 
+      affinityPath = "$HOME/.local/share/affinity/";
+
       wrapWithPrefix = pkg: name:
         pkgs.stdenv.mkDerivation {
           inherit name;
@@ -67,7 +69,7 @@
           nativeBuildInputs = [pkgs.makeWrapper];
           installPhase = ''
             makeWrapper ${pkgs.lib.getExe' pkg name} $out/bin/${name} \
-              --run 'export WINEPREFIX="$HOME/.local/share/affinity"' \
+              --run 'export WINEPREFIX="${affinityPath}"' \
               --set LD_LIBRARY_PATH "${wineUnwrapped}/lib:$LD_LIBRARY_PATH" \
               --set WINESERVER "${pkgs.lib.getExe' wineUnwrapped "wineserver"}" \
               --set WINELOADER "${pkgs.lib.getExe' wineUnwrapped "wine"}" \
@@ -87,24 +89,14 @@
         ${pkgs.lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
         ${pkgs.lib.getExe wine} winecfg -v win11
 
-        if [ ! -d "$HOME/.local/share/affinity/drive_c/windows/system32/WinMetadata/" ]; then
-          echo "------------------------------------------------------"
-          echo
-          echo "Please copy the WinMetadata folder from a windows installation!"
-          echo "Example: cp -r ~/Documents/WinMetadata ~/.local/share/affinity/drive_c/windows/system32/WinMetadata/"
-          echo
-          echo "Then, restart this application."
-          echo
-          echo "------------------------------------------------------"
-          exit 1
-        fi
+        install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
       '';
 
       createInstaller = src: name:
         pkgs.writeScriptBin "install-${name}" ''
           ${pkgs.lib.getExe check} || exit 1
 
-          if [ ! -f "$HOME/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
+          if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
               ${pkgs.lib.getExe wine} ${src}
           fi
         '';
@@ -113,7 +105,7 @@
         pkgs.writeScriptBin "run-${name}" ''
           ${pkgs.lib.getExe installer} || exit 1
 
-          ${pkgs.lib.getExe wine} "$HOME/.local/share/affinity/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
+          ${pkgs.lib.getExe wine} ${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
         '';
     in {
       inherit winetricks wine wineboot;
