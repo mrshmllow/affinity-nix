@@ -1,0 +1,5 @@
+builds:
+  exclude: []
+  include:
+  - packages.x86_64-linux._cached_wine_unwrapped
+  - packages.x86_64-linux._cached_winetricks_unwrapped

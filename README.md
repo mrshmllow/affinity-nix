@@ -18,10 +18,3 @@ nix run github:mrshmllow/affinity-nix#designer
 nix run github:mrshmllow/affinity-nix#publisher
 ```
 
-The operation will fail half way. Copy `C:\Windows\System32\WinMetadata` from a windows computer to `~/.local/share/affinity/drive_c/windows/system32/`.
-
-```bash
-cp -r ~/Documents/WinMetadata ~/.local/share/affinity/drive_c/windows/system32/
-```
-
-Launch the package again and follow the installation prompts.
