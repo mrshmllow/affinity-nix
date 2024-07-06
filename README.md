@@ -6,8 +6,6 @@ Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty
 
 ## Usage Instructions
 
-**Cached with garnix. Add it as a nix subsitutor! Read https://garnix.io/docs/caching for instructions.**
-
 Perform the first time setup which will manipluate `~/.local/share/affinity/`.
 
 ```bash
