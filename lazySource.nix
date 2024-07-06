@@ -1,20 +1,19 @@
-{fetchurl}: {
-  photo = fetchurl {
-    url = "https://archive.org/download/affinity-photo-msi-2.5.2/affinity-photo-msi-2.5.2.exe";
-    sha256 = "0g58px4cx4wam6srvx6ymafj1ngv7igg7cgxzsqhf1gbxl7r1ixj";
-    version = "2.5.2";
-    name = "affinity-photo-msi-2.5.2.exe";
+{requireFile}: let
+  version = "2.5.3";
+in {
+  photo = requireFile {
+    name = "affinity-photo-msi-${version}.exe";
+    sha256 = "0lly8jr6w0i8ifxphqpclisr3zrcfn2snnilwcs4q2h2jpvfgbiv";
+    url = "https://store.serif.com/en-gb/update/windows/photo/2/";
   };
-  designer = fetchurl {
-    url = "https://archive.org/download/affinity-designer-msi-2.5.2/affinity-designer-msi-2.5.2.exe";
-    sha256 = "1955vwl06l6dbzx0dfm5vg2jvqbff7994yp8s9sqjf61a609lqhg";
-    version = "2.5.2";
-    name = "affinity-designer-msi-2.5.2.exe";
+  designer = requireFile {
+    name = "affinity-designer-msi-${version}.exe";
+    sha256 = "1pj9adxh6d77b7sikqbd798gbf2hbn2yxwcld62bvfwrbqkyq6v7";
+    url = "https://store.serif.com/en-gb/update/windows/designer/2/";
   };
-  publisher = fetchurl {
-    url = "https://archive.org/download/affinity-publisher-msi-2.5.2/affinity-publisher-msi-2.5.2.exe";
-    sha256 = "1k30vb1fh106fjvivrq8j2sd3nnq16fspp1g1bid3lf2i5jpw9h6";
-    version = "2.5.2";
-    name = "affinity-publisher-msi-2.5.2.exe";
+  publisher = requireFile {
+    name = "affinity-publisher-msi-${version}.exe";
+    sha256 = "1rd6ma5idaa88i49mz2d9gl3k1svvpa6sna333p34dbjqdc5y7yq";
+    url = "https://store.serif.com/en-gb/update/windows/designer/2/";
   };
 }
