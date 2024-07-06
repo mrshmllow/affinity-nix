@@ -18,7 +18,7 @@
   '';
 
   createInstaller = name: let
-    sources = pkgs.callPackage ./lazySource.nix {};
+    sources = pkgs.callPackage ./source.nix {};
   in
     writeScriptBin "install-Affinity-${name}-2" ''
       ${lib.getExe check} || exit 1
