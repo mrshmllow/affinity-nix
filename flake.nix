@@ -56,11 +56,11 @@
         _cached_wine_unwrapped = wineUnstable;
         _cached_winetricks_unwrapped = winetricksUnwrapped;
 
-        installPhoto = createInstaller "Photo";
+        updatePhoto = createInstaller "Photo";
         photo = createPackage "Photo";
-        installDesigner = createInstaller "Designer";
+        updateDesigner = createInstaller "Designer";
         designer = createPackage "Designer";
-        installPublisher = createInstaller "Publisher";
+        updatePublisher = createInstaller "Publisher";
         publisher = createPackage "Publisher";
       });
   };
