@@ -8,7 +8,7 @@ Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty
 
 **Cached with garnix. Add it as a nix subsitutor! Read https://garnix.io/docs/caching for instructions.**
 
-Perform the first time setup which will manipluate `~/.local/share/affinity/`.
+Perform the first time setup which will manipluate `$XDG_DATA_HOME/affinity/`.
 
 ```bash
 nix run github:mrshmllow/affinity-nix#photo
