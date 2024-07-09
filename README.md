@@ -16,3 +16,12 @@ nix run github:mrshmllow/affinity-nix#designer
 nix run github:mrshmllow/affinity-nix#publisher
 ```
 
+Update installations in `~/.local/share/affinity/`.
+
+```bash
+nix run github:mrshmllow/affinity-nix#updatePhoto
+
+nix run github:mrshmllow/affinity-nix#updateDesigner
+
+nix run github:mrshmllow/affinity-nix#updatePublisher
+```
