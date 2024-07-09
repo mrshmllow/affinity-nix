@@ -26,7 +26,7 @@
       ] (system: function nixpkgs.legacyPackages.${system});
   in {
     packages = forAllSystems (pkgs: let
-      affinityPath = "$HOME/.local/share/affinity/";
+      affinityPath = "$XDG_DATA_HOME/affinity/";
       symlink = pkgs.callPackage ./symlink.nix {};
 
       wineUnstable =
