@@ -16,4 +16,6 @@ in {
     sha256 = "1rd6ma5idaa88i49mz2d9gl3k1svvpa6sna333p34dbjqdc5y7yq";
     url = "https://store.serif.com/en-gb/update/windows/designer/2/";
   };
+
+  _version = version;
 }

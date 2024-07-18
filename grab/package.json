@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "playwright": "1.40.0",
+    "ts-node": "^10.9.2"
+  }
+}
