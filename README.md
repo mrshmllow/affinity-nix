@@ -6,7 +6,7 @@ Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty
 
 ## Usage Instructions
 
-Perform the first time setup which will manipluate `$XDG_DATA_HOME/affinity/`.
+Perform the first time setup which will manipluate `$XDG_DATA_HOME/affinity/`. Run these scripts again to launch the apps!
 
 ```bash
 nix run github:mrshmllow/affinity-nix#photo
