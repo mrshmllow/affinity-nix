@@ -2,7 +2,7 @@
 
 Affinity Photo, Designer, and Publisher applications packaged with nix.
 
-Based on https://github.com/lf-/affinity-crimes and https://codeberg.org/wanesty/affinity-wine-docs, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
+Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
 ## Usage Instructions
 
