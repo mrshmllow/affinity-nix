@@ -1,6 +1,6 @@
 {
   pkgs,
-  writeScriptBin,
+  writeShellScriptBin,
   lib,
   wineUnwrapped,
   wine,
@@ -8,7 +8,7 @@
   wineboot,
   winetricks,
 }: rec {
-  check = writeScriptBin "check" ''
+  check = writeShellScriptBin "check" ''
     WINEDLLOVERRIDES="mscoree=" ${lib.getExe wineboot} --init
     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
     ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
@@ -20,7 +20,7 @@
   createInstaller = name: let
     sources = pkgs.callPackage ./source.nix {};
   in
-    writeScriptBin "install-Affinity-${name}-2" ''
+    writeShellScriptBin "install-Affinity-${name}-2" ''
       ${lib.getExe check} || exit 1
       ${lib.getExe wine} ${sources.${lib.toLower name}}
     '';
@@ -28,7 +28,7 @@
   createRunner = name: let
     installer = createInstaller name;
   in
-    writeScriptBin "run-Affinity-${name}-2" ''
+    writeShellScriptBin "run-Affinity-${name}-2" ''
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
         ${lib.getExe installer} || exit 1
       else
