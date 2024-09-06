@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
     elemental-wine-source = {
-      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=c12ed1469948f764817fa17efd2299533cf3fe1c";
+      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=a7c9b19e1a26cf49c63a7c19189a3e2bbe2c6ac2";
       flake = false;
     };
     winetricks-source = {
@@ -26,13 +26,13 @@
       ] (system: function nixpkgs.legacyPackages.${system});
   in {
     devShells = forAllSystems (pkgs: {
-        default = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [nodejs playwright-driver.browsers];
-            shellHook = ''
-                export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
-                export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
-            '';
-        };
+      default = pkgs.mkShell {
+        nativeBuildInputs = with pkgs; [nodejs playwright-driver.browsers];
+        shellHook = ''
+          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+          export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+        '';
+      };
     });
 
     packages = forAllSystems (pkgs: let
@@ -45,7 +45,7 @@
         })
         .overrideAttrs {
           src = elemental-wine-source;
-          version = "8.14";
+          version = "9.13";
         };
       wineUnwrapped = symlink {
         wine = wineUnstable;
