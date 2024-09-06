@@ -36,7 +36,7 @@
     });
 
     packages = forAllSystems (pkgs: let
-      affinityPath = "$XDG_DATA_HOME/affinity/";
+      affinityPath = "$([[ -z \"$XDG_DATA_HOME\" ]] && echo \"$HOME/.local/share/affinity\" || echo \"$XDG_DATA_HOME/affinity\")";
       symlink = pkgs.callPackage ./symlink.nix {};
 
       wineUnstable =
