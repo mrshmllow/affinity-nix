@@ -1,5 +1,7 @@
 # affinity-nix
 
+![image](https://github.com/user-attachments/assets/eeb77651-8126-4899-a696-5bb154149753)
+
 Affinity Photo, Designer, and Publisher applications packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
