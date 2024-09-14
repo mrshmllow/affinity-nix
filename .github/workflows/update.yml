@@ -89,6 +89,8 @@ jobs:
               --label "update" \
               --body "$BODY")
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           BODY: |
             ## new hashes
             photo `${{ steps.hash-photo.outputs.photo-hash}}`
