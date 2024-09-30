@@ -14,7 +14,7 @@ in {
   publisher = requireFile {
     name = "affinity-publisher-msi-${version}.exe";
     sha256 = "1c49svih8azk5cfxk8x42w6y1xr0bvf8vir8nn1ksf04xvip7kqc";
-    url = "https://store.serif.com/en-gb/update/windows/designer/2/";
+    url = "https://store.serif.com/en-gb/update/windows/publisher/2/";
   };
 
   _version = version;
