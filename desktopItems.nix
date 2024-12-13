@@ -36,7 +36,7 @@
   };
   publisher = makeDesktopItem {
     desktopName = "Affinity Publisher 2";
-    name = "affinity-photo";
+    name = "affinity-publisher";
     exec = "${lib.getExe publisher} %U";
     icon = fetchurl {
       url = "https://cdn.serif.com/store/img/logos/affinity-publisher-2-020520191502.svg";

@@ -14,8 +14,8 @@
       "original": {
         "host": "gitlab.winehq.org",
         "owner": "ElementalWarrior",
+        "ref": "c12ed1469948f764817fa17efd2299533cf3fe1c",
         "repo": "wine",
-        "rev": "c12ed1469948f764817fa17efd2299533cf3fe1c",
         "type": "gitlab"
       }
     },
