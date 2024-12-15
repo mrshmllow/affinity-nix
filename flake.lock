@@ -14,18 +14,18 @@
       "original": {
         "host": "gitlab.winehq.org",
         "owner": "ElementalWarrior",
-        "ref": "c12ed1469948f764817fa17efd2299533cf3fe1c",
         "repo": "wine",
+        "rev": "c12ed1469948f764817fa17efd2299533cf3fe1c",
         "type": "gitlab"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1727348695,
-        "narHash": "sha256-J+PeFKSDV+pHL7ukkfpVzCOO7mBSrrpJ3svwBFABbhI=",
+        "lastModified": 1733940404,
+        "narHash": "sha256-Pj39hSoUA86ZePPF/UXiYHHM7hMIkios8TYG29kQT4g=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "1925c603f17fc89f4c8f6bf6f631a802ad85d784",
+        "rev": "5d67ea6b4b63378b9c13be21e2ec9d1afc921713",
         "type": "github"
       },
       "original": {
