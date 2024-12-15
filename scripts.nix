@@ -9,7 +9,7 @@
   winetricks,
 }: rec {
   check = writeShellScriptBin "check" ''
-    WINEDLLOVERRIDES="mscoree=" ${lib.getExe wineboot} --init
+    ${lib.getExe wineboot} --init
     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
     ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
     ${lib.getExe wine} winecfg -v win11
