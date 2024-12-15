@@ -36,7 +36,7 @@ jobs:
         working-directory: ./grab
         run: |
           echo "live-version=$(npx ts-node grab.ts version)" >> $GITHUB_OUTPUT
-  grab-newest:
+  create-issue:
     runs-on: ubuntu-latest
     needs:
       - get-live-version
@@ -45,55 +45,14 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: sudo apt install -y wget2
-      - run: mkdir -p grab/out
-      - run: npm ci
-        working-directory: ./grab
-      - name: Install Playwright Browsers
-        working-directory: ./grab
-        run: npx playwright install --with-deps
-      - id: download-photo
-        working-directory: ./grab/out
-        run: |
-          wget2 --cut-file-get-vars $(npx ts-node ../grab.ts photo)
-      - id: download-designer
-        working-directory: ./grab/out
-        run: |
-          wget2 --cut-file-get-vars $(npx ts-node ../grab.ts designer)
-      - id: download-publisher
-        working-directory: ./grab/out
-        run: |
-          wget2 --cut-file-get-vars $(npx ts-node ../grab.ts publisher)
-      - id: hash-photo
-        working-directory: ./grab/out
-        run: |
-          echo "photo-hash=$(nix-hash --type sha256 ./affinity-photo-msi-*.exe)" >> $GITHUB_OUTPUT
-      - id: hash-designer
-        working-directory: ./grab/out
-        run: |
-          echo "designer-hash=$(nix-hash --type sha256 ./affinity-designer-msi-*.exe)" >> $GITHUB_OUTPUT
-      - id: hash-publisher
-        working-directory: ./grab/out
-        run: |
-          echo "publisher-hash=$(nix-hash --type sha256 ./affinity-publisher-msi-*.exe)" >> $GITHUB_OUTPUT
       - name: Create Issue
         run: |
             new_issue_url=$(gh issue create \
-              --title "bump suite version ${{needs.get-current-version.current-version}} > ${{needs.get-live-version}}" \
+              --title "bump suite version $CURRENT_VERSION > $LIVE_VERSION" \
               --assignee "mrshmllow" \
-              --label "update" \
-              --body "$BODY")
+              --label "update")
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          BODY: |
-            ## new hashes
-            photo `${{ steps.hash-photo.outputs.photo-hash}}`
-            designer `${{ steps.hash-designer.outputs.designer-hash}}`
-            publisher `${{ steps.hash-designer.outputs.publisher-hash}}`
-
+          CURRENT_VERSION: ${{ needs.get-current-version.outputs.current-version }}
+          LIVE_VERSION: ${{ needs.get-live-version.outputs.version }}
