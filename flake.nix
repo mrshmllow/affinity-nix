@@ -63,9 +63,6 @@
       with pkgs.callPackage ./scripts.nix {inherit wineUnwrapped wineboot winetricks wine affinityPath;}; {
         inherit winetricks wine wineboot;
 
-        _cached_wine_unwrapped = wineUnstable;
-        _cached_winetricks_unwrapped = winetricksUnwrapped;
-
         updatePhoto = createInstaller "Photo";
         photo = createPackage "Photo";
         updateDesigner = createInstaller "Designer";
