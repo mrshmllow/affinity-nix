@@ -104,3 +104,19 @@ nix run github:mrshmllow/affinity-nix#updateDesigner
 
 nix run github:mrshmllow/affinity-nix#updatePublisher
 ```
+
+### 4. Troubleshooting, winetricks, wineboot, and more
+You can access winetricks, wine, and wineboot with the affinity environment & wine prefix baked in with nix run.
+
+> [!TIP]
+> Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
+
+```bash
+nix run github:mrshmllow/affinity-nix#winetricks
+
+nix run github:mrshmllow/affinity-nix#wine
+
+nix run github:mrshmllow/affinity-nix#wine -- winecfg
+
+nix run github:mrshmllow/affinity-nix#wineboot
+```
