@@ -56,4 +56,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           CURRENT_VERSION: ${{ needs.get-current-version.outputs.current-version }}
-          LIVE_VERSION: ${{ needs.get-live-version.outputs.version }}
+          LIVE_VERSION: ${{ needs.get-live-version.outputs.live-version }}
