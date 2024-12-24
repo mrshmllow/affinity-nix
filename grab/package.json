@@ -1,7 +1,0 @@
-{
-  "type": "module",
-  "dependencies": {
-    "playwright": "1.49.0",
-    "ts-node": "^10.9.2"
-  }
-}

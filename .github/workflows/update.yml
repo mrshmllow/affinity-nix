@@ -21,21 +21,12 @@ jobs:
   get-live-version:
     runs-on: ubuntu-latest
     outputs:
-      live-version: ${{ steps.get-version.outputs.live-version }}
+      live-version: ${{ steps.get-live-version.outputs.live-version }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm ci
-        working-directory: ./grab
-      - name: Install Playwright Browsers
-        working-directory: ./grab
-        run: npx playwright install --with-deps
-      - id: get-version
-        working-directory: ./grab
+      - id: get-live-version
         run: |
-          echo "live-version=$(npx ts-node grab.ts version)" >> $GITHUB_OUTPUT
+          echo "live-version=$(curl https://store.serif.com/en-gb/update/windows/photo/2/ | grep "Download version" | awk '{print $NF}')" >> $GITHUB_OUTPUT
   create-issue:
     runs-on: ubuntu-latest
     needs:
