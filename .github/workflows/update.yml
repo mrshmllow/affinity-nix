@@ -17,7 +17,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - id: get-version
         run: |
-          echo "current-version=$(nix eval --impure --json --expr 'let nixpkgs = import <nixpkgs> {}; source = nixpkgs.callPackage ./source.nix {}; in source._version')" >> $GITHUB_OUTPUT
+          echo "current-version=$(nix eval --impure --json --expr 'let nixpkgs = import <nixpkgs> {}; source = nixpkgs.callPackage ./source.nix {}; in source._version' | tr -d '"')" >> $GITHUB_OUTPUT
   get-live-version:
     runs-on: ubuntu-latest
     outputs:
