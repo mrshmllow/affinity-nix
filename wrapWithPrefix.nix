@@ -4,13 +4,13 @@
   pkgs,
   affinityPath,
   wineUnwrapped,
-}: pkg: name:
-stdenv.mkDerivation {
-  inherit name;
+}: pkg: pname:
+stdenv.mkDerivation rec {
+  name = "affinity-${pname}";
   src = ./.;
   nativeBuildInputs = [pkgs.makeWrapper];
   installPhase = ''
-    makeWrapper ${lib.getExe' pkg name} $out/bin/${name} \
+    makeWrapper ${lib.getExe' pkg pname} $out/bin/${name} \
       --run 'export WINEPREFIX="${affinityPath}"' \
       --set LD_LIBRARY_PATH "${wineUnwrapped}/lib:$LD_LIBRARY_PATH" \
       --set WINESERVER "${lib.getExe' wineUnwrapped "wineserver"}" \
