@@ -51,7 +51,7 @@
       meta = {
         description = "Affinity ${name} 2";
         homepage = "https://affinity.serif.com/";
-        license = lib.licenses.unfree;
+        # license = lib.licenses.unfree;
         # maintainers = with pkgs.lib.maintainers; [marshmallow];
         platforms = ["x86_64-linux"];
         mainProgram = "run-Affinity-${name}-2";
