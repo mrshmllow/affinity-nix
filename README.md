@@ -7,6 +7,8 @@ Affinity Photo, Designer, and Publisher applications packaged with nix.
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
 ## Usage Instructions
+### 0. [Add garnix as a substituter](https://garnix.io/docs/caching)
+... If you want to avoid building wine
 ### 1. Perform a first time setup
 Perform the first time setup which will manipluate `$XDG_DATA_HOME/affinity/`.
 
