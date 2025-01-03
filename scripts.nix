@@ -11,7 +11,7 @@
   check = writeShellScriptBin "check" ''
     ${lib.getExe wineboot} --init
     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
-    ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2015
+    ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2022
     ${lib.getExe wine} winecfg -v win11
 
     install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
