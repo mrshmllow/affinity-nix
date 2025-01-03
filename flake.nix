@@ -45,7 +45,7 @@
         })
         .overrideAttrs {
           src = elemental-wine-source;
-          version = "8.14";
+          version = "9.13-part3";
         };
       wineUnwrapped = symlink {
         wine = wineUnstable;
