@@ -8,17 +8,12 @@
       url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
       flake = false;
     };
-    winetricks-source = {
-      url = "github:winetricks/winetricks?ref=20240105";
-      flake = false;
-    };
   };
 
   outputs = {
     self,
     nixpkgs,
     elemental-wine-source,
-    winetricks-source,
   }: let
     forAllSystems = function:
       nixpkgs.lib.genAttrs [
@@ -50,13 +45,10 @@
       wineUnwrapped = symlink {
         wine = wineUnstable;
       };
-      winetricksUnwrapped = pkgs.winetricks.overrideAttrs {
-        src = winetricks-source;
-      };
 
       wrapWithPrefix = pkgs.callPackage ./wrapWithPrefix.nix {inherit affinityPath wineUnwrapped;};
 
-      winetricks = wrapWithPrefix winetricksUnwrapped "winetricks";
+      winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
       wine = wrapWithPrefix wineUnwrapped "wine";
       wineboot = wrapWithPrefix wineUnwrapped "wineboot";
     in

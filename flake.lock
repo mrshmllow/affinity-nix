@@ -38,25 +38,7 @@
     "root": {
       "inputs": {
         "elemental-wine-source": "elemental-wine-source",
-        "nixpkgs": "nixpkgs",
-        "winetricks-source": "winetricks-source"
-      }
-    },
-    "winetricks-source": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1704453875,
-        "narHash": "sha256-YTEgb19aoM54KK8/IjrspoChzVnWAEItDlTxpfpS52w=",
-        "owner": "winetricks",
-        "repo": "winetricks",
-        "rev": "bc91718a5cad45e9f33de9b351a5960d5395bed5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "winetricks",
-        "ref": "20240105",
-        "repo": "winetricks",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
