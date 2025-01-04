@@ -6,33 +6,40 @@ Affinity Photo, Designer, and Publisher applications packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
+## Preamble
+
+> [!TIP]
+> [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
+
+The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.local/share/affinity/`.
+
 ## Usage Instructions
-### 0. [Add garnix as a substituter](https://garnix.io/docs/caching)
-... If you want to avoid building wine
-### 1. Perform a first time setup
-Perform the first time setup which will manipluate `$XDG_DATA_HOME/affinity/`.
 
+> [!IMPORTANT]
+> You will be graphically prompted to install the application: **Uncheck the desktop shortcut but leave the installation path default.**
+
+### Running Ad-hoc
 ```bash
-nix run github:mrshmllow/affinity-nix#photo
+$ nix run github:mrshmllow/affinity-nix#photo
 
-nix run github:mrshmllow/affinity-nix#designer
+$ nix run github:mrshmllow/affinity-nix#designer
 
-nix run github:mrshmllow/affinity-nix#publisher
+$ nix run github:mrshmllow/affinity-nix#publisher
 ```
 
-### 2. Install the applications on your system (Optional)
+### Installing the applications on your system (Optional)
 
-#### 2.1 Install with nix-profile
+#### Install with nix-profile
 
 ```bash
-nix profile install github:mrshmllow/affinity-nix#photo
+$ nix profile install github:mrshmllow/affinity-nix#photo
 
-nix profile install github:mrshmllow/affinity-nix#designer
+$ nix profile install github:mrshmllow/affinity-nix#designer
 
-nix profile install github:mrshmllow/affinity-nix#publisher
+$ nix profile install github:mrshmllow/affinity-nix#publisher
 ```
 
-#### 2.2 Install on NixOS / Home Manager
+#### Install on NixOS / Home Manager
 
 <details>
 <summary>Install on NixOS</summary>
@@ -97,14 +104,14 @@ The following is an example. **Installing this package does not differ to instal
 </details>
 
 ### 3. Updating the applications
-Update installations in `$XDG_DATA_HOME/affinity/`.
+These will graphically prompt you to update the affinity application.
 
 ```bash
-nix run github:mrshmllow/affinity-nix#updatePhoto
+$ nix run github:mrshmllow/affinity-nix#updatePhoto
 
-nix run github:mrshmllow/affinity-nix#updateDesigner
+$ nix run github:mrshmllow/affinity-nix#updateDesigner
 
-nix run github:mrshmllow/affinity-nix#updatePublisher
+$ nix run github:mrshmllow/affinity-nix#updatePublisher
 ```
 
 ### 4. Troubleshooting, winetricks, wineboot, and more
@@ -114,11 +121,11 @@ You can access winetricks, wine, and wineboot with the affinity environment & wi
 > Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
 
 ```bash
-nix run github:mrshmllow/affinity-nix#winetricks
+$ nix run github:mrshmllow/affinity-nix#winetricks
 
-nix run github:mrshmllow/affinity-nix#wine
+$ nix run github:mrshmllow/affinity-nix#wine
 
-nix run github:mrshmllow/affinity-nix#wine -- winecfg
+$ nix run github:mrshmllow/affinity-nix#wine -- winecfg
 
-nix run github:mrshmllow/affinity-nix#wineboot
+$ nix run github:mrshmllow/affinity-nix#wineboot
 ```
