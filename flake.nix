@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+
     elemental-wine-source = {
       url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
       flake = false;
@@ -14,12 +16,31 @@
     self,
     nixpkgs,
     elemental-wine-source,
+    pre-commit-hooks,
   }: let
     forAllSystems = function:
       nixpkgs.lib.genAttrs [
         "x86_64-linux"
       ] (system: function nixpkgs.legacyPackages.${system});
   in {
+    checks = forAllSystems (pkgs: {
+      pre-commit-check = pre-commit-hooks.lib.${pkgs.system}.run {
+        src = ./.;
+        hooks = {
+          alejandra.enable = true;
+          statix.enable = true;
+          deadnix.enable = true;
+        };
+      };
+    });
+
+    devShells = forAllSystems (pkgs: {
+      default = nixpkgs.legacyPackages.${pkgs.system}.mkShell {
+        inherit (self.checks.${pkgs.system}.pre-commit-check) shellHook;
+        buildInputs = self.checks.${pkgs.system}.pre-commit-check.enabledPackages;
+      };
+    });
+
     packages = forAllSystems (pkgs: let
       affinityPath = "$([[ -z \"$XDG_DATA_HOME\" ]] && echo \"$HOME/.local/share/affinity\" || echo \"$XDG_DATA_HOME/affinity\")";
       symlink = pkgs.callPackage ./symlink.nix {};
