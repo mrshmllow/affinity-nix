@@ -13,6 +13,8 @@ Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, a
 
 The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.local/share/affinity/`.
 
+You will be prompted to provide affinity's installation exe on the first-time run, just follow the error's instructions to add the exe to your nix store and run again. 
+
 ## Usage Instructions
 
 > [!IMPORTANT]
