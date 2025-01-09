@@ -18,7 +18,7 @@ You will be prompted to provide affinity's installation exe on the first-time ru
 ## Usage Instructions
 
 > [!IMPORTANT]
-> You will be graphically prompted to install the application: **Uncheck the desktop shortcut but leave the installation path default.**
+> You will be graphically prompted to install the application: **Leave the installation path default.**
 
 ### Running Ad-hoc
 ```bash
