@@ -1,6 +1,7 @@
 # affinity-nix
 
-![image](https://github.com/user-attachments/assets/eeb77651-8126-4899-a696-5bb154149753)
+![image](https://github.com/user-attachments/assets/d81f1805-c72b-4999-909e-c5666b5e0a11)
+
 
 Affinity Photo, Designer, and Publisher applications packaged with nix.
 
