@@ -132,3 +132,34 @@ $ nix run github:mrshmllow/affinity-nix#wine -- winecfg
 
 $ nix run github:mrshmllow/affinity-nix#wineboot
 ```
+
+## FAQ
+
+### Im getting `Unfortunately, we cannot download file affinity-photo-msi-2.5.7.exe automatically.`
+
+You got an error such as:
+
+```
+error: builder for '/nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designer-msi-2.5.7.exe.drv' failed with exit code 1;
+       last 11 log lines:
+       >
+       > ***
+       > Unfortunately, we cannot download file affinity-designer-msi-2.5.7.exe automatically.
+       > Please go to https://store.serif.com/en-gb/update/windows/designer/2/ to download it yourself, and add it to the Nix store
+       > using either
+       >   nix-store --add-fixed sha256 affinity-designer-msi-2.5.7.exe
+       > or
+       >   nix-prefetch-url --type sha256 file:///path/to/affinity-designer-msi-2.5.7.exe
+       >
+       > ***
+       >
+       For full logs, run 'nix log /nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designer-msi-2.5.7.exe.drv'.
+```
+> [!TIP]
+> **You must follow the instructions**
+
+Download the exe from the url in the error, and run the example command to add it to the store.
+
+### I ran the store command above but its still not building!
+
+Double check which tool you are running. You likely added the exe for `Photo` but you are running `Designer` / `Publisher`. You must add the installation exe for every tool you want to run.
