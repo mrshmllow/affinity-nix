@@ -10,6 +10,8 @@
       url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
       flake = false;
     };
+
+    flake-compat.url = "github:edolstra/flake-compat";
   };
 
   outputs = {
@@ -17,6 +19,7 @@
     nixpkgs,
     elemental-wine-source,
     pre-commit-hooks,
+    ...
   }: let
     forAllSystems = function:
       nixpkgs.lib.genAttrs [
