@@ -1,6 +1,8 @@
-{requireFile}: let
+{ requireFile }:
+let
   version = "2.5.7";
-in {
+in
+{
   photo = requireFile {
     name = "affinity-photo-msi-${version}.exe";
     sha256 = "0765m6ci844kkw2wf2c8x9drizbi0h0m5kjd1z3csvhq4fiqqxys";

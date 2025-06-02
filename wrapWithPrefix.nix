@@ -4,11 +4,12 @@
   pkgs,
   affinityPath,
   wineUnwrapped,
-}: pkg: pname:
+}:
+pkg: pname:
 stdenv.mkDerivation rec {
   name = "affinity-${pname}";
   src = ./.;
-  nativeBuildInputs = [pkgs.makeWrapper];
+  nativeBuildInputs = [ pkgs.makeWrapper ];
   installPhase = ''
     makeWrapper ${lib.getExe' pkg pname} $out/bin/${name} \
       --run 'export WINEPREFIX="${affinityPath}"' \

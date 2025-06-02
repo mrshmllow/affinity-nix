@@ -5,7 +5,8 @@
   photo ? null,
   publisher ? null,
   designer ? null,
-}: {
+}:
+{
   photo = makeDesktopItem {
     desktopName = "Affinity Photo 2";
     name = "affinity-photo";
@@ -15,9 +16,17 @@
       sha256 = "04bnf12znp9dgkwpk46c01381cw298gq14ga7j7dwccyl3m556d7";
     };
     type = "Application";
-    categories = ["Graphics"];
-    keywords = ["Graphics" "2DGraphics" "RasterGraphics" "image" "editor" "vector" "drawing"];
-    mimeTypes = ["application/x-affinity"];
+    categories = [ "Graphics" ];
+    keywords = [
+      "Graphics"
+      "2DGraphics"
+      "RasterGraphics"
+      "image"
+      "editor"
+      "vector"
+      "drawing"
+    ];
+    mimeTypes = [ "application/x-affinity" ];
     startupWMClass = "photo.exe";
   };
   designer = makeDesktopItem {
@@ -29,9 +38,17 @@
       sha256 = "025j4aq8py2a5r34hx39nlhdmps06z6506h7wxchyxbbz6xz3d11";
     };
     type = "Application";
-    categories = ["Graphics"];
-    keywords = ["Graphics" "2DGraphics" "VectorGraphics" "image" "editor" "vector" "drawing"];
-    mimeTypes = ["application/x-affinity"];
+    categories = [ "Graphics" ];
+    keywords = [
+      "Graphics"
+      "2DGraphics"
+      "VectorGraphics"
+      "image"
+      "editor"
+      "vector"
+      "drawing"
+    ];
+    mimeTypes = [ "application/x-affinity" ];
     startupWMClass = "designer.exe";
   };
   publisher = makeDesktopItem {
@@ -43,9 +60,18 @@
       sha256 = "16ghh3mc2vjhvphbyy9zgan066ccp3xj1ilb6z5lmvsb94dp37aj";
     };
     type = "Application";
-    categories = ["Graphics"];
-    keywords = ["Graphics" "2DGraphics" "RasterGraphics" "VectorGraphics" "image" "editor" "vector" "drawing"];
-    mimeTypes = ["application/x-affinity"];
+    categories = [ "Graphics" ];
+    keywords = [
+      "Graphics"
+      "2DGraphics"
+      "RasterGraphics"
+      "VectorGraphics"
+      "image"
+      "editor"
+      "vector"
+      "drawing"
+    ];
+    mimeTypes = [ "application/x-affinity" ];
     startupWMClass = "publisher.exe";
   };
 }
