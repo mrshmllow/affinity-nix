@@ -2,19 +2,17 @@
 
 ![image](https://github.com/user-attachments/assets/d81f1805-c72b-4999-909e-c5666b5e0a11)
 
-
 Affinity Photo, Designer, and Publisher applications packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
 ## Preamble
 
-> [!TIP]
-> [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
+> [!TIP] > [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
 
 The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.local/share/affinity/`.
 
-You will be prompted to provide affinity's installation exe on the first-time run, just follow the error's instructions to add the exe to your nix store and run again. 
+You will be prompted to provide affinity's installation exe on the first-time run, just follow the error's instructions to add the exe to your nix store and run again.
 
 ## Usage Instructions
 
@@ -22,6 +20,7 @@ You will be prompted to provide affinity's installation exe on the first-time ru
 > You will be graphically prompted to install the application: **Leave the installation path default.**
 
 ### Running Ad-hoc
+
 ```bash
 $ nix run github:mrshmllow/affinity-nix#photo
 
@@ -73,6 +72,7 @@ The following is an example. **Installing this package does not differ to instal
   }
 }
 ```
+
 </details>
 
 <details>
@@ -104,9 +104,11 @@ The following is an example. **Installing this package does not differ to instal
   }
 }
 ```
+
 </details>
 
 ### 3. Updating the applications
+
 These will graphically prompt you to update the affinity application.
 
 ```bash
@@ -118,6 +120,7 @@ $ nix run github:mrshmllow/affinity-nix#updatePublisher
 ```
 
 ### 4. Troubleshooting, winetricks, wineboot, and more
+
 You can access winetricks, wine, and wineboot with the affinity environment & wine prefix baked in with nix run.
 
 > [!TIP]
@@ -155,8 +158,8 @@ error: builder for '/nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designe
        >
        For full logs, run 'nix log /nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designer-msi-2.5.7.exe.drv'.
 ```
-> [!TIP]
-> **You must follow the instructions**
+
+> [!TIP] > **You must follow the instructions**
 
 Download the exe from the url in the error, and run the example command to add it to the store.
 
