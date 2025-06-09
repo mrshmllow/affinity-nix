@@ -1,0 +1,6 @@
+{
+  imports = [
+    ./wine
+    ./affinity
+  ];
+}

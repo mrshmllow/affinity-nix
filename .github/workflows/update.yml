@@ -38,11 +38,11 @@ jobs:
     steps:
       - name: Create Issue
         run: |
-            new_issue_url=$(gh issue create \
-              --title "bump suite version $CURRENT_VERSION > $LIVE_VERSION" \
-              --assignee "mrshmllow" \
-              --label "update" \
-              --body "pls update the suite to $LIVE_VERSION")
+          new_issue_url=$(gh issue create \
+            --title "bump suite version $CURRENT_VERSION > $LIVE_VERSION" \
+            --assignee "mrshmllow" \
+            --label "update" \
+            --body "pls update the suite to $LIVE_VERSION")
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}

@@ -1,6 +1,6 @@
 builds:
   exclude: []
   include:
-  - packages.x86_64-linux.wine
-  - packages.x86_64-linux.wineboot
-  - packages.x86_64-linux.winetricks
+    - packages.x86_64-linux.wine
+    - packages.x86_64-linux.wineboot
+    - packages.x86_64-linux.winetricks
