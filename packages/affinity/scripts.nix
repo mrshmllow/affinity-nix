@@ -10,7 +10,7 @@
 }:
 rec {
   check = writeShellScriptBin "check" ''
-    ${lib.getExe wineboot} --init
+    ${lib.getExe wineboot} --update
     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
     ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2022
     ${lib.getExe wine} winecfg -v win11
