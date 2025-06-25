@@ -25,8 +25,7 @@ rec {
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       ${lib.getExe check} || exit 1
-      # block winemenubuilder.exe from making .desktop files and file associations
-      WINEDLLOVERRIDES=winemenubuilder.exe=d ${lib.getExe wine} ${sources.${lib.toLower name}}
+      ${lib.getExe wine} ${sources.${lib.toLower name}}
     '';
 
   createRunner =
