@@ -26,7 +26,7 @@
       "vector"
       "drawing"
     ];
-    mimeTypes = [ "application/x-affinity" ];
+    mimeTypes = [ "application/afphoto" ];
     startupWMClass = "photo.exe";
   };
   designer = makeDesktopItem {
@@ -48,7 +48,7 @@
       "vector"
       "drawing"
     ];
-    mimeTypes = [ "application/x-affinity" ];
+    mimeTypes = [ "application/afdesign" ];
     startupWMClass = "designer.exe";
   };
   publisher = makeDesktopItem {
@@ -71,7 +71,11 @@
       "vector"
       "drawing"
     ];
-    mimeTypes = [ "application/x-affinity" ];
+    mimeTypes = [
+      "application/afdesign"
+      "application/afphoto"
+      # Note that there is no mime type for a `.afpub` file
+    ];
     startupWMClass = "publisher.exe";
   };
 }
