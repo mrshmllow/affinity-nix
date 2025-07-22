@@ -12,7 +12,8 @@ rec {
   check = writeShellScriptBin "check" ''
     ${lib.getExe wineboot} --update
     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
-    ${lib.getExe winetricks} -q dotnet48 corefonts vcrun2022
+    ${lib.getExe winetricks} -q allfonts dotnet35 dotnet48 corefonts vcrun2022
+    ${lib.getExe winetricks} renderer=vulkan
     ${lib.getExe wine} winecfg -v win11
 
     install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
