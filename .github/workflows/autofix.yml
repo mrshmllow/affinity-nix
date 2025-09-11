@@ -1,0 +1,20 @@
+name: autofix.ci
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: nix fmt
+        run: nix develop --print-build-logs -v --command pre-commit run --all-files
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
