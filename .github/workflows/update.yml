@@ -11,7 +11,7 @@ jobs:
     outputs:
       current-version: ${{ steps.get-version.outputs.current-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
@@ -23,7 +23,7 @@ jobs:
     outputs:
       live-version: ${{ steps.get-live-version.outputs.live-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: get-live-version
         run: |
           echo "live-version=$(curl https://store.serif.com/en-gb/update/windows/photo/2/ | grep "Download version" | awk '{print $NF}')" >> $GITHUB_OUTPUT
