@@ -8,7 +8,8 @@ Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, a
 
 ## Preamble
 
-> [!TIP] > [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
+> [!TIP]
+> [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
 
 The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.local/share/affinity/`.
 
@@ -159,7 +160,8 @@ error: builder for '/nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designe
        For full logs, run 'nix log /nix/store/wnh96wlyi5f6ywr628mjfdpvsl8w03m0-affinity-designer-msi-2.5.7.exe.drv'.
 ```
 
-> [!TIP] > **You must follow the instructions**
+> [!TIP]
+> **You must follow the instructions**
 
 Download the exe from the url in the error, and run the example command to add it to the store.
 
