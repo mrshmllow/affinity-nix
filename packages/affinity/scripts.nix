@@ -15,6 +15,8 @@ rec {
       revision = "1";
     in
     writeShellScriptBin "check" ''
+      set -e
+
       function setup {
           ${lib.getExe wineboot} --update
           ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
@@ -60,6 +62,8 @@ rec {
       installer = createInstaller name;
     in
     writeShellScriptBin "run-Affinity-${name}-2" ''
+      set -e
+
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
         ${lib.getExe installer} || exit 1
       else
