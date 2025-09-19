@@ -7,17 +7,42 @@
   affinityPath,
   wineboot,
   winetricks,
+  revision,
 }:
 rec {
-  check = writeShellScriptBin "check" ''
-    ${lib.getExe wineboot} --update
-    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
-    ${lib.getExe winetricks} -q allfonts dotnet35 dotnet48 corefonts vcrun2022
-    ${lib.getExe winetricks} renderer=vulkan
-    ${lib.getExe wine} winecfg -v win11
+  check =
+    let
+      revisionPath = "${affinityPath}/.revision";
+    in
+    writeShellScriptBin "check" ''
+      function setup {
+          ${lib.getExe wineboot} --update
+          ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
+          ${lib.getExe winetricks} -q allfonts dotnet35 dotnet48 corefonts vcrun2022
+          ${lib.getExe winetricks} renderer=vulkan
+          ${lib.getExe wine} winecfg -v win11
 
-    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
-  '';
+          install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
+          echo "${revision}" > "${revisionPath}"
+      }
+
+      # older prefix with no revision number
+      if [ ! -f "${revisionPath}" ]; then
+          echo "affinity-nix: Running setup, no revision"
+
+          setup
+      else
+          content=$(<"${revisionPath}")
+
+          # only install deps if the revision number is higher than the
+          # one found in the prefix
+          if [[ "${revision}" -gt "$content" ]]; then
+            echo "affinity-nix: Running setup, old prefix revision"
+
+            setup
+          fi
+      fi
+    '';
 
   createInstaller =
     name:
