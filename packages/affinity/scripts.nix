@@ -14,7 +14,6 @@ rec {
     let
       revisionPath = "${affinityPath}/.revision";
       revision = "1";
-      winmetadata = pkgs.callPackage ./winmetadata.nix { };
       verbs = [
         "dotnet48"
         "corefonts"
@@ -23,10 +22,9 @@ rec {
         "allfonts"
         # "dotnet35"
       ];
+      winmetadata = pkgs.callPackage ./winmetadata.nix { };
     in
     writeShellScriptBin "check" ''
-      set -e
-
       ${lib.strings.toShellVars {
         inherit verbs;
         tricksInstalled = 0;
