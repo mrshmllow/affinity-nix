@@ -7,12 +7,12 @@
   affinityPath,
   wineboot,
   winetricks,
-  revision,
 }:
 rec {
   check =
     let
       revisionPath = "${affinityPath}/.revision";
+      revision = "1";
     in
     writeShellScriptBin "check" ''
       function setup {

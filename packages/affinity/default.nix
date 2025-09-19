@@ -5,7 +5,6 @@
       self',
       affinityPath,
       wineUnwrapped,
-      revision,
       ...
     }:
     let
@@ -15,7 +14,7 @@
           winetricks
           wine
           ;
-        inherit affinityPath wineUnwrapped revision;
+        inherit affinityPath wineUnwrapped;
       };
     in
     {
