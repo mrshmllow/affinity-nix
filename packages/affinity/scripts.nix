@@ -93,8 +93,6 @@ rec {
       installer = createInstaller name;
     in
     writeShellScriptBin "run-Affinity-${name}-2" ''
-      set -e
-
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
         ${lib.getExe installer} || exit 1
       else
