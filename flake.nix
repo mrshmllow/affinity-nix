@@ -2,7 +2,10 @@
   description = "An attempt at packging affinity photo for nix";
 
   inputs = {
+    # a known working revision of nixpkgs for wine. somewhat tracked by #63
+    nixpkgs-wine.url = "github:nixos/nixpkgs?ref=6df24922a1400241dae323af55f30e4318a6ca65";
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
     treefmt-nix.url = "github:numtide/treefmt-nix";
     git-hooks.url = "github:cachix/git-hooks.nix";

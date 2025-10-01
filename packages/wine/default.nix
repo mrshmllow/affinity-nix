@@ -4,11 +4,12 @@
     {
       pkgs,
       affinityPath,
+      system,
       ...
     }:
     let
       wineUnstable =
-        (pkgs.wineWow64Packages.full.override {
+        (inputs.nixpkgs-wine.legacyPackages.${system}.wineWow64Packages.full.override {
           wineRelease = "unstable";
         }).overrideAttrs
           {
