@@ -14,12 +14,29 @@ rec {
       revisionPath = "${affinityPath}/.revision";
       revision = "1";
       winmetadata = pkgs.callPackage ./winmetadata.nix { };
+      tricks = [
+        "dotnet48"
+        "corefonts"
+        "vcrun2022"
+
+        "allfonts"
+        # "dotnet35"
+      ];
     in
     writeShellScriptBin "check" ''
       function setup {
           ${lib.getExe wineboot} --update
           ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
-          ${lib.getExe winetricks} -q allfonts dotnet35 dotnet48 corefonts vcrun2022
+
+          ${lib.strings.toShellVars {
+            inherit tricks;
+          }}
+
+          for trick in "${"\${tricks[@]}"}"; do
+            echo "winetricks: Installing $trick"
+            ${lib.getExe winetricks} -q -f "$trick"
+          done
+
           ${lib.getExe winetricks} renderer=vulkan
           ${lib.getExe wine} winecfg -v win11
 
