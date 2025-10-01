@@ -7,6 +7,7 @@
   affinityPath,
   wineboot,
   winetricks,
+  wineserver,
 }:
 rec {
   check =
@@ -14,7 +15,7 @@ rec {
       revisionPath = "${affinityPath}/.revision";
       revision = "1";
       winmetadata = pkgs.callPackage ./winmetadata.nix { };
-      tricks = [
+      verbs = [
         "dotnet48"
         "corefonts"
         "vcrun2022"
@@ -24,18 +25,14 @@ rec {
       ];
     in
     writeShellScriptBin "check" ''
+      ${lib.strings.toShellVars {
+        inherit verbs;
+        tricksInstalled = 0;
+      }}
+
       function setup {
           ${lib.getExe wineboot} --update
           ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
-
-          ${lib.strings.toShellVars {
-            inherit tricks;
-          }}
-
-          for trick in "${"\${tricks[@]}"}"; do
-            echo "winetricks: Installing $trick"
-            ${lib.getExe winetricks} -q -f "$trick"
-          done
 
           ${lib.getExe winetricks} renderer=vulkan
           ${lib.getExe wine} winecfg -v win11
@@ -59,6 +56,22 @@ rec {
 
             setup
           fi
+      fi
+
+      # kinda stolen from the nix-citizen project, tysm
+      # we can be more smart about installing verbs other than relying on the revision number
+      for verb in "${"\${verbs[@]}"}"; do
+        # skip if verb is installed
+        if ! ${lib.getExe winetricks} list-installed | grep -qw "$verb"; then
+            echo "winetricks: Installing $verb"
+            ${lib.getExe winetricks} -q -f "$verb"
+            tricksInstalled=1
+        fi
+      done
+
+      # Ensure wineserver is restarted after tricks are installed
+      if [ "$tricksInstalled" -eq 1 ]; then
+        ${lib.getExe wineserver} -k
       fi
     '';
 
