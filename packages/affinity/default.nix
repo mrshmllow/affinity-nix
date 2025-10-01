@@ -13,6 +13,7 @@
           wineboot
           winetricks
           wine
+          wineserver
           ;
         inherit affinityPath wineUnwrapped;
       };
