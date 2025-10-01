@@ -22,6 +22,7 @@ rec {
         "allfonts"
         # "dotnet35"
       ];
+      winmetadata = pkgs.callPackage ./winmetadata.nix { };
     in
     writeShellScriptBin "check" ''
       ${lib.strings.toShellVars {
@@ -36,7 +37,7 @@ rec {
           ${lib.getExe winetricks} renderer=vulkan
           ${lib.getExe wine} winecfg -v win11
 
-          install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${./winmetadata}/*
+          install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
           echo "${revision}" > "${revisionPath}"
       }
 
