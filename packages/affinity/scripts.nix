@@ -25,6 +25,8 @@ rec {
       winmetadata = pkgs.callPackage ./winmetadata.nix { };
     in
     writeShellScriptBin "check" ''
+      set -x
+
       ${lib.strings.toShellVars {
         inherit verbs;
         tricksInstalled = 0;
@@ -80,6 +82,8 @@ rec {
       sources = pkgs.callPackage ./source.nix { };
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
+      set -x
+
       ${lib.getExe check} || exit 1
       ${lib.getExe wine} winecfg -v win11
       ${lib.getExe wineserver} -w
@@ -92,6 +96,8 @@ rec {
       installer = createInstaller name;
     in
     writeShellScriptBin "run-Affinity-${name}-2" ''
+      set -x
+
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
         ${lib.getExe installer} || exit 1
       else
