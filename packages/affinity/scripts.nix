@@ -35,7 +35,6 @@ rec {
           ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
 
           ${lib.getExe winetricks} renderer=vulkan
-          ${lib.getExe wine} winecfg -v win11
 
           install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
           echo "${revision}" > "${revisionPath}"
@@ -82,6 +81,8 @@ rec {
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       ${lib.getExe check} || exit 1
+      ${lib.getExe wine} winecfg -v win11
+      ${lib.getExe wineserver} -w
       ${lib.getExe wine} ${sources.${lib.toLower name}}
     '';
 
