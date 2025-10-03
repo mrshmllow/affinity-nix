@@ -118,9 +118,13 @@ rec {
       set -x
 
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
-        ${lib.getExe installer} || exit 1
+          ${lib.getExe installer} || exit 1
       else
-        ${lib.getExe check} || exit 1
+          ${lib.getExe check} || exit 1
+      fi
+
+      if [ "$1" != "--verbose" ]; then
+          export WINEDEBUG=-all,fixme-all
       fi
 
       ${lib.getExe wine} "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
