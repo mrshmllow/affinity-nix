@@ -68,6 +68,8 @@ rec {
       for app in "${"\${apps[@]}"}"; do
           echo "affinity-nix: Installing settings for $app"
 
+          mkdir -p "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+
           ${lib.getExe pkgs.rsync} -v \
               --ignore-existing \
               --chmod=644 \
