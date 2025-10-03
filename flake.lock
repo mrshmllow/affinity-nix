@@ -186,6 +186,22 @@
         "type": "github"
       }
     },
+    "on-linux": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1759319647,
+        "narHash": "sha256-R1aAOcjS1jc5Dthz/59aQxr0YVDv7K0JsoTb9SV11cA=",
+        "owner": "seapear",
+        "repo": "AffinityOnLinux",
+        "rev": "29527c1b64dc439c5ad65d3babe40d62834f6234",
+        "type": "github"
+      },
+      "original": {
+        "owner": "seapear",
+        "repo": "AffinityOnLinux",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "elemental-wine-source": "elemental-wine-source",
@@ -194,6 +210,7 @@
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-wine": "nixpkgs-wine",
+        "on-linux": "on-linux",
         "treefmt-nix": "treefmt-nix"
       }
     },

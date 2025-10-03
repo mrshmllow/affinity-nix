@@ -8,6 +8,7 @@
   wineboot,
   winetricks,
   wineserver,
+  on-linux,
 }:
 rec {
   check =
@@ -30,6 +31,11 @@ rec {
       ${lib.strings.toShellVars {
         inherit verbs;
         tricksInstalled = 0;
+        apps = [
+          "Photo"
+          "Designer"
+          "Publisher"
+        ];
       }}
 
       function setup {
@@ -58,6 +64,17 @@ rec {
             setup
           fi
       fi
+
+      for app in "${"\${apps[@]}"}"; do
+          echo "affinity-nix: Installing settings for $app"
+
+          ${lib.getExe pkgs.rsync} -v \
+              --ignore-existing \
+              --chmod=644 \
+              --recursive \
+              "${on-linux}/Auxillary/Settings/$app/2.0/" \
+              "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+      done
 
       # kinda stolen from the nix-citizen project, tysm
       # we can be more smart about installing verbs other than relying on the revision number

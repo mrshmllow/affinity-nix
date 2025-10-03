@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   perSystem =
     {
@@ -16,6 +17,7 @@
           wineserver
           ;
         inherit affinityPath wineUnwrapped;
+        inherit (inputs) on-linux;
       };
     in
     {
