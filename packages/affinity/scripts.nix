@@ -98,7 +98,7 @@ rec {
   createDownloader =
     name:
     let
-      sources = pkgs.callPackage ./source.nix;
+      sources = import ./source.nix;
       escapedVersion = builtins.replaceStrings [ "." ] [ "\\." ] sources._version;
       lowerName = lib.toLower name;
     in
@@ -130,8 +130,9 @@ rec {
   createInstaller =
     name:
     let
-      sources = pkgs.callPackage ./source.nix;
+      sources = import ./source.nix;
       source = sources.${lib.toLower name};
+      downloader = createDownloader name;
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       set -x
@@ -149,7 +150,7 @@ rec {
               return 0
           fi
 
-          download_url=$(${lib.getExe (createDownloader name)} | sed 's/&amp;/\&/g')
+          download_url=$(${lib.getExe downloader} | sed 's/&amp;/\&/g')
 
           echo "download: Downloading $download_url"
 
