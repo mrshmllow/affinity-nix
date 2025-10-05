@@ -106,7 +106,7 @@ rec {
           --text="Preparing the wine prefix\n"
 
       if [ ! $? -eq 0 ]; then
-          ${lib.getExe pkgs.zenity} --error --text="Installation failed."
+          ${lib.getExe pkgs.zenity} --error --text="Preparing the wine prefix failed."
 
           exit 1
       fi
@@ -179,7 +179,7 @@ rec {
           grep --line-buffered -ve "100" | grep --line-buffered -o "[0-9]*\.[0-9]" | \
           (
               trap 'kill "$curlpid"' ERR
-              zenity --progress \
+              ${lib.getExe pkgs.zenity} --progress \
                 --auto-close \
                 --title="Affinity ${name} 2" \
                 --text="Downloading the installer for ${name}.\n\nThis might take a moment.\n" 2>/dev/null
@@ -190,7 +190,7 @@ rec {
               echo "download: user aborted. removing $cache_dir/${source.name}..."
               rm --interactive=never "$cache_dir/${source.name}"
               rm --interactive=never "$FIFO"
-              return 1
+              exit 1
           fi
 
           rm --interactive=never "$FIFO"
@@ -211,14 +211,15 @@ rec {
       }
 
       if ! ensure_exists; then
-          echo "-------------------
-
+          read -r -d ''' message << EOM
       Could not successfully download ${source.name}
       Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new?template=bug_report.md.
 
       In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
-
-      -------------------"
+      EOM
+          
+          ${lib.getExe pkgs.zenity} --error --text="$message"
+          echo -e "-------------------\n\n$message\n\n-------------------"
 
           exit 1
       fi
