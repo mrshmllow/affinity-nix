@@ -227,6 +227,11 @@ rec {
       ${lib.getExe check} || exit 1
       ${lib.getExe wine} winecfg -v win11
       ${lib.getExe wineserver} -w
+
+      ${lib.getExe pkgs.zenity} --info \
+          --title="Affinity ${name} 2" \
+          --text="You will be prompted to install ${name} 2.\n\nPlease do not change the installation path."
+
       ${lib.getExe wine} "$cache_dir/${source.name}"
     '';
 
