@@ -95,6 +95,23 @@ rec {
       fi
     '';
 
+  createGraphicalCheck =
+    name:
+    writeShellScriptBin "affinity-${name}-gui-check" ''
+      ${lib.getExe check} | ${lib.getExe pkgs.zenity} --progress \
+          --pulsate \
+          --no-cancel \
+          --auto-close \
+          --title="Affinity ${name} 2" \
+          --text="Preparing the wine prefix\n"
+
+      if [ ! $? -eq 0 ]; then
+          ${lib.getExe pkgs.zenity} --error --text="Installation failed."
+
+          exit 1
+      fi
+    '';
+
   createDownloader =
     name:
     let
@@ -129,6 +146,7 @@ rec {
       sources = import ./source.nix;
       source = sources.${lib.toLower name};
       downloader = createDownloader name;
+      check = createGraphicalCheck name;
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       set -x
@@ -149,6 +167,33 @@ rec {
           download_url=$(${lib.getExe downloader} | sed 's/&amp;/\&/g')
 
           echo "download: Downloading $download_url"
+
+          # excerpt stolen from https://github.com/mactan-sc/rsilauncher/blob/main/scripts/rsi-run.sh
+          FIFO=$(mktemp -u)
+
+          mkfifo "$FIFO"
+
+          curl -#L "$download_url" -o "$cache_dir/${source.name}" > "$FIFO" 2>&1 & curlpid="$!"
+
+          stdbuf -oL tr '\r' '\n' < "$FIFO" | \
+          grep --line-buffered -ve "100" | grep --line-buffered -o "[0-9]*\.[0-9]" | \
+          (
+              trap 'kill "$curlpid"' ERR
+              zenity --progress \
+                --auto-close \
+                --title="Affinity ${name} 2" \
+                --text="Downloading the installer for ${name}.\n\nThis might take a moment.\n" 2>/dev/null
+          )
+
+          if [ "$?" -eq 1 ]; then
+              # user clicked cancel
+              echo "download: user aborted. removing $cache_dir/${source.name}..."
+              rm --interactive=never "$cache_dir/${source.name}"
+              rm --interactive=never "$FIFO"
+              return 1
+          fi
+
+          rm --interactive=never "$FIFO"
 
           if ! curl -L "$download_url" -o "$cache_dir/${source.name}"; then
               echo "download: Download failed"
@@ -188,6 +233,7 @@ rec {
     name:
     let
       installer = createInstaller name;
+      check = createGraphicalCheck name;
     in
     writeShellScriptBin "run-Affinity-${name}-2" ''
       set -x
