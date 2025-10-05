@@ -173,9 +173,9 @@ rec {
           echo "-------------------
 
       Could not successfully download ${source.name}
-      Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new/choose.
+      Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new?template=bug_report.md.
 
-      For the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
+      In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
 
       -------------------"
 
