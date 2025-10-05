@@ -102,30 +102,26 @@ rec {
       escapedVersion = builtins.replaceStrings [ "." ] [ "\\." ] sources._version;
       lowerName = lib.toLower name;
     in
-    pkgs.writers.writePyPy3Bin "download-affinity-${name}-installer"
-      {
-        libraries = [ ];
-      }
-      ''
-        import urllib.request
-        import re
+    pkgs.writers.writePyPy3Bin "download-affinity-${name}-installer" { } ''
+      import urllib.request
+      import re
 
-        REGEX = re.compile(
-            r'href="('
-            r"https://[a-z0-9]+\.cloudfront\.net/"
-            r"windows/${lowerName}2/${escapedVersion}/affinity-${lowerName}-msi-${escapedVersion}"
-            r'\.exe\?[^"]*'
-            r')"',
-        )
+      REGEX = re.compile(
+          r'href="('
+          r"https://[a-z0-9]+\.cloudfront\.net/"
+          r"windows/${lowerName}2/${escapedVersion}/affinity-${lowerName}-msi-${escapedVersion}"
+          r'\.exe\?[^"]*'
+          r')"',
+      )
 
-        url = "https://store.serif.com/en-gb/update/windows/${name}/2/"
-        f = urllib.request.urlopen(url)
-        content = f.read().decode("utf-8")
+      url = "https://store.serif.com/en-gb/update/windows/${name}/2/"
+      f = urllib.request.urlopen(url)
+      content = f.read().decode("utf-8")
 
-        url_search = re.search(REGEX, content)
+      url_search = re.search(REGEX, content)
 
-        print(url_search.group(1))
-      '';
+      print(url_search.group(1))
+    '';
 
   createInstaller =
     name:
