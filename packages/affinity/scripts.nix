@@ -78,11 +78,13 @@ rec {
               "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
       done
 
+      installed_tricks=$(${lib.getExe winetricks} list-installed)
+
       # kinda stolen from the nix-citizen project, tysm
       # we can be more smart about installing verbs other than relying on the revision number
       for verb in "${"\${verbs[@]}"}"; do
           # skip if verb is installed
-          if ! ${lib.getExe winetricks} list-installed | grep -qw "$verb"; then
+          if ! echo "$installed_tricks" | grep -qw "$verb"; then
               echo "winetricks: Installing $verb"
               ${lib.getExe winetricks} -q -f "$verb"
               tricksInstalled=1
