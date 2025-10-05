@@ -95,18 +95,96 @@ rec {
       fi
     '';
 
+  createDownloader =
+    name:
+    let
+      sources = pkgs.callPackage ./source.nix;
+      escapedVersion = builtins.replaceStrings [ "." ] [ "\\." ] sources._version;
+      lowerName = lib.toLower name;
+    in
+    pkgs.writers.writePyPy3Bin "download-affinity-${name}-installer"
+      {
+        libraries = [ ];
+      }
+      ''
+        import urllib.request
+        import re
+
+        REGEX = re.compile(
+            r'href="('
+            r"https://[a-z0-9]+\.cloudfront\.net/"
+            r"windows/${lowerName}2/${escapedVersion}/affinity-${lowerName}-msi-${escapedVersion}"
+            r'\.exe\?[^"]*'
+            r')"',
+        )
+
+        url = "https://store.serif.com/en-gb/update/windows/${name}/2/"
+        f = urllib.request.urlopen(url)
+        content = f.read().decode("utf-8")
+
+        url_search = re.search(REGEX, content)
+
+        print(url_search.group(1))
+      '';
+
   createInstaller =
     name:
     let
-      sources = pkgs.callPackage ./source.nix { };
+      sources = pkgs.callPackage ./source.nix;
+      source = sources.${lib.toLower name};
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       set -x
 
+      cache_dir="${"\${XDG_CACHE_HOME:-$HOME/.cache}"}"/affinity
+
+      mkdir -p "$cache_dir"
+
+      function matches {
+          echo "${source.sha256} $cache_dir/${source.name}" | sha256sum --check --status
+      }
+
+      function ensure_exists {
+          if matches; then
+              return 0
+          fi
+
+          download_url=$(${lib.getExe (createDownloader name)} | sed 's/&amp;/\&/g')
+
+          echo "download: Downloading $download_url"
+
+          if ! curl -L "$download_url" -o "$cache_dir/${source.name}"; then
+              echo "download: Download failed"
+              return 1
+          fi
+
+          if matches; then
+              echo "download: Downloaded file matches sha256"
+
+              return 0
+          fi
+
+          echo "download: Failed to verify the downloaded file"
+          return 1
+      }
+
+      if ! ensure_exists; then
+          echo "-------------------
+
+      Could not successfully download ${source.name}
+      Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new/choose.
+
+      For the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
+
+      -------------------"
+
+          exit 1
+      fi
+
       ${lib.getExe check} || exit 1
       ${lib.getExe wine} winecfg -v win11
       ${lib.getExe wineserver} -w
-      ${lib.getExe wine} ${sources.${lib.toLower name}}
+      ${lib.getExe wine} "$cache_dir/${source.name}"
     '';
 
   createRunner =

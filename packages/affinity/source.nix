@@ -1,21 +1,20 @@
-{ requireFile }:
 let
   version = "2.6.4";
 in
 {
-  photo = requireFile {
+  photo = {
     name = "affinity-photo-msi-${version}.exe";
-    sha256 = "0wf8ywgvssh9r1b9qcaam5b0ma91722z33a2mj94869p0hrs1m3g";
+    sha256 = "6fd4a0330437194492ac428df1853821a90a56a94a319c56c8096abd1ff7c871";
     url = "https://store.serif.com/en-gb/update/windows/photo/2/";
   };
-  designer = requireFile {
+  designer = {
     name = "affinity-designer-msi-${version}.exe";
-    sha256 = "16ax8cg08xffyh2z8jjqb9zk8yrhlxy9mv3mgxzds635hh9d6r4v";
+    sha256 = "9b64d312846518dd7e7f75ec9a7ca7307b347f5a584af405f4ce75041e435d99";
     url = "https://store.serif.com/en-gb/update/windows/designer/2/";
   };
-  publisher = requireFile {
+  publisher = {
     name = "affinity-publisher-msi-${version}.exe";
-    sha256 = "0pbjmhj53d852k2i9414z86xcsz54hkwwswij3pdmx05590a9n4y";
+    sha256 = "9ed8a4402a05f4daee90916bce2724e56bd60dfa249014c51405b55124ac725d";
     url = "https://store.serif.com/en-gb/update/windows/publisher/2/";
   };
 
