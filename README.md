@@ -122,7 +122,7 @@ $ nix run github:mrshmllow/affinity-nix#publisher -- update
 
 ### 4. Troubleshooting, winetricks, wineboot, and more
 
-Each package (`photo|designer|publisher`) have the following usage:
+Each package (`photo|designer|publisher`) has the following usage:
 
 ```sh
 $ affinity-photo-2 --help
