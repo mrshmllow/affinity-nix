@@ -263,10 +263,12 @@ rec {
     name:
     let
       pkg = createRunner name;
-
       desktop = pkgs.callPackage ./desktopItems.nix {
         ${lib.toLower name} = pkg;
       };
+
+      icons = pkgs.callPackage ./icons.nix { };
+      icon-package = icons.mkIconPackageFor name;
     in
     pkgs.symlinkJoin {
       name = "Affinity ${name} 2";
@@ -274,6 +276,7 @@ rec {
       paths = [
         pkg
         desktop.${lib.toLower name}
+        icon-package
       ];
       meta = {
         description = "Affinity ${name} 2";
