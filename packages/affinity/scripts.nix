@@ -254,9 +254,11 @@ rec {
 
       if [ "$1" != "--verbose" ]; then
           export WINEDEBUG=-all,fixme-all
+      else
+        shift
       fi
 
-      ${lib.getExe wine} "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe"
+      ${lib.getExe wine} "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
     '';
 
   createPackage =

@@ -27,7 +27,6 @@ rec {
       cp ${icons.${lib.toLower name}} \
           $out/share/icons/hicolor/scalable/apps/affinity-${lib.toLower name}.svg
 
-      # https://docs.appimage.org/reference/appdir.html
       ${lib.getExe pkgs.inkscape} \
           -w 256 -h 256 \
           ${icons.${lib.toLower name}} \
