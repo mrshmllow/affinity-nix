@@ -18,7 +18,12 @@
           wine
           wineserver
           ;
-        inherit affinityPath wineUnwrapped sources version;
+        inherit
+          affinityPath
+          wineUnwrapped
+          sources
+          version
+          ;
         inherit (inputs) on-linux;
       };
     in
