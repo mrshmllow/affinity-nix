@@ -10,7 +10,7 @@
   wineserver,
   on-linux,
   sources,
-  version
+  version,
 }:
 rec {
   check =
