@@ -6,6 +6,8 @@
       self',
       affinityPath,
       wineUnwrapped,
+      sources,
+      version,
       ...
     }:
     let
@@ -16,7 +18,7 @@
           wine
           wineserver
           ;
-        inherit affinityPath wineUnwrapped;
+        inherit affinityPath wineUnwrapped sources version;
         inherit (inputs) on-linux;
       };
     in

@@ -9,6 +9,8 @@
   winetricks,
   wineserver,
   on-linux,
+  sources,
+  version
 }:
 rec {
   check =
@@ -117,8 +119,7 @@ rec {
   createDownloader =
     name:
     let
-      sources = import ./source.nix;
-      escapedVersion = builtins.replaceStrings [ "." ] [ "\\." ] sources._version;
+      escapedVersion = builtins.replaceStrings [ "." ] [ "\\." ] version;
       lowerName = lib.toLower name;
     in
     pkgs.writers.writePyPy3Bin "download-affinity-${name}-installer" { } ''
@@ -145,7 +146,6 @@ rec {
   createInstaller =
     name:
     let
-      sources = import ./source.nix;
       source = sources.${lib.toLower name};
       downloader = createDownloader name;
       check = createGraphicalCheck name;
@@ -273,8 +273,8 @@ rec {
       icon-package = icons.mkIconPackageFor name;
     in
     pkgs.symlinkJoin {
-      name = "Affinity ${name} 2";
-      pname = "affinity-${lib.toLower name}-2";
+      name = "Affinity ${name} ${version}";
+      pname = "affinity-${lib.toLower name}-${version}";
       paths = [
         pkg
         desktop.${lib.toLower name}
