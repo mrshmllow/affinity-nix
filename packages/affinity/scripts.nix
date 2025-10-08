@@ -243,7 +243,7 @@ rec {
       installer = createInstaller name;
       check = createGraphicalCheck name;
     in
-    writeShellScriptBin "run-Affinity-${name}-2" ''
+    writeShellScriptBin "run-affinity-${lib.toLower name}-2" ''
       set -x
 
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
@@ -270,6 +270,7 @@ rec {
     in
     pkgs.symlinkJoin {
       name = "Affinity ${name} 2";
+      pname = "affinity-${lib.toLower name}-2";
       paths = [
         pkg
         desktop.${lib.toLower name}
@@ -280,7 +281,7 @@ rec {
         # license = lib.licenses.unfree;
         # maintainers = with pkgs.lib.maintainers; [marshmallow];
         platforms = [ "x86_64-linux" ];
-        mainProgram = "run-Affinity-${name}-2";
+        mainProgram = "run-affinity-${lib.toLower name}-2";
       };
     };
 }
