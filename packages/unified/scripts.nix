@@ -73,6 +73,9 @@ rec {
         app
         pkg
       ];
+      postBuild = ''
+        rm $out/bin/run-affinity-${lib.toLower name}-2
+      '';
       meta = {
         description = "Affinity ${name} 2";
         homepage = "https://affinity.serif.com/";

@@ -16,7 +16,9 @@
           ;
         inherit sources;
         apps = {
-          inherit (self'.packages) photo designer publisher;
+          photo = self'.packages.directPhoto;
+          designer = self'.packages.directDesigner;
+          publisher = self'.packages.directPublisher;
         };
         updateApps = {
           photo = self'.packages.updatePhoto;
@@ -27,9 +29,11 @@
     in
     {
       packages = {
-        _appimage_photo = scripts.createUnifiedPackage "Photo";
-        _appimage_designer = scripts.createUnifiedPackage "Designer";
-        _appimage_publisher = scripts.createUnifiedPackage "Publisher";
+        default = self'.packages.photo;
+
+        photo = scripts.createUnifiedPackage "Photo";
+        designer = scripts.createUnifiedPackage "Designer";
+        publisher = scripts.createUnifiedPackage "Publisher";
       };
     };
 }

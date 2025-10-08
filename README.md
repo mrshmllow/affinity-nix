@@ -113,26 +113,51 @@ The following is an example. **Installing this package does not differ to instal
 These will graphically prompt you to update the affinity application.
 
 ```bash
-$ nix run github:mrshmllow/affinity-nix#updatePhoto
+$ nix run github:mrshmllow/affinity-nix#photo -- update
 
-$ nix run github:mrshmllow/affinity-nix#updateDesigner
+$ nix run github:mrshmllow/affinity-nix#designer -- update
 
-$ nix run github:mrshmllow/affinity-nix#updatePublisher
+$ nix run github:mrshmllow/affinity-nix#publisher -- update
 ```
 
 ### 4. Troubleshooting, winetricks, wineboot, and more
 
-You can access winetricks, wine, and wineboot with the affinity environment & wine prefix baked in with nix run.
+Each package (`photo|designer|publisher`) have the following usage:
 
 > [!TIP]
 > Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
 
-```bash
-$ nix run github:mrshmllow/affinity-nix#winetricks
+```sh
+$ affinity-photo-2 --help
+Usage: affinity-photo-2 [COMMAND] [OPTIONS]
 
-$ nix run github:mrshmllow/affinity-nix#wine
+Commands:
+  wine
+  winetricks
+  wineboot
+  wineserver
+  update|repair|install   Update or repair the application
+  help                    Show this
+  (nothing)               Launch Affinity Photo 2
 
-$ nix run github:mrshmllow/affinity-nix#wine -- winecfg
-
-$ nix run github:mrshmllow/affinity-nix#wineboot
 ```
+
+For example, accessing `wine`:
+
+```sh
+$ affinity-photo-2 wine
+Usage: wine PROGRAM [ARGUMENTS...]   Run the specified program
+       wine --help                   Display this help and exit
+       wine --version                Output version information and exit
+
+```
+
+Or `winecfg`:
+
+```sh
+$ affinity-photo-2 wine winecfg
+```
+
+`wine`, `wineboot`, `wineserver`, and `winetricks` are also exposed as nix packages
+that you can run with `nix run`.
+

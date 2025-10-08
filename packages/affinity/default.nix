@@ -30,11 +30,11 @@
     {
       packages = {
         updatePhoto = scripts.createInstaller "Photo";
-        photo = scripts.createPackage "Photo";
+        directPhoto = scripts.createPackage "Photo";
         updateDesigner = scripts.createInstaller "Designer";
-        designer = scripts.createPackage "Designer";
+        directDesigner = scripts.createPackage "Designer";
         updatePublisher = scripts.createInstaller "Publisher";
-        publisher = scripts.createPackage "Publisher";
+        directPublisher = scripts.createPackage "Publisher";
       };
     };
 }
