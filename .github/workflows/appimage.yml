@@ -1,4 +1,4 @@
-name: Build
+name: Build AppImage
 on:
   push:
   pull_request:
@@ -24,5 +24,15 @@ jobs:
       - name: Upload appimage
         uses: actions/upload-artifact@v4
         with:
-          name: affinity-${{ matrix.app }}-2.AppImage
+          name: ${{ matrix.app }}-${{ github.sha }}
           path: affinity-${{ matrix.app }}-2.AppImage
+  publish-appimage:
+    needs: [build-appimage]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        name: Download
+        with:
+          path: artifact
+          pattern: \{photo,publisher,designer}-${{ github.sha }}
