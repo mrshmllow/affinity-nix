@@ -17,9 +17,9 @@ jobs:
           extra_nix_config: |
             trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://cache.garnix.io https://cache.nixos.org/
-      - id: build
+      - name: build-${{ matrix.arch }}-${{ matrix.app }}
         run: nix build .#packages.${{ matrix.arch }}._appimage_${{ matrix.app }}
-      - id: bundle
+      - name: bundle-${{ matrix.arch }}-${{ matrix.app }}
         run: nix bundle --bundler github:ralismark/nix-appimage .#packages.${{ matrix.arch }}._appimage_${{ matrix.app }}
       - name: Upload appimage
         uses: actions/upload-artifact@v4
