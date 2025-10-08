@@ -124,9 +124,6 @@ $ nix run github:mrshmllow/affinity-nix#publisher -- update
 
 Each package (`photo|designer|publisher`) have the following usage:
 
-> [!TIP]
-> Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
-
 ```sh
 $ affinity-photo-2 --help
 Usage: affinity-photo-2 [COMMAND] [OPTIONS]
@@ -141,6 +138,9 @@ Commands:
   (nothing)               Launch Affinity Photo 2
 
 ```
+
+> [!TIP]
+> Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
 
 For example, accessing `wine`:
 
