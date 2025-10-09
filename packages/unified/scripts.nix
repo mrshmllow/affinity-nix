@@ -13,7 +13,7 @@
 rec {
   createScript =
     name:
-    writeShellScriptBin "affinity-${lib.toLower name}-2" ''
+    writeShellScriptBin "affinity-${lib.toLower name}-${sources._version}" ''
       function show_help {
           cat << EOF
       Usage: $(basename "$0") [COMMAND] [OPTIONS]
