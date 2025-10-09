@@ -23,6 +23,7 @@
           pkgs.coreutils
           pkgs.gnused
           pkgs.gnugrep
+          pkgs.wget
 
           pkgs.busybox
         ];
