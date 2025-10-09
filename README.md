@@ -108,19 +108,15 @@ The following is an example. **Installing this package does not differ to instal
 
 </details>
 
-### 3. Updating the applications
+### Updating the applications
 
 These will graphically prompt you to update the affinity application.
 
 ```bash
-$ nix run github:mrshmllow/affinity-nix#photo -- update
-
-$ nix run github:mrshmllow/affinity-nix#designer -- update
-
-$ nix run github:mrshmllow/affinity-nix#publisher -- update
+$ nix run github:mrshmllow/affinity-nix#{photo,designer,publisher} -- update
 ```
 
-### 4. Troubleshooting, winetricks, wineboot, and more
+### Troubleshooting, winetricks, wineboot, and more
 
 Each package (`photo|designer|publisher`) has the following usage:
 
