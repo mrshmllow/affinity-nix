@@ -8,6 +8,7 @@
       wineUnwrapped,
       sources,
       version,
+      stdShellArgs,
       ...
     }:
     let
@@ -23,6 +24,7 @@
           wineUnwrapped
           sources
           version
+          stdShellArgs
           ;
         inherit (inputs) on-linux;
       };

@@ -11,6 +11,7 @@
   on-linux,
   sources,
   version,
+  stdShellArgs,
 }:
 rec {
   check =
@@ -29,7 +30,7 @@ rec {
     in
     writeShellScriptBin "check" ''
       set -x
-
+      ${stdShellArgs}
       ${lib.strings.toShellVars {
         inherit verbs;
         tricksInstalled = 0;
@@ -102,7 +103,8 @@ rec {
   createGraphicalCheck =
     name:
     writeShellScriptBin "affinity-${name}-gui-check" ''
-      ${lib.getExe check} | ${lib.getExe pkgs.zenity} --progress \
+      ${stdShellArgs}
+      ${lib.getExe check} | zenity --progress \
           --pulsate \
           --no-cancel \
           --auto-close \
@@ -110,7 +112,7 @@ rec {
           --text="Preparing the wine prefix\n\nThis can take a while.\n"
 
       if [ ! $? -eq 0 ]; then
-          ${lib.getExe pkgs.zenity} --error --text="Preparing the wine prefix failed."
+          zenity --error --text="Preparing the wine prefix failed."
 
           exit 1
       fi
@@ -152,6 +154,7 @@ rec {
     in
     writeShellScriptBin "install-Affinity-${name}-2" ''
       set -x
+      ${stdShellArgs}
 
       cache_dir="${"\${XDG_CACHE_HOME:-$HOME/.cache}"}"/affinity
 
@@ -181,7 +184,7 @@ rec {
           grep --line-buffered -ve "100" | grep --line-buffered -o "[0-9]*\.[0-9]" | \
           (
               trap 'kill "$curlpid"' ERR
-              ${lib.getExe pkgs.zenity} --progress \
+              zenity --progress \
                 --auto-close \
                 --title="Affinity ${name} 2" \
                 --text="Downloading the installer for ${name}.\n\nThis might take a moment.\n" 2>/dev/null
@@ -220,7 +223,7 @@ rec {
       In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
       EOM
           
-          ${lib.getExe pkgs.zenity} --error --text="$message"
+          zenity --error --text="$message"
           echo -e "-------------------\n\n$message\n\n-------------------"
 
           exit 1
@@ -230,7 +233,7 @@ rec {
       ${lib.getExe wine} winecfg -v win11
       ${lib.getExe wineserver} -w
 
-      ${lib.getExe pkgs.zenity} --info \
+      zenity --info \
           --title="Affinity ${name} 2" \
           --text="You will be prompted to install ${name} 2.\n\nPlease do not change the installation path."
 
@@ -245,6 +248,7 @@ rec {
     in
     writeShellScriptBin "affinity-${lib.toLower name}-2" ''
       set -x
+      ${stdShellArgs}
 
       if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
           ${lib.getExe installer} || exit 1

@@ -9,14 +9,17 @@
   sources,
   apps,
   updateApps,
+  stdShellArgs,
 }:
 rec {
   createScript =
     name:
     writeShellScriptBin "affinity-${lib.toLower name}-2" ''
+      ${stdShellArgs}
+
       function show_help {
-          ${lib.getExe' pkgs.toybox "cat"} << EOF
-      Usage: $(${lib.getExe' pkgs.toybox "basename"} "$0") [COMMAND] [OPTIONS]
+          cat << EOF
+      Usage: $(basename "$0") [COMMAND] [OPTIONS]
 
       Commands:
         wine

@@ -5,11 +5,25 @@
     ./unified
   ];
   perSystem =
-    { sources, ... }:
+    {
+      sources,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       _module.args = {
         sources = import ./sources.nix;
         version = sources._version;
+
+        stdShellArgs = ''
+          export PATH=${
+            lib.makeSearchPathOutput "dev" "bin" [
+              pkgs.toybox
+              pkgs.zenity
+            ]
+          }
+        '';
       };
     };
 
