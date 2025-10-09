@@ -69,13 +69,12 @@ rec {
     pkgs.symlinkJoin {
       name = "Affinity ${name} ${sources._version}";
       pname = "affinity-${lib.toLower name}-${sources._version}";
+      # order is important because the script and the app both use the same
+      # binary name...
       paths = [
-        app
         pkg
+        app
       ];
-      postBuild = ''
-        rm $out/bin/run-affinity-${lib.toLower name}-2
-      '';
       meta = {
         description = "Affinity ${name} 2";
         homepage = "https://affinity.serif.com/";
