@@ -107,7 +107,7 @@ rec {
           --no-cancel \
           --auto-close \
           --title="Affinity ${name} 2" \
-          --text="Preparing the wine prefix\n"
+          --text="Preparing the wine prefix\n\nThis can take a while.\n"
 
       if [ ! $? -eq 0 ]; then
           ${lib.getExe pkgs.zenity} --error --text="Preparing the wine prefix failed."
