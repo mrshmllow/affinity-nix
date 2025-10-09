@@ -4,7 +4,6 @@
       pkgs,
       self',
       sources,
-      version,
       ...
     }:
     let
@@ -15,7 +14,7 @@
           wine
           wineserver
           ;
-        inherit sources version;
+        inherit sources;
         apps = {
           photo = self'.packages.directPhoto;
           designer = self'.packages.directDesigner;
