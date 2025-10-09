@@ -200,11 +200,6 @@ rec {
 
           rm --interactive=never "$FIFO"
 
-          if ! curl -L "$download_url" -o "$cache_dir/${source.name}"; then
-              echo "download: Download failed"
-              return 1
-          fi
-
           if matches; then
               echo "download: Downloaded file matches sha256"
 
