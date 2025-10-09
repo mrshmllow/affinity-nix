@@ -15,8 +15,8 @@ rec {
     name:
     writeShellScriptBin "affinity-${lib.toLower name}-2" ''
       function show_help {
-          cat << EOF
-      Usage: $(basename "$0") [COMMAND] [OPTIONS]
+          ${lib.getExe' pkgs.toybox "cat"} << EOF
+      Usage: $(${lib.getExe' pkgs.toybox "basename"} "$0") [COMMAND] [OPTIONS]
 
       Commands:
         wine
