@@ -9,6 +9,7 @@
       sources,
       version,
       stdShellArgs,
+      stdPath,
       ...
     }:
     let
@@ -25,6 +26,7 @@
           sources
           version
           stdShellArgs
+          stdPath
           ;
         inherit (inputs) on-linux;
       };

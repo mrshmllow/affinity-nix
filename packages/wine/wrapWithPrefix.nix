@@ -8,7 +8,7 @@
 }:
 pkg: pname:
 stdenv.mkDerivation rec {
-  name = "affinity-${pname}";
+  name = pname;
   src = ./.;
   nativeBuildInputs = [ pkgs.makeWrapper ];
   installPhase = ''
