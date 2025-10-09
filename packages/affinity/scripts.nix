@@ -30,7 +30,6 @@ rec {
     in
     writeShellScriptBin "check" ''
       set -x
-      ${stdShellArgs}
       ${lib.strings.toShellVars {
         inherit verbs;
         tricksInstalled = 0;
@@ -103,7 +102,6 @@ rec {
   createGraphicalCheck =
     name:
     writeShellScriptBin "affinity-${name}-gui-check" ''
-      ${stdShellArgs}
       ${lib.getExe check} | zenity --progress \
           --pulsate \
           --no-cancel \
