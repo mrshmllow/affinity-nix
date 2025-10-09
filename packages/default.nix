@@ -9,26 +9,26 @@
       sources,
       lib,
       pkgs,
+      stdPath,
       ...
     }:
     {
       _module.args = {
         sources = import ./sources.nix;
         version = sources._version;
+        stdPath = [
+          pkgs.zenity
+          pkgs.curl
+
+          pkgs.coreutils
+          pkgs.gnused
+          pkgs.gnugrep
+        ];
 
         stdShellArgs = ''
           export LC_ALL="C"
           export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-          export PATH=${
-            lib.makeSearchPath "bin" [
-              pkgs.zenity
-              pkgs.curl
-
-              pkgs.coreutils
-              pkgs.gnused
-              pkgs.gnugrep
-            ]
-          }
+          export PATH=${lib.makeBinPath stdPath}
         '';
       };
     };

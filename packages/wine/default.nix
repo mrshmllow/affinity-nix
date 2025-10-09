@@ -5,6 +5,7 @@
       pkgs,
       affinityPath,
       system,
+      stdPath,
       ...
     }:
     let
@@ -21,7 +22,9 @@
       wineUnwrapped = symlink {
         wine = wineUnstable;
       };
-      wrapWithPrefix = pkgs.callPackage ./wrapWithPrefix.nix { inherit affinityPath wineUnwrapped; };
+      wrapWithPrefix = pkgs.callPackage ./wrapWithPrefix.nix {
+        inherit affinityPath wineUnwrapped stdPath;
+      };
     in
     {
       _module.args = {
