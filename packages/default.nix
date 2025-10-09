@@ -23,6 +23,7 @@
           pkgs.coreutils
           pkgs.gnused
           pkgs.gnugrep
+          pkgs.findutils
         ];
 
         stdShellArgs = ''
