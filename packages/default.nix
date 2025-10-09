@@ -2,6 +2,7 @@
   imports = [
     ./wine
     ./affinity
+    ./unified
   ];
   perSystem =
     { sources, ... }:
