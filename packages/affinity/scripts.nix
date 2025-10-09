@@ -12,12 +12,13 @@
   sources,
   version,
   stdShellArgs,
+  stdPath,
 }:
 rec {
   check =
     let
       revisionPath = "${affinityPath}/.revision";
-      revision = "1";
+      revision = "2";
       verbs = [
         "dotnet48"
         "corefonts"
@@ -27,6 +28,26 @@ rec {
         # "dotnet35"
       ];
       winmetadata = pkgs.callPackage ./winmetadata.nix { };
+      setup-dxvk =
+        pkgs.runCommand "wrap-setup-dxvk"
+          {
+            nativeBuildInputs = [ pkgs.makeWrapper ];
+            original = lib.getExe pkgs.dxvk.out;
+          }
+          ''
+            mkdir -p $out/bin
+            cp $original $out/bin/setup-dxvk
+            wrapProgram $out/bin/setup-dxvk \
+              --set PATH ${
+                lib.makeBinPath (
+                  stdPath
+                  ++ [
+                    wine
+                  ]
+                )
+              }
+          '';
+
     in
     writeShellScriptBin "check" ''
       set -x
@@ -47,6 +68,9 @@ rec {
           ${lib.getExe winetricks} renderer=vulkan
 
           install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
+
+          ${setup-dxvk}/bin/setup-dxvk install --prefix "${affinityPath}"
+
           echo "${revision}" > "${revisionPath}"
       }
 

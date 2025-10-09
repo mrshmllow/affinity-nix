@@ -6,6 +6,7 @@
       affinityPath,
       system,
       stdPath,
+      self',
       ...
     }:
     let
@@ -31,7 +32,21 @@
         inherit wineUnwrapped;
       };
       packages = {
-        wine = wrapWithPrefix wineUnwrapped "wine";
+        wine = pkgs.symlinkJoin {
+          name = "wine";
+          pname = "wine";
+          paths = [
+            (wrapWithPrefix wineUnwrapped "wine")
+            (wrapWithPrefix wineUnwrapped "wine64")
+            self'.packages.winetricks
+            self'.packages.wineboot
+            self'.packages.wineserver
+          ];
+          meta = {
+            mainProgram = "wine";
+          };
+        };
+
         winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
         wineboot = wrapWithPrefix wineUnwrapped "wineboot";
         wineserver = wrapWithPrefix wineUnwrapped "wineserver";
