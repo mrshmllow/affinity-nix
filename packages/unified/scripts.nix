@@ -9,11 +9,12 @@
   sources,
   apps,
   updateApps,
+  version,
 }:
 rec {
   createScript =
     name:
-    writeShellScriptBin "affinity-${lib.toLower name}-${sources._version}" ''
+    writeShellScriptBin "affinity-${lib.toLower name}-${version}" ''
       function show_help {
           cat << EOF
       Usage: $(basename "$0") [COMMAND] [OPTIONS]
@@ -75,6 +76,7 @@ rec {
       ];
       postBuild = ''
         rm $out/bin/run-affinity-${lib.toLower name}-2
+        mv $out/bin/affinity-${lib.toLower name}-${version} $out/bin/affinity-${lib.toLower name}-2
       '';
       meta = {
         description = "Affinity ${name} 2";
