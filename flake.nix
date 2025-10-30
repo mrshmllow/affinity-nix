@@ -45,6 +45,7 @@
       perSystem = {
         _module.args = {
           affinityPath = "$([[ -z \"$XDG_DATA_HOME\" ]] && echo \"$HOME/.local/share/affinity\" || echo \"$XDG_DATA_HOME/affinity\")";
+          affinityPathV3 = "$([[ -z \"$XDG_DATA_HOME\" ]] && echo \"$HOME/.local/share/affinity-v3\" || echo \"$XDG_DATA_HOME/affinity-v3\")";
         };
       };
     };

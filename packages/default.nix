@@ -2,6 +2,7 @@
   imports = [
     ./wine
     ./affinity
+    ./affinity-v3
     ./unified
   ];
   perSystem =
