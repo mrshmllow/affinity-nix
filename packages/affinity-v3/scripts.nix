@@ -3,11 +3,11 @@
   writeShellScriptBin,
   lib,
   wineUnwrapped,
-  wine,
+  wine-v3,
   affinityPathV3,
-  wineboot,
-  winetricks,
-  wineserver,
+  wineboot-v3,
+  winetricks-v3,
+  wineserver-v3,
   on-linux,
   sources,
   stdShellArgs,
@@ -205,7 +205,7 @@ rec {
       set -x
       ${stdShellArgs}
 
-      if [ ! -f "${affinityPathV3}/drive_c/Program Files/Affinity/v3/Affinity.exe" ]; then
+      if [ ! -f "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" ]; then
           ${lib.getExe installer} || exit 1
       else
           ${lib.getExe check} || exit 1
@@ -217,7 +217,7 @@ rec {
         shift
       fi
 
-      ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/v3/Affinity.exe" "$@"
+      ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" "$@"
     '';
 
   createPackage =

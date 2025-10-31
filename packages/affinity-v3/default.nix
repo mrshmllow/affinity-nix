@@ -7,23 +7,21 @@
       affinityPathV3,
       wineUnwrapped,
       sources,
-      version,
       stdShellArgs,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
         inherit (self'.packages)
-          wineboot
-          winetricks
-          wine
-          wineserver
+          wineboot-v3
+          winetricks-v3
+          wine-v3
+          wineserver-v3
           ;
         inherit
           affinityPathV3
           wineUnwrapped
           sources
-          version
           stdShellArgs
           ;
         inherit (inputs) on-linux;
