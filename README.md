@@ -1,8 +1,10 @@
 # affinity-nix
 
-![image](https://github.com/user-attachments/assets/d81f1805-c72b-4999-909e-c5666b5e0a11)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9d2f00d4-9043-4cfd-a820-17ffa68d939b" />
 
-Affinity V3 & V2 packaged with nix.
+## About
+
+Affinity v3 & v2 packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
@@ -14,12 +16,16 @@ With the release of v3 some package names have changed.
 {wine,wineboot,wineserver,winetricks} -> v2-{wine,wineboot,wineserver,winetricks}
 ```
 
+Since v3 was unified into a single application, `photo|designer|publisher` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
+
+Additionally, the `default` package now points to v3.
+
 ## Preamble
 
 > [!TIP]
 > [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
 
-The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.local/share/affinity/`.
+The prefix is located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/affinity-v3/` falling back to `$HOME/.local/share/affinity/` or `$HOME/.local/share/affinity-v3/`.
 
 ## Usage Instructions
 
@@ -29,10 +35,12 @@ The prefix is located in `$XDG_DATA_HOME/affinity/` falling back to `$HOME/.loca
 ### Running Ad-hoc
 
 ```bash
+$ nix run github:mrshmllow/affinity-nix#v3
+
+-- v2 versions:
+
 $ nix run github:mrshmllow/affinity-nix#photo
-
 $ nix run github:mrshmllow/affinity-nix#designer
-
 $ nix run github:mrshmllow/affinity-nix#publisher
 ```
 
@@ -41,10 +49,12 @@ $ nix run github:mrshmllow/affinity-nix#publisher
 #### Install with nix-profile
 
 ```bash
+$ nix profile install github:mrshmllow/affinity-nix#v3
+
+-- v2 versions:
+
 $ nix profile install github:mrshmllow/affinity-nix#photo
-
 $ nix profile install github:mrshmllow/affinity-nix#designer
-
 $ nix profile install github:mrshmllow/affinity-nix#publisher
 ```
 
@@ -72,7 +82,7 @@ The following is an example. **Installing this package does not differ to instal
       modules = [
         # ...
         {
-          environment.systemPackages = [affinity-nix.packages.x86_64-linux.photo];
+          environment.systemPackages = [affinity-nix.packages.x86_64-linux.v3];
         }
       ];
     };
@@ -104,7 +114,7 @@ The following is an example. **Installing this package does not differ to instal
       modules = [
         # ...
         {
-          home.packages = [affinity-nix.packages.x86_64-linux.photo];
+          home.packages = [affinity-nix.packages.x86_64-linux.v3];
         }
       ];
     };
@@ -119,16 +129,16 @@ The following is an example. **Installing this package does not differ to instal
 These will graphically prompt you to update the affinity application.
 
 ```bash
-$ nix run github:mrshmllow/affinity-nix#{photo,designer,publisher} -- update
+$ nix run github:mrshmllow/affinity-nix#{v3,photo,designer,publisher} -- update
 ```
 
 ### Troubleshooting, winetricks, wineboot, and more
 
-Each package (`photo|designer|publisher`) has the following usage:
+Each package (`v3|photo|designer|publisher`) has the following usage:
 
 ```sh
-$ affinity-photo-2 --help
-Usage: affinity-photo-2 [COMMAND] [OPTIONS]
+$ affinity-v3 --help
+Usage: affinity-v3 [COMMAND] [OPTIONS]
 
 Commands:
   wine
@@ -137,7 +147,7 @@ Commands:
   wineserver
   update|repair|install   Update or repair the application
   help                    Show this
-  (nothing)               Launch Affinity Photo 2
+  (nothing)               Launch Affinity v3
 
 ```
 
@@ -147,7 +157,7 @@ Commands:
 For example, accessing `wine`:
 
 ```sh
-$ affinity-photo-2 wine
+$ affinity-v3 wine
 Usage: wine PROGRAM [ARGUMENTS...]   Run the specified program
        wine --help                   Display this help and exit
        wine --version                Output version information and exit
@@ -157,7 +167,7 @@ Usage: wine PROGRAM [ARGUMENTS...]   Run the specified program
 Or `winecfg`:
 
 ```sh
-$ affinity-photo-2 wine winecfg
+$ affinity-v3 wine winecfg
 ```
 
 `wine`, `wineboot`, `wineserver`, and `winetricks` are also exposed as nix packages
