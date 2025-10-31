@@ -5,23 +5,31 @@
       self',
       sources,
       stdShellArgs,
+      wine-stuff,
+      updatePhoto,
+      updateDesigner,
+      updatePublisher,
+      updateV3,
+      directPhoto,
+      directDesigner,
+      directPublisher,
+      directV3,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (self') packages;
-        inherit sources stdShellArgs;
+        inherit sources stdShellArgs wine-stuff;
         apps = {
-          photo = self'.packages.directPhoto;
-          designer = self'.packages.directDesigner;
-          publisher = self'.packages.directPublisher;
-          v3 = self'.packages.v3-direct;
+          photo = directPhoto;
+          designer = directDesigner;
+          publisher = directPublisher;
+          v3 = directV3;
         };
         updateApps = {
-          photo = self'.packages.updatePhoto;
-          designer = self'.packages.updatePhoto;
-          publisher = self'.packages.updatePublisher;
-          v3 = self'.packages.v3-update;
+          photo = updatePhoto;
+          designer = updateDesigner;
+          publisher = updatePublisher;
+          v3 = updateV3;
         };
       };
     in

@@ -2,17 +2,17 @@
   perSystem =
     {
       pkgs,
-      self',
       affinityPath,
       version,
       stdShellArgs,
       mkGraphicalCheck,
       mkInstaller,
+      v2-wine,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        wine = self'.packages.v2-wine;
+        wine = v2-wine;
         inherit
           affinityPath
           version
@@ -23,7 +23,7 @@
       };
     in
     {
-      packages = {
+      _module.args = {
         updatePhoto = mkInstaller "Photo";
         directPhoto = scripts.createPackage "Photo";
         updateDesigner = mkInstaller "Designer";

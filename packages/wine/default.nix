@@ -36,17 +36,26 @@
     {
       _module.args = {
         inherit wineUnwrapped;
-      };
-      packages = {
+
         v2-wine = wrapWithPrefix-v2 wineUnwrapped "wine";
         v2-winetricks = wrapWithPrefix-v2 pkgs.winetricks "winetricks";
         v2-wineboot = wrapWithPrefix-v2 wineUnwrapped "wineboot";
         v2-wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
 
-        v3-wine = wrapWithPrefix-v3 wineUnwrapped "wine";
-        v3-winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
-        v3-wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
-        v3-wineserver = wrapWithPrefix-v3 wineUnwrapped "wineserver";
+        wine-stuff = {
+          v2 = {
+            wine = wrapWithPrefix-v2 wineUnwrapped "wine";
+            winetricks = wrapWithPrefix-v2 pkgs.winetricks "winetricks";
+            wineboot = wrapWithPrefix-v2 wineUnwrapped "wineboot";
+            wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
+          };
+          v3 = {
+            wine = wrapWithPrefix-v3 wineUnwrapped "wine";
+            winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
+            wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
+            wineserver = wrapWithPrefix-v3 wineUnwrapped "wineserver";
+          };
+        };
       };
     };
 }

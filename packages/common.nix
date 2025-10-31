@@ -6,11 +6,11 @@
       affinityPathV3,
       pkgs,
       lib,
-      self',
       wineUnwrapped,
       sources,
       stdShellArgs,
       version,
+      wine-stuff,
       ...
     }:
     {
@@ -31,10 +31,12 @@
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
-            wine = self'.packages."${type}-wine";
-            wineboot = self'.packages."${type}-wineboot";
-            winetricks = self'.packages."${type}-winetricks";
-            wineserver = self'.packages."${type}-wineserver";
+            inherit (wine-stuff."${type}")
+              wine
+              wineboot
+              winetricks
+              wineserver
+              ;
           in
           pkgs.writeShellScriptBin "check" ''
             set -x
@@ -156,11 +158,12 @@
           let
             source = sources.${lib.toLower name};
             check = mkGraphicalCheck name;
-
             type = if name == "v3" then "v3" else "v2";
 
-            wine = self'.packages."${type}-wine";
-            wineserver = self'.packages."${type}-wineserver";
+            inherit (wine-stuff."${type}")
+              wine
+              wineserver
+              ;
           in
           pkgs.writeShellScriptBin "install-Affinity-${name}" ''
             set -x

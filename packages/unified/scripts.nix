@@ -6,17 +6,19 @@
   apps,
   updateApps,
   stdShellArgs,
-  packages,
+  wine-stuff,
 }:
 rec {
   createScript =
     v3:
     let
       type = if v3 then "v3" else "v2";
-      wine = packages."${type}-wine";
-      wineboot = packages."${type}-wineboot";
-      winetricks = packages."${type}-winetricks";
-      wineserver = packages."${type}-wineserver";
+      inherit (wine-stuff."${type}")
+        wine
+        wineboot
+        winetricks
+        wineserver
+        ;
     in
     name:
     writeShellScriptBin "affinity-${lib.toLower name}" ''

@@ -10,15 +10,12 @@ Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, a
 
 ## Recent Breaking Changes
 
-With the release of v3 some package names have changed.
+With the release of v3, there has been some changes:
 
-```
-{wine,wineboot,wineserver,winetricks} -> v2-{wine,wineboot,wineserver,winetricks}
-```
-
-Since v3 was unified into a single application, `photo|designer|publisher` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
-
-Additionally, the `default` package now points to v3.
+- Packages `{wine,wineboot,wineserver,winetricks}` have been removed. There are instructions below to access these binaries.
+- Packages `{update,direct}*` have been removed. There are instructions below to update the apps.
+- Since v3 was unified into a single application, `photo|designer|publisher` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
+- Additionally, the `default` package now points to v3.
 
 ## Preamble
 
@@ -169,7 +166,3 @@ Or `winecfg`:
 ```sh
 $ affinity-v3 wine winecfg
 ```
-
-`wine`, `wineboot`, `wineserver`, and `winetricks` are also exposed as nix packages
-that you can run with `nix run`.
-
