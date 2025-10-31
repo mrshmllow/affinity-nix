@@ -1,6 +1,6 @@
 # affinity-nix
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9d2f00d4-9043-4cfd-a820-17ffa68d939b" />
+![image](https://github.com/user-attachments/assets/d81f1805-c72b-4999-909e-c5666b5e0a11)
 
 ## About
 
@@ -14,7 +14,7 @@ With the release of v3, there has been some changes:
 
 - Packages `{wine,wineboot,wineserver,winetricks}` have been removed. There are instructions below to access these binaries.
 - Packages `{update,direct}*` have been removed. There are instructions below to update the apps.
-- Since v3 was unified into a single application, `photo|designer|publisher` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
+- Since v3 was unified into a single application, `{photo,designer,publisher}` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
 - Additionally, the `default` package now points to v3.
 
 ## Preamble
