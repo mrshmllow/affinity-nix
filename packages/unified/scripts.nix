@@ -77,7 +77,7 @@ rec {
       pkg = createScript v3 name;
 
       version = if v3 then "" else sources._version;
-      postfix = if v3 then "" else "-${version}";
+      postfix = if v3 then "" else "-2";
     in
     pkgs.symlinkJoin {
       name = "Affinity ${name} ${version}";
