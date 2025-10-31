@@ -5,36 +5,43 @@
       self',
       sources,
       stdShellArgs,
+      wine-stuff,
+      updatePhoto,
+      updateDesigner,
+      updatePublisher,
+      updateV3,
+      directPhoto,
+      directDesigner,
+      directPublisher,
+      directV3,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (self'.packages)
-          wineboot
-          winetricks
-          wine
-          wineserver
-          ;
-        inherit sources stdShellArgs;
+        inherit sources stdShellArgs wine-stuff;
         apps = {
-          photo = self'.packages.directPhoto;
-          designer = self'.packages.directDesigner;
-          publisher = self'.packages.directPublisher;
+          photo = directPhoto;
+          designer = directDesigner;
+          publisher = directPublisher;
+          v3 = directV3;
         };
         updateApps = {
-          photo = self'.packages.updatePhoto;
-          designer = self'.packages.updatePhoto;
-          publisher = self'.packages.updatePublisher;
+          photo = updatePhoto;
+          designer = updateDesigner;
+          publisher = updatePublisher;
+          v3 = updateV3;
         };
       };
     in
     {
       packages = {
-        default = self'.packages.photo;
+        default = self'.packages.v3;
 
         photo = scripts.createUnifiedPackage "Photo";
         designer = scripts.createUnifiedPackage "Designer";
         publisher = scripts.createUnifiedPackage "Publisher";
+
+        v3 = scripts.createUnifiedPackage "v3";
       };
     };
 }

@@ -17,6 +17,11 @@ in
     sha256 = "9ed8a4402a05f4daee90916bce2724e56bd60dfa249014c51405b55124ac725d";
     url = "https://store.serif.com/en-gb/update/windows/publisher/2/";
   };
+  v3 = {
+    name = "Affinity x64.exe";
+    sha256 = "26194fb7ab0c83754549c99951b2dbbdc0361278172d02bb55eaf6b42a100409";
+    url = "https://downloads.affinity.studio/Affinity%20x64.exe";
+  };
 
   _version = version;
 }

@@ -1,41 +1,34 @@
-{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
-      self',
       affinityPath,
-      wineUnwrapped,
-      sources,
       version,
       stdShellArgs,
+      mkGraphicalCheck,
+      mkInstaller,
+      wine-stuff,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (self'.packages)
-          wineboot
-          winetricks
-          wine
-          wineserver
-          ;
+        inherit (wine-stuff.v2) wine;
         inherit
           affinityPath
-          wineUnwrapped
-          sources
           version
           stdShellArgs
+          mkGraphicalCheck
+          mkInstaller
           ;
-        inherit (inputs) on-linux;
       };
     in
     {
-      packages = {
-        updatePhoto = scripts.createInstaller "Photo";
+      _module.args = {
+        updatePhoto = mkInstaller "Photo";
         directPhoto = scripts.createPackage "Photo";
-        updateDesigner = scripts.createInstaller "Designer";
+        updateDesigner = mkInstaller "Designer";
         directDesigner = scripts.createPackage "Designer";
-        updatePublisher = scripts.createInstaller "Publisher";
+        updatePublisher = mkInstaller "Publisher";
         directPublisher = scripts.createPackage "Publisher";
       };
     };

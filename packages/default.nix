@@ -2,7 +2,9 @@
   imports = [
     ./wine
     ./affinity
+    ./affinity-v3
     ./unified
+    ./common.nix
   ];
   perSystem =
     {

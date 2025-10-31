@@ -3,24 +3,22 @@
   writeShellScriptBin,
   lib,
   wine,
-  affinityPath,
-  version,
+  affinityPathV3,
   stdShellArgs,
   mkInstaller,
   mkGraphicalCheck,
 }:
 rec {
   createRunner =
-    name:
     let
-      installer = mkInstaller name;
-      check = mkGraphicalCheck name;
+      installer = mkInstaller "v3";
+      check = mkGraphicalCheck "v3";
     in
-    writeShellScriptBin "affinity-${lib.toLower name}-2" ''
+    writeShellScriptBin "affinity-v3" ''
       set -x
       ${stdShellArgs}
 
-      if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
+      if [ ! -f "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" ]; then
           ${lib.getExe installer} || exit 1
       else
           ${lib.getExe check} || exit 1
@@ -32,35 +30,34 @@ rec {
         shift
       fi
 
-      ${lib.getExe wine} "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
+      ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" "$@"
     '';
 
   createPackage =
-    name:
     let
-      pkg = createRunner name;
+      pkg = createRunner;
       desktop = pkgs.callPackage ./desktopItems.nix {
-        ${lib.toLower name} = pkg;
+        affinity-v3 = pkg;
       };
 
       icons = pkgs.callPackage ./icons.nix { };
-      icon-package = icons.mkIconPackageFor name;
+      icon-package = icons.iconPackage;
     in
     pkgs.symlinkJoin {
-      name = "Affinity ${name} ${version}";
-      pname = "affinity-${lib.toLower name}-${version}";
+      name = "Affinity v3";
+      pname = "affinity-v3";
       paths = [
         pkg
-        desktop.${lib.toLower name}
+        desktop.affinity-v3
         icon-package
       ];
       meta = {
-        description = "Affinity ${name} 2";
-        homepage = "https://affinity.serif.com/";
+        description = "Affinity v3";
+        homepage = "https://www.affinity.studio";
         # license = lib.licenses.unfree;
         # maintainers = with pkgs.lib.maintainers; [marshmallow];
         platforms = [ "x86_64-linux" ];
-        mainProgram = "affinity-${lib.toLower name}-2";
+        mainProgram = "affinity-v3";
       };
     };
 }

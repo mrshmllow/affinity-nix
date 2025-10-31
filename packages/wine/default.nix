@@ -3,6 +3,7 @@
   perSystem =
     {
       pkgs,
+      affinityPathV3,
       affinityPath,
       system,
       stdPath,
@@ -22,19 +23,34 @@
       wineUnwrapped = symlink {
         wine = wineUnstable;
       };
-      wrapWithPrefix = pkgs.callPackage ./wrapWithPrefix.nix {
+
+      wrapWithPrefix-v2 = pkgs.callPackage ./wrapWithPrefix.nix {
         inherit affinityPath wineUnwrapped stdPath;
+      };
+
+      wrapWithPrefix-v3 = pkgs.callPackage ./wrapWithPrefix.nix {
+        inherit wineUnwrapped stdPath;
+        affinityPath = affinityPathV3;
       };
     in
     {
       _module.args = {
         inherit wineUnwrapped;
-      };
-      packages = {
-        wine = wrapWithPrefix wineUnwrapped "wine";
-        winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
-        wineboot = wrapWithPrefix wineUnwrapped "wineboot";
-        wineserver = wrapWithPrefix wineUnwrapped "wineserver";
+
+        wine-stuff = {
+          v2 = {
+            wine = wrapWithPrefix-v2 wineUnwrapped "wine";
+            winetricks = wrapWithPrefix-v2 pkgs.winetricks "winetricks";
+            wineboot = wrapWithPrefix-v2 wineUnwrapped "wineboot";
+            wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
+          };
+          v3 = {
+            wine = wrapWithPrefix-v3 wineUnwrapped "wine";
+            winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
+            wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
+            wineserver = wrapWithPrefix-v3 wineUnwrapped "wineserver";
+          };
+        };
       };
     };
 }
