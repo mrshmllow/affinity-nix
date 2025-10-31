@@ -2,19 +2,24 @@
   pkgs,
   writeShellScriptBin,
   lib,
-  wine,
-  wineboot,
-  winetricks,
-  wineserver,
   sources,
   apps,
   updateApps,
   stdShellArgs,
+  packages,
 }:
 rec {
   createScript =
+    v3:
+    let
+      type = if v3 then "v3" else "v2";
+      wine = packages."${type}-wine";
+      wineboot = packages."${type}-wineboot";
+      winetricks = packages."${type}-winetricks";
+      wineserver = packages."${type}-wineserver";
+    in
     name:
-    writeShellScriptBin "affinity-${lib.toLower name}-2" ''
+    writeShellScriptBin "affinity-${lib.toLower name}" ''
       ${stdShellArgs}
 
       function show_help {
@@ -28,7 +33,7 @@ rec {
         wineserver
         update|repair|install   Update or repair the application
         help                    Show this
-        (nothing)               Launch Affinity ${name} 2
+        (nothing)               Launch Affinity ${name}
       EOF
       }
 
@@ -66,12 +71,17 @@ rec {
   createUnifiedPackage =
     name:
     let
+      v3 = name == "v3";
+
       app = apps.${lib.toLower name};
-      pkg = createScript name;
+      pkg = createScript v3 name;
+
+      version = if v3 then "" else sources._version;
+      postfix = if v3 then "" else "-${version}";
     in
     pkgs.symlinkJoin {
-      name = "Affinity ${name} ${sources._version}";
-      pname = "affinity-${lib.toLower name}-${sources._version}";
+      name = "Affinity ${name} ${version}";
+      pname = "affinity-${lib.toLower name}${postfix}";
       # order is important because the script and the app both use the same
       # binary name...
       paths = [
@@ -79,10 +89,10 @@ rec {
         app
       ];
       meta = {
-        description = "Affinity ${name} 2";
+        description = "Affinity ${name} ${version}";
         homepage = "https://affinity.serif.com/";
         platforms = [ "x86_64-linux" ];
-        mainProgram = "affinity-${lib.toLower name}-2";
+        mainProgram = "affinity-${lib.toLower name}${postfix}";
       };
     };
 }

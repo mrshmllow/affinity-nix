@@ -1,7 +1,6 @@
 {
   fetchurl,
   pkgs,
-  lib,
 }:
 rec {
   icon = fetchurl {
@@ -9,7 +8,7 @@ rec {
     sha256 = "sha256-KLT9loFiD2y8uNXNzc27DZ4A73yEs6Ntr4h3WULG5HM=";
   };
 
-  mkIconPackageFor = pkgs.runCommand "affinity-v3-icons" { } ''
+  iconPackage = pkgs.runCommand "affinity-v3-icons" { } ''
     mkdir -p $out/share/icons/hicolor/180x180/apps
 
     cp ${icon} \

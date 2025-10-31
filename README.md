@@ -6,6 +6,14 @@ Affinity V3 & V2 packaged with nix.
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
+## Recent Breaking Changes
+
+With the release of v3 some package names have changed.
+
+```
+{wine,wineboot,wineserver,winetricks} -> v2-{wine,wineboot,wineserver,winetricks}
+```
+
 ## Preamble
 
 > [!TIP]

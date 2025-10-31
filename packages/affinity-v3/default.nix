@@ -1,36 +1,30 @@
-{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
       self',
       affinityPathV3,
-      wineUnwrapped,
-      sources,
       stdShellArgs,
+      mkGraphicalCheck,
+      mkInstaller,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (self'.packages)
-          wineboot-v3
-          winetricks-v3
-          wine-v3
-          wineserver-v3
-          ;
+        wine = self'.packages.v3-wine;
+
         inherit
           affinityPathV3
-          wineUnwrapped
-          sources
           stdShellArgs
+          mkGraphicalCheck
+          mkInstaller
           ;
-        inherit (inputs) on-linux;
       };
     in
     {
       packages = {
-        updateV3 = scripts.createInstaller;
-        directV3 = scripts.createPackage;
+        v3-update = mkInstaller "v3";
+        v3-direct = scripts.createPackage;
       };
     };
 }
