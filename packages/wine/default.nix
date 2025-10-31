@@ -37,11 +37,6 @@
       _module.args = {
         inherit wineUnwrapped;
 
-        v2-wine = wrapWithPrefix-v2 wineUnwrapped "wine";
-        v2-winetricks = wrapWithPrefix-v2 pkgs.winetricks "winetricks";
-        v2-wineboot = wrapWithPrefix-v2 wineUnwrapped "wineboot";
-        v2-wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
-
         wine-stuff = {
           v2 = {
             wine = wrapWithPrefix-v2 wineUnwrapped "wine";

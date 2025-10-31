@@ -6,12 +6,12 @@
       stdShellArgs,
       mkGraphicalCheck,
       mkInstaller,
-      v3-wine,
+      wine-stuff,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        wine = v3-wine;
+        inherit (wine-stuff.v2) wine;
 
         inherit
           affinityPathV3
