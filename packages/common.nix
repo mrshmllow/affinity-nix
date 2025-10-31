@@ -21,7 +21,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "1";
+            revision = "2";
             verbs = [
               "dotnet48"
               "corefonts"
