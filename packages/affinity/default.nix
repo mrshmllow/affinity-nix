@@ -2,7 +2,7 @@
   perSystem =
     {
       pkgs,
-      affinityPath,
+      affinityPathV2,
       version,
       stdShellArgs,
       mkGraphicalCheck,
@@ -14,7 +14,7 @@
       scripts = pkgs.callPackage ./scripts.nix {
         inherit (wine-stuff.v2) wine;
         inherit
-          affinityPath
+          affinityPathV2
           version
           stdShellArgs
           mkGraphicalCheck

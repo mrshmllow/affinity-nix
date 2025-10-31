@@ -3,7 +3,7 @@
   writeShellScriptBin,
   lib,
   wine,
-  affinityPath,
+  affinityPathV2,
   version,
   stdShellArgs,
   mkInstaller,
@@ -20,7 +20,7 @@ rec {
       set -x
       ${stdShellArgs}
 
-      if [ ! -f "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
+      if [ ! -f "${affinityPathV2}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" ]; then
           ${lib.getExe installer} || exit 1
       else
           ${lib.getExe check} || exit 1
@@ -32,7 +32,7 @@ rec {
         shift
       fi
 
-      ${lib.getExe wine} "${affinityPath}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
+      ${lib.getExe wine} "${affinityPathV2}/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
     '';
 
   createPackage =

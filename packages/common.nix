@@ -2,7 +2,7 @@
 {
   perSystem =
     {
-      affinityPath,
+      affinityPathV2,
       affinityPathV3,
       pkgs,
       lib,
@@ -19,7 +19,8 @@
           v3:
           let
             type = if v3 then "v3" else "v2";
-            revisionPath = if v3 then "${affinityPathV3}/.revision" else "${affinityPath}/.revision";
+            affinityPath = if v3 then affinityPathV3 else affinityPathV2;
+            revisionPath = "${affinityPath}/.revision";
             revision = "1";
             verbs = [
               "dotnet48"
@@ -51,7 +52,7 @@
 
                 ${lib.getExe winetricks} renderer=vulkan
 
-                install -D -t "${affinityPathV3}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
+                install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
                 echo "${revision}" > "${revisionPath}"
             }
 
@@ -76,14 +77,14 @@
                 for app in "${"\${apps[@]}"}"; do
                     echo "affinity-nix: Installing settings for $app"
 
-                    mkdir -p "${affinityPathV3}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                    mkdir -p "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
 
                     ${lib.getExe pkgs.rsync} -v \
                         --ignore-existing \
                         --chmod=644 \
                         --recursive \
                         "${inputs.on-linux}/Auxillary/Settings/$app/2.0/" \
-                        "${affinityPathV3}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                        "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
             fi
 
