@@ -5,7 +5,7 @@
 }:
 {
   affinity-v3 = makeDesktopItem rec {
-    desktopName = "Affinity Photo 2";
+    desktopName = "Affinity";
     name = "affinity-v3";
     exec = "${lib.getExe affinity-v3} %U";
     icon = name;
