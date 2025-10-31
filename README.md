@@ -4,7 +4,7 @@
 
 ## About
 
-Affinity v3 & v2 packaged with nix.
+Affinity v3 & v2 packaged with Nix!
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
