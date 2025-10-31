@@ -26,7 +26,7 @@ jobs:
         run: mkdir -p $HOME/test-data-dir/
       - id: run-wine
         run: |
-          XDG_DATA_HOME=$HOME/test-data-dir/ nix run .#v2-winetricks
+          XDG_DATA_HOME=$HOME/test-data-dir/ nix run .#photo -- winetricks
       - id: test-directory
         run: |
           if [ -d "$HOME/test-data-dir/affinity" ]; then
@@ -48,7 +48,7 @@ jobs:
       - id: run-wine
         run: |
           unset XDG_DATA_HOME
-          nix run .#v2-winetricks
+          nix run .#photo -- winetricks
       - id: test-directory
         run: |
           if [ -d "$HOME/.local/share/affinity" ]; then
