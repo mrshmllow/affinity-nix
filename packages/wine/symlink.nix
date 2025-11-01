@@ -1,6 +1,6 @@
-{ runCommandNoCC }:
+{ runCommand }:
 { wine }:
-runCommandNoCC "wine-symlink" { inherit wine; } ''
+runCommand "wine-symlink" { inherit wine; } ''
   mkdir -p $out/bin
   for f in $wine/bin/*; do
     ln -s "$f" $out/bin
