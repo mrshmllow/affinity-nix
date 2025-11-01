@@ -20,7 +20,8 @@ in
   v3 = {
     name = "Affinity x64.exe";
     sha256 = "26194fb7ab0c83754549c99951b2dbbdc0361278172d02bb55eaf6b42a100409";
-    url = "https://downloads.affinity.studio/Affinity%20x64.exe";
+    # Oct 30th 2025
+    url = "https://web.archive.org/web/20251030194823/https://downloads.affinity.studio/Affinity%20x64.exe";
   };
 
   _version = version;
