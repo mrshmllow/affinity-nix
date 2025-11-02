@@ -10,7 +10,7 @@
 }:
 rec {
   createScript =
-    v3:
+    v3: name:
     let
       type = if v3 then "v3" else "v2";
       inherit (wine-stuff."${type}")
@@ -20,7 +20,6 @@ rec {
         wineserver
         ;
     in
-    name:
     writeShellScriptBin "affinity-${lib.toLower name}" ''
       ${stdShellArgs}
 
