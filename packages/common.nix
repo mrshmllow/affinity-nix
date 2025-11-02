@@ -21,7 +21,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "2";
+            revision = "3";
             verbs = [
               "dotnet48"
               "corefonts"
@@ -48,7 +48,7 @@
 
             function setup {
                 ${lib.getExe wineboot} --update
-                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
+                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
                 ${lib.getExe winetricks} renderer=vulkan
 
