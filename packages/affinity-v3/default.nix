@@ -11,7 +11,7 @@
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (wine-stuff.v2) wine;
+        inherit (wine-stuff.v3) wine;
 
         inherit
           affinityPathV3
