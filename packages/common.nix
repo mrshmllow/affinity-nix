@@ -27,7 +27,6 @@
               "dotnet48"
               "corefonts"
               "win11"
-              "aiusdhiaushd"
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
