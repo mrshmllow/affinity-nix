@@ -43,6 +43,24 @@
               tricksInstalled = 0;
             }}
 
+            installed_tricks=$(${lib.getExe winetricks} list-installed)
+
+            # kinda stolen from the nix-citizen project, tysm
+            # we can be more smart about installing verbs other than relying on the revision number
+            for verb in "${"\${verbs[@]}"}"; do
+                # skip if verb is installed
+                if ! echo "$installed_tricks" | grep -qw "$verb"; then
+                    echo "winetricks: Installing $verb"
+                    ${lib.getExe winetricks} -q -f "$verb"
+                    tricksInstalled=1
+                fi
+            done
+
+            # Ensure wineserver is restarted after tricks are installed
+            if [ "$tricksInstalled" -eq 1 ]; then
+                ${lib.getExe wineserver} -k
+            fi
+
             function setup {
                 ${lib.getExe wineboot} --update
 
@@ -82,24 +100,6 @@
                         "${inputs.on-linux}/Auxillary/Settings/$app/2.0/" \
                         "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
-            fi
-
-            installed_tricks=$(${lib.getExe winetricks} list-installed)
-
-            # kinda stolen from the nix-citizen project, tysm
-            # we can be more smart about installing verbs other than relying on the revision number
-            for verb in "${"\${verbs[@]}"}"; do
-                # skip if verb is installed
-                if ! echo "$installed_tricks" | grep -qw "$verb"; then
-                    echo "winetricks: Installing $verb"
-                    ${lib.getExe winetricks} -q -f "$verb"
-                    tricksInstalled=1
-                fi
-            done
-
-            # Ensure wineserver is restarted after tricks are installed
-            if [ "$tricksInstalled" -eq 1 ]; then
-                ${lib.getExe wineserver} -k
             fi
           '';
 
