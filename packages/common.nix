@@ -27,6 +27,7 @@
               "dotnet48"
               "corefonts"
               "win11"
+              "aiusdhiaushd"
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
@@ -55,6 +56,7 @@
                     if ! ${lib.getExe winetricks} -q -f "$verb"; then
                         zenity --error \
                             --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
+
                         exit 1
                     fi
 
@@ -115,12 +117,23 @@
             check = mkCheck (name == "v3");
           in
           pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
-            ${lib.getExe check} | zenity --progress \
+            FIFO=$(mktemp -u)
+
+            mkfifo "$FIFO"
+
+            zenity --progress \
                 --pulsate \
                 --no-cancel \
                 --auto-close \
                 --title="Affinity" \
-                --text="Preparing the wine prefix\n\nThis can take a while.\n"
+                --text="Preparing the wine prefix\n\nThis can take a while.\n" \
+                < $FIFO &
+
+            zenity_pid=$!
+
+            ${lib.getExe check} > $FIFO
+
+            kill zenity_pid
 
             if [ ! $? -eq 0 ]; then
                 zenity --error --text="Preparing the wine prefix failed."
