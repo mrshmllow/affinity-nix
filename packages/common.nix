@@ -23,24 +23,22 @@
             revisionPath = "${affinityPath}/.revision";
             revision = "3";
             verbs = [
+              "remove_mono"
+              "vcrun2022"
               "dotnet48"
               "corefonts"
-              "vcrun2022"
-
-              "allfonts"
-              # "dotnet35"
+              "win11"
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
             inherit (wine-stuff."${type}")
-              wine
               wineboot
               winetricks
               wineserver
               ;
           in
           pkgs.writeShellScriptBin "check" ''
-            set -x
+            set -x -e
             ${lib.strings.toShellVars {
               inherit verbs type;
               tricksInstalled = 0;
@@ -48,7 +46,6 @@
 
             function setup {
                 ${lib.getExe wineboot} --update
-                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
                 ${lib.getExe winetricks} renderer=vulkan
 
