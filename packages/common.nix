@@ -51,7 +51,13 @@
                 # skip if verb is installed
                 if ! echo "$installed_tricks" | grep -qw "$verb"; then
                     echo "winetricks: Installing $verb"
-                    ${lib.getExe winetricks} -q -f "$verb"
+
+                    if ! ${lib.getExe winetricks} -q -f "$verb"; then
+                        zenity --error \
+                            --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
+                        exit 1
+                    fi
+
                     tricksInstalled=1
                 fi
             done
