@@ -6,7 +6,6 @@
       affinityPathV3,
       pkgs,
       lib,
-      wineUnwrapped,
       sources,
       stdShellArgs,
       version,
