@@ -8,7 +8,6 @@
       lib,
       sources,
       stdShellArgs,
-      version,
       wine-stuff,
       wineUnwrapped,
       ...
