@@ -132,8 +132,6 @@
 
             ${lib.getExe check} > $FIFO
 
-            kill zenity_pid
-
             if [ ! $? -eq 0 ]; then
                 zenity --error --text="Preparing the wine prefix failed."
 
