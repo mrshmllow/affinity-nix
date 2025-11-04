@@ -6,6 +6,7 @@
       affinityPathV3,
       pkgs,
       lib,
+      wineUnwrapped,
       sources,
       stdShellArgs,
       version,
@@ -22,54 +23,32 @@
             revisionPath = "${affinityPath}/.revision";
             revision = "3";
             verbs = [
-              "remove_mono"
-              "vcrun2022"
               "dotnet48"
               "corefonts"
-              "win11"
+              "vcrun2022"
+
+              "allfonts"
+              # "dotnet35"
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
             inherit (wine-stuff."${type}")
+              wine
               wineboot
               winetricks
               wineserver
               ;
           in
           pkgs.writeShellScriptBin "check" ''
-            set -x -e
+            set -x
             ${lib.strings.toShellVars {
               inherit verbs type;
               tricksInstalled = 0;
             }}
 
-            installed_tricks=$(${lib.getExe winetricks} list-installed)
-
-            # kinda stolen from the nix-citizen project, tysm
-            # we can be more smart about installing verbs other than relying on the revision number
-            for verb in "${"\${verbs[@]}"}"; do
-                # skip if verb is installed
-                if ! echo "$installed_tricks" | grep -qw "$verb"; then
-                    echo "winetricks: Installing $verb"
-
-                    if ! ${lib.getExe winetricks} -q -f "$verb"; then
-                        zenity --error \
-                            --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
-
-                        exit 1
-                    fi
-
-                    tricksInstalled=1
-                fi
-            done
-
-            # Ensure wineserver is restarted after tricks are installed
-            if [ "$tricksInstalled" -eq 1 ]; then
-                ${lib.getExe wineserver} -k
-            fi
-
             function setup {
                 ${lib.getExe wineboot} --update
+                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
                 ${lib.getExe winetricks} renderer=vulkan
 
@@ -108,6 +87,24 @@
                         "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
             fi
+
+            installed_tricks=$(${lib.getExe winetricks} list-installed)
+
+            # kinda stolen from the nix-citizen project, tysm
+            # we can be more smart about installing verbs other than relying on the revision number
+            for verb in "${"\${verbs[@]}"}"; do
+                # skip if verb is installed
+                if ! echo "$installed_tricks" | grep -qw "$verb"; then
+                    echo "winetricks: Installing $verb"
+                    ${lib.getExe winetricks} -q -f "$verb"
+                    tricksInstalled=1
+                fi
+            done
+
+            # Ensure wineserver is restarted after tricks are installed
+            if [ "$tricksInstalled" -eq 1 ]; then
+                ${lib.getExe wineserver} -k
+            fi
           '';
 
         mkGraphicalCheck =
@@ -116,23 +113,12 @@
             check = mkCheck (name == "v3");
           in
           pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
-            FIFO=$(mktemp -u)
-
-            mkfifo "$FIFO"
-
-            zenity --progress \
+            ${lib.getExe check} | zenity --progress \
                 --pulsate \
                 --no-cancel \
                 --auto-close \
                 --title="Affinity" \
-                --text="Preparing the wine prefix\n\nThis can take a while.\n" \
-                < $FIFO &
-
-            zenity_pid=$!
-
-            ${lib.getExe check} > $FIFO
-
-            kill zenity_pid
+                --text="Preparing the wine prefix\n\nThis can take a while.\n"
 
             if [ ! $? -eq 0 ]; then
                 zenity --error --text="Preparing the wine prefix failed."
