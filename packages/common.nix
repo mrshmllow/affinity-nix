@@ -6,11 +6,11 @@
       affinityPathV3,
       pkgs,
       lib,
-      wineUnwrapped,
       sources,
       stdShellArgs,
       version,
       wine-stuff,
+      wineUnwrapped,
       ...
     }:
     {
@@ -21,14 +21,13 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "3";
+            revision = "4";
             verbs = [
+              "vcrun2022"
               "dotnet48"
               "corefonts"
-              "vcrun2022"
-
-              "allfonts"
-              # "dotnet35"
+              "win11"
+              "tahoma"
             ];
             winmetadata = pkgs.callPackage ./winmetadata.nix { };
 
@@ -40,7 +39,7 @@
               ;
           in
           pkgs.writeShellScriptBin "check" ''
-            set -x
+            set -x -e
             ${lib.strings.toShellVars {
               inherit verbs type;
               tricksInstalled = 0;
@@ -96,7 +95,14 @@
                 # skip if verb is installed
                 if ! echo "$installed_tricks" | grep -qw "$verb"; then
                     echo "winetricks: Installing $verb"
-                    ${lib.getExe winetricks} -q -f "$verb"
+
+                    if ! ${lib.getExe winetricks} -q -f "$verb"; then
+                        zenity --error \
+                            --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
+
+                        exit 1
+                    fi
+
                     tricksInstalled=1
                 fi
             done
@@ -113,12 +119,21 @@
             check = mkCheck (name == "v3");
           in
           pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
-            ${lib.getExe check} | zenity --progress \
+            FIFO=$(mktemp -u)
+
+            mkfifo "$FIFO"
+
+            zenity --progress \
                 --pulsate \
                 --no-cancel \
                 --auto-close \
                 --title="Affinity" \
-                --text="Preparing the wine prefix\n\nThis can take a while.\n"
+                --text="Preparing the wine prefix\n\nThis can take a while.\n" \
+                < $FIFO &
+
+            zenity_pid=$!
+
+            ${lib.getExe check} > $FIFO
 
             if [ ! $? -eq 0 ]; then
                 zenity --error --text="Preparing the wine prefix failed."
