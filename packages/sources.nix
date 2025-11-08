@@ -16,7 +16,7 @@ in
   publisher = {
     name = "affinity-publisher-msi-${version}.exe";
     sha256 = "efa8a49009db02085a494e582d82f15e21df02ea957e811c40ad7aac777afbb0";
-    url = "https://web.archive.org/web/20251103235402/https://d1gl0nrskhax8d.cloudfront.net/windows/publisher2/2.6.5/affinity-publisher-msi-2.6.5.exe?Expires=1762217633&Signature=a66~IMXMQ0CVfuT284IDwZTSvQepehSumTq7kQl5-tv-bxjjFh4a4Eb1N2ecHGCeqQH~mHirG4d7Lzki56tEHr-HFw3YHGANm4CK8Ol6BM1WMlgsfxr7YoR7Use1c~3IsxMhw6dXDhLtoV9HcV-wlI-PijQ565NMp8NGD9tZAVEwy~t--5EdKC3KY~n-cHXykKh3lomAYbj1APF~IZd-OpiM0kEFdtvOGosMqqc6Hd1g~J878mrKfu7CpC66fSkOdL0MFOyvs1PaHoaWKjsYZnAk8tFRyfwIY7CPLUsRM6fw5KIeXiXhins5BLas~GEd9GPoQOW1WLDYseU14nh-rg__&Key-Pair-Id=APKAIMMPYSI7GSVTEAAQ";
+    url = "https://web.archive.org/web/20251108071110/https://d1gl0nrskhax8d.cloudfront.net/windows/publisher2/2.6.5/affinity-publisher-msi-2.6.5.exe?Expires=1762589460&Signature=WumFyCJpH7YV2ZKcRV7HOI70ITEVvkQX0pjuyfDsUmso5OTtdGaQxjSpmzQzZQZlbh6KZkAsxgZiujJQF-ktNA3JtED7~T-7ZTWDUVp0Q1B7cWbvKBDJkbgy1j0fVD2~mwOwK9TbQC6g8r-fmwVEsnWHiypcopR73fINt6PV0Ha4zuriIp3hFec6ho~00MG1hDCQkWRgmI3FHJAaUWQWWlt-C7Z5kM8ObvNHTb08qk~oh8ErDhpucEd3txjMN07jA3KTCKZohQV82mKVa~X0m~l2f5xJbEe0uU~HBv4CQwfnmdzC9zEfvgBJuqyB6VV5LnhMI3lGJAjvongA4KlozQ__&Key-Pair-Id=APKAIMMPYSI7GSVTEAAQ";
   };
 
   v3 = {
