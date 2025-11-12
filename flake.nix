@@ -11,6 +11,11 @@
       flake = false;
     };
 
+    plugin-loader = {
+      url = "file+https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.1.0.1/affinitypluginloader-plus-winefix.tar.xz";
+      flake = false;
+    };
+
     flake-parts.url = "github:hercules-ci/flake-parts";
     treefmt-nix.url = "github:numtide/treefmt-nix";
     git-hooks.url = "github:cachix/git-hooks.nix";

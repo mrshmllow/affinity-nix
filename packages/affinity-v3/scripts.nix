@@ -30,7 +30,7 @@ rec {
         shift
       fi
 
-      ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" "$@"
+      ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe" "$@"
     '';
 
   createPackage =

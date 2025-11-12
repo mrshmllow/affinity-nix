@@ -14,13 +14,26 @@
     }:
     {
       _module.args = rec {
+        mkInjectPluginLoader =
+          affinityPath:
+          pkgs.writeShellScriptBin "inject-plugin-loader" ''
+            # Must be inserted after installer
+            # installer gets mad if we make the directory for it, so only install
+            # if it put something there
+            if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
+                pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
+                tar -xvf ${inputs.plugin-loader}
+                popd
+            fi
+          '';
+
         mkCheck =
           v3:
           let
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            latestRevision = "5";
+            latestRevision = "6";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -29,6 +42,7 @@
               "tahoma"
             ];
             dependencies = pkgs.callPackage ./dependencies.nix { };
+            injectPluginLoader = mkInjectPluginLoader affinityPath;
 
             inherit (wine-stuff."${type}")
               wine
@@ -142,6 +156,8 @@
             if [ "$tricksInstalled" -eq 1 ]; then
                 ${lib.getExe wineserver} -k
             fi
+
+            ${lib.getExe injectPluginLoader}
           '';
 
         mkGraphicalCheck =
@@ -178,6 +194,8 @@
           let
             source = sources.${lib.toLower name};
             check = mkGraphicalCheck name;
+            affinityPath = if name == "v3" then affinityPathV3 else affinityPathV2;
+            injectPluginLoader = mkInjectPluginLoader affinityPath;
             type = if name == "v3" then "v3" else "v2";
 
             inherit (wine-stuff."${type}")
@@ -268,6 +286,7 @@
                 --text="You will be prompted to install ${name}.\n\nPlease do not change the installation path."
 
             ${lib.getExe wine} "$cache_dir/${source.name}"
+            ${lib.getExe injectPluginLoader}
           '';
       };
     };
