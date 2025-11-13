@@ -20,7 +20,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "4";
+            revision = "5";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -55,6 +55,31 @@
                     ${lib.getExe winetricks} renderer=vulkan
 
                     install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+                fi
+                if [[ "$revision" -le 4 ]]; then
+                   echo "affinity-nix: Installing Microsoft WebView2 Runtime"
+
+                   ${lib.getExe wine} winecfg -v win7
+                   ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
+                   ${lib.getExe wine} winecfg -v win11
+
+                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
+                     Windows Registry Editor Version 5.00
+
+                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
+                     "Start"=dword:00000004
+
+                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
+                     "Start"=dword:00000004
+
+                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
+
+                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
+                     "Version"="win7"
+                   '').outPath}"
+
+                   # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
+                   ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
                 fi
 
                 echo "${revision}" > "${revisionPath}"
