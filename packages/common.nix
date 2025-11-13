@@ -157,7 +157,9 @@
                 ${lib.getExe wineserver} -k
             fi
 
-            ${lib.getExe injectPluginLoader}
+            if [[ "$type" == "v3" ]]; then
+                ${lib.getExe injectPluginLoader}
+            fi
           '';
 
         mkGraphicalCheck =
@@ -286,7 +288,10 @@
                 --text="You will be prompted to install ${name}.\n\nPlease do not change the installation path."
 
             ${lib.getExe wine} "$cache_dir/${source.name}"
-            ${lib.getExe injectPluginLoader}
+
+            if [[ "$type" == "v3" ]]; then
+                ${lib.getExe injectPluginLoader}
+            fi
           '';
       };
     };
