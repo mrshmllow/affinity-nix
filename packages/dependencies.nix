@@ -15,7 +15,7 @@ let
     };
   };
 in
-runCommand "winmetadata" { } ''
+runCommand "dependencies" { } ''
   mkdir -p $out
 
   ${lib.concatStringsSep "\n" (

@@ -28,7 +28,7 @@
               "win11"
               "tahoma"
             ];
-            winmetadata = pkgs.callPackage ./winmetadata.nix { };
+            dependencies = pkgs.callPackage ./dependencies.nix { };
 
             inherit (wine-stuff."${type}")
               wine
@@ -54,7 +54,7 @@
 
                     ${lib.getExe winetricks} renderer=vulkan
 
-                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
+                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
                 fi
 
                 echo "${revision}" > "${revisionPath}"
