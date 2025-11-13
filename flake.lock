@@ -207,11 +207,11 @@
       "locked": {
         "narHash": "sha256-CCqT6TQHG7HqvxsnP/EC9Mg6A3KfNg5i/vGXW0exTxU=",
         "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.1.0.1/affinitypluginloader-plus-winefix.tar.xz"
+        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/latest/download/affinitypluginloader-plus-winefix.tar.xz"
       },
       "original": {
         "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.1.0.1/affinitypluginloader-plus-winefix.tar.xz"
+        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/latest/download/affinitypluginloader-plus-winefix.tar.xz"
       }
     },
     "root": {
