@@ -20,7 +20,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "4";
+            latestRevision = "5";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -28,7 +28,7 @@
               "win11"
               "tahoma"
             ];
-            winmetadata = pkgs.callPackage ./winmetadata.nix { };
+            dependencies = pkgs.callPackage ./dependencies.nix { };
 
             inherit (wine-stuff."${type}")
               wine
@@ -45,29 +45,61 @@
             }}
 
             function setup {
-                ${lib.getExe wineboot} --update
-                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+                local prefixRevision="$1"
+                if [[ "$prefixRevision" -le 3 ]]; then
+                    echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
-                ${lib.getExe winetricks} renderer=vulkan
+                    ${lib.getExe wineboot} --update
+                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
-                install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
-                echo "${revision}" > "${revisionPath}"
+                    ${lib.getExe winetricks} renderer=vulkan
+
+                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+                fi
+
+                if [[ "$prefixRevision" -le 4 ]]; then
+                   echo "affinity-nix: Installing Microsoft WebView2 Runtime"
+
+                   ${lib.getExe wine} winecfg -v win7
+                   ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
+                   ${lib.getExe wine} winecfg -v win11
+
+                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
+                     Windows Registry Editor Version 5.00
+
+                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
+                     "Start"=dword:00000004
+
+                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
+                     "Start"=dword:00000004
+
+                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
+
+                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
+                     "Version"="win7"
+                   '').outPath}"
+
+                   # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
+                   ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
+                fi
+
+                echo "${latestRevision}" > "${revisionPath}"
             }
 
             # older prefix with no revision number
             if [ ! -f "${revisionPath}" ]; then
                 echo "affinity-nix: Running setup, no revision"
 
-                setup
+                setup "0"
             else
-                content=$(<"${revisionPath}")
+                prefixRevision=$(<"${revisionPath}")
 
                 # only install deps if the revision number is higher than the
                 # one found in the prefix
-                if [[ "${revision}" -gt "$content" ]]; then
+                if [[ "${latestRevision}" -gt "$prefixRevision" ]]; then
                   echo "affinity-nix: Running setup, old prefix revision"
 
-                  setup
+                  setup "$prefixRevision"
                 fi
             fi
 
@@ -220,7 +252,7 @@
 
             In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
             EOM
-                
+
                 zenity --error --text="$message"
                 echo -e "-------------------\n\n$message\n\n-------------------"
 
