@@ -45,12 +45,18 @@
             }}
 
             function setup {
-                ${lib.getExe wineboot} --update
-                ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+                local revision="$1"
+                if [[ "$revision" -le 3 ]]; then
+                    echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
-                ${lib.getExe winetricks} renderer=vulkan
+                    ${lib.getExe wineboot} --update
+                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
-                install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
+                    ${lib.getExe winetricks} renderer=vulkan
+
+                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${winmetadata}/*.winmd
+                fi
+
                 echo "${revision}" > "${revisionPath}"
             }
 
@@ -58,7 +64,7 @@
             if [ ! -f "${revisionPath}" ]; then
                 echo "affinity-nix: Running setup, no revision"
 
-                setup
+                setup "0"
             else
                 content=$(<"${revisionPath}")
 
@@ -67,7 +73,7 @@
                 if [[ "${revision}" -gt "$content" ]]; then
                   echo "affinity-nix: Running setup, old prefix revision"
 
-                  setup
+                  setup "$revision"
                 fi
             fi
 
@@ -220,7 +226,7 @@
 
             In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
             EOM
-                
+
                 zenity --error --text="$message"
                 echo -e "-------------------\n\n$message\n\n-------------------"
 
