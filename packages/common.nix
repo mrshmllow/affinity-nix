@@ -20,7 +20,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            revision = "5";
+            latestRevision = "5";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -45,8 +45,8 @@
             }}
 
             function setup {
-                local revision="$1"
-                if [[ "$revision" -le 3 ]]; then
+                local prefixRevision="$1"
+                if [[ "$prefixRevision" -le 3 ]]; then
                     echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
                     ${lib.getExe wineboot} --update
@@ -56,7 +56,8 @@
 
                     install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
                 fi
-                if [[ "$revision" -le 4 ]]; then
+
+                if [[ "$prefixRevision" -le 4 ]]; then
                    echo "affinity-nix: Installing Microsoft WebView2 Runtime"
 
                    ${lib.getExe wine} winecfg -v win7
@@ -82,7 +83,7 @@
                    ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
                 fi
 
-                echo "${revision}" > "${revisionPath}"
+                echo "${latestRevision}" > "${revisionPath}"
             }
 
             # older prefix with no revision number
@@ -91,14 +92,14 @@
 
                 setup "0"
             else
-                content=$(<"${revisionPath}")
+                prefixRevision=$(<"${revisionPath}")
 
                 # only install deps if the revision number is higher than the
                 # one found in the prefix
-                if [[ "${revision}" -gt "$content" ]]; then
+                if [[ "${latestRevision}" -gt "$prefixRevision" ]]; then
                   echo "affinity-nix: Running setup, old prefix revision"
 
-                  setup "$revision"
+                  setup "$prefixRevision"
                 fi
             fi
 
