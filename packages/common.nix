@@ -58,6 +58,8 @@
               tricksInstalled = 0;
             }}
 
+            ${lib.getExe wine} --version
+
             function setup {
                 local prefixRevision="$1"
                 if [[ "$prefixRevision" -le 3 ]]; then
