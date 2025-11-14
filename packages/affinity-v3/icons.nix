@@ -1,6 +1,7 @@
 {
   fetchurl,
   pkgs,
+  lib,
 }:
 rec {
   icon = fetchurl {
@@ -9,9 +10,11 @@ rec {
   };
 
   iconPackage = pkgs.runCommand "affinity-v3-icons" { } ''
-    mkdir -p $out/share/icons/hicolor/180x180/apps
+    mkdir -p $out/share/icons/hicolor/256x256/apps
 
-    cp ${icon} \
-        $out/share/icons/hicolor/180x180/apps/affinity-v3.png
+    ${lib.getExe pkgs.imagemagick} \
+        ${icon} \
+        -resize 256x256 \
+        $out/share/icons/hicolor/256x256/apps/affinity-v3.png
   '';
 }
