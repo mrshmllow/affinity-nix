@@ -10,18 +10,18 @@
       ...
     }:
     let
-      wineUnstable =
-        (inputs.nixpkgs-wine.legacyPackages.${system}.wineWow64Packages.full.override {
-          wineRelease = "unstable";
-        }).overrideAttrs
-          {
-            src = inputs.elemental-wine-source;
-            version = "9.13-part3";
-          };
+      # wineUnstable =
+      #   (inputs.nixpkgs-wine.legacyPackages.${system}.wineWow64Packages.full.override {
+      #     wineRelease = "unstable";
+      #   }).overrideAttrs
+      #     {
+      #       src = inputs.elemental-wine-source;
+      #       version = "9.13-part3";
+      #     };
 
       symlink = pkgs.callPackage ./symlink.nix { };
       wineUnwrapped = symlink {
-        wine = wineUnstable;
+        wine = pkgs.wineWow64Packages.full;
       };
 
       wrapWithPrefix-v2 = pkgs.callPackage ./wrapWithPrefix.nix {
@@ -46,6 +46,12 @@
             wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
           };
           v3 = {
+            wine = wrapWithPrefix-v3 wineUnwrapped "wine";
+            winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
+            wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
+            wineserver = wrapWithPrefix-v3 wineUnwrapped "wineserver";
+          };
+          v3-runtime = {
             wine = wrapWithPrefix-v3 wineUnwrapped "wine";
             winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
             wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
