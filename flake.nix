@@ -3,8 +3,8 @@
 
   inputs = {
     # a known working revision of nixpkgs for wine. somewhat tracked by #63
-    nixpkgs-wine.url = "github:nixos/nixpkgs?ref=6df24922a1400241dae323af55f30e4318a6ca65";
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-wine.url = "github:nixos/nixpkgs/6df24922a1400241dae323af55f30e4318a6ca65";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     on-linux = {
       url = "github:seapear/AffinityOnLinux";
