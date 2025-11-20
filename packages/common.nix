@@ -102,6 +102,8 @@
                 if [[ "$prefixRevision" -le 6 ]]; then
                    echo "affinity-nix: PROPERLY disabling the menubuilder"
 
+                   # by diffing a registry dump we found that you can disable the file association
+                   # through a registry key.
                    ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
                      Windows Registry Editor Version 5.00
 
