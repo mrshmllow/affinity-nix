@@ -110,7 +110,7 @@
                      [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
                      "winemenubuilder.exe"=""
 
-                     [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociation]
+                     [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociations]
                      "Enable"="N"
                    '').outPath}"
                 fi
