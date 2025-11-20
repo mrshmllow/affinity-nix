@@ -149,7 +149,7 @@ Commands:
 ```
 
 > [!TIP]
-> Armed with these you should be able to follow https://affinity.liz.pet/docs/misc-troubleshooting.html for troubleshooting steps.
+> Armed with these you should be able to follow https://affinity.liz.pet/v2/misc-troubleshooting/ for troubleshooting steps.
 
 For example, accessing `wine`:
 
