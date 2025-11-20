@@ -33,7 +33,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            latestRevision = "6";
+            latestRevision = "7";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -97,6 +97,22 @@
 
                    # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
                    ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
+                fi
+
+                if [[ "$prefixRevision" -le 6 ]]; then
+                   echo "affinity-nix: PROPERLY disabling the menubuilder"
+
+                   # by diffing a registry dump we found that you can disable the file association
+                   # through a registry key.
+                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
+                     Windows Registry Editor Version 5.00
+
+                     [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
+                     "winemenubuilder.exe"=""
+
+                     [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociation]
+                     "Enable"="N"
+                   '').outPath}"
                 fi
 
                 echo "${latestRevision}" > "${revisionPath}"
