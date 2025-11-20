@@ -6,10 +6,6 @@ labels: bug
 assignees: mrshmllow
 ---
 
-**Checklist**
-
-- [ ] I read the FAQ section on the README
-
 **Describe the bug**
 A clear and concise description of what the bug is.
 
