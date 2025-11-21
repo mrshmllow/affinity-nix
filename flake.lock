@@ -138,22 +138,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-wine": {
-      "locked": {
-        "lastModified": 1735834308,
-        "narHash": "sha256-dklw3AXr3OGO4/XT1Tu3Xz9n/we8GctZZ75ZWVqAVhk=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "6df24922a1400241dae323af55f30e4318a6ca65",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "6df24922a1400241dae323af55f30e4318a6ca65",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1763421233,
@@ -221,7 +205,6 @@
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs_2",
-        "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
         "plugin-loader": "plugin-loader",
         "treefmt-nix": "treefmt-nix"

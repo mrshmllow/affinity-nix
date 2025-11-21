@@ -1,4 +1,3 @@
-{ inputs, ... }:
 {
   perSystem =
     {
@@ -10,15 +9,6 @@
       ...
     }:
     let
-      # wineUnstable =
-      #   (inputs.nixpkgs-wine.legacyPackages.${system}.wineWow64Packages.full.override {
-      #     wineRelease = "unstable";
-      #   }).overrideAttrs
-      #     {
-      #       src = inputs.elemental-wine-source;
-      #       version = "9.13-part3";
-      #     };
-
       symlink = pkgs.callPackage ./symlink.nix { };
       wineUnwrapped = symlink {
         wine = pkgs.wineWow64Packages.stagingFull;
