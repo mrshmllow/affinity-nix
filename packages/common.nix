@@ -66,7 +66,7 @@
                     echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
                     ${lib.getExe wineboot} --update
-                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-8.1.0-x86.msi"
+                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-10.3.0-x86.msi"
 
                     ${lib.getExe winetricks} renderer=vulkan
 
