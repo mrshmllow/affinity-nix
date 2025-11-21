@@ -21,7 +21,7 @@
 
       symlink = pkgs.callPackage ./symlink.nix { };
       wineUnwrapped = symlink {
-        wine = pkgs.wineWow64Packages.full;
+        wine = pkgs.wineWow64Packages.stagingFull;
       };
 
       wrapWithPrefix-v2 = pkgs.callPackage ./wrapWithPrefix.nix {
