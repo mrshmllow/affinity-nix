@@ -4,7 +4,6 @@
       pkgs,
       affinityPathV3,
       affinityPathV2,
-      system,
       stdPath,
       ...
     }:
