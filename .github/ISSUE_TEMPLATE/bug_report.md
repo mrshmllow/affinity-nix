@@ -6,6 +6,10 @@ labels: bug
 assignees: mrshmllow
 ---
 
+**Checklist**
+
+- [ ] Make sure to run `affinity-v3` with `--verbose` when posting logs: `affinity-v3 --verbose`
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
