@@ -8,6 +8,8 @@ Affinity v3 & v2 packaged with Nix!
 
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
+There is a sister project which allows you to run these packages on any Linux distro through AppImages, [affinity-everywhere](https://github.com/mrshmllow/affinity-everywhere).
+
 ## Recent Breaking Changes
 
 With the release of v3, there has been some changes:
