@@ -300,6 +300,19 @@
             ${lib.getExe check} || exit 1
             ${lib.getExe wine} winecfg -v win11
             ${lib.getExe wineserver} -w
+                
+            cp ${
+              pkgs.fetchurl {
+                url = "https://github.com/microsoft/windows-rs/raw/23ec2a2267646dbb87658f1b1247eae0ec49a9e7/crates/libs/bindgen/default/Windows.winmd";
+                sha256 = "sha256-50WS8edKdwWNBB+cAYvTD/0QYovIObRRdCoZaAgjCYo=";
+              }
+            } "${affinityPath}/drive_c/windows/system32/winmetadata"
+            cp ${
+              pkgs.fetchurl {
+                url = "https://github.com/ElementalWarrior/wine-wintypes.dll-for-affinity/raw/ed8fa4372bda2c966e86ecd3ec880b17891e8ece/wintypes_shim.dll.so";
+                sha256 = "1xmzxfzn8g94jkdg3sv9i3i8z8vx16ps2ww93rp7l51ziw1ybjm5";
+              }
+            } "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
 
             zenity --info \
                 --title="Affinity ${name} (${type})" \
