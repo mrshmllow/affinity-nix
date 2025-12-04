@@ -19,7 +19,7 @@ stdenv.mkDerivation rec {
       --set WINELOADER "${lib.getExe' wineUnwrapped "wine"}" \
       --set WINEDLLPATH "${wineUnwrapped}/lib/wine" \
       --set WINE "${lib.getExe' wineUnwrapped "wine"}" \
-      --set WINEDLLOVERRIDES "winemenubuilder.exe=d" \
+      --set WINEDLLOVERRIDES "winemenubuilder.exe=d;wintypes=n,b" \
       --set PATH "${lib.makeBinPath stdPath}"
   '';
   meta.mainProgram = name;
