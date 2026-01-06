@@ -21,8 +21,8 @@ in
 
   v3 = {
     name = "Affinity x64.exe";
-    sha256 = "255bb7e688bc68818513a469f6bec75ef48a4fdb3956e37ed33411cdfac3e50d";
-    url = "https://web.archive.org/web/20251108071019/https://downloads.affinity.studio/Affinity%20x64.exe";
+    sha256 = "53f44bcdbbe7923ade322ac5c713905cbc40447b1b9bcfc704219d66b56bc1dc";
+    url = "https://web.archive.org/web/20260106232536/https://downloads.affinity.studio/Affinity%20x64.exe";
   };
 
   _version = version;
