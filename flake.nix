@@ -1,5 +1,5 @@
 {
-  description = "An attempt at packging affinity photo for nix";
+  description = "An attempt at packaging affinity photo for nix";
 
   inputs = {
     # a known working revision of nixpkgs for wine. somewhat tracked by #63

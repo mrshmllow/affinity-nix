@@ -22,7 +22,7 @@ With the release of v3, there has been some changes:
 ## Preamble
 
 > [!TIP]
-> [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compling yourself.
+> [Add garnix as a substituter](https://garnix.io/docs/caching) to avoid compiling yourself.
 
 The prefix is located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/affinity-v3/` falling back to `$HOME/.local/share/affinity/` or `$HOME/.local/share/affinity-v3/`.
 
