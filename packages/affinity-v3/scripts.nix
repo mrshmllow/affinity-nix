@@ -7,6 +7,7 @@
   stdShellArgs,
   mkInstaller,
   mkGraphicalCheck,
+  sources,
 }:
 rec {
   createRunner =
@@ -20,6 +21,12 @@ rec {
 
       if [ ! -f "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/Affinity.exe" ]; then
           ${lib.getExe installer} || exit 1
+      elif [ -f "${affinityPathV3}/installed-hash" ]; then
+          installed_hash=$(<"${affinityPathV3}/installed-hash")
+
+          if [[ "$installed_hash" != "${sources.v3.sha256}" ]] && zenity --question --text="New update found, would you like to install it?"; then
+            ${lib.getExe installer} || exit 1
+          fi
       else
           ${lib.getExe check} || exit 1
       fi

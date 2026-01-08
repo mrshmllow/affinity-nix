@@ -7,6 +7,7 @@
       mkGraphicalCheck,
       mkInstaller,
       wine-stuff,
+      sources,
       ...
     }:
     let
@@ -14,6 +15,7 @@
         inherit (wine-stuff.v3) wine;
 
         inherit
+          sources
           affinityPathV3
           stdShellArgs
           mkGraphicalCheck

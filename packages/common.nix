@@ -310,6 +310,8 @@
             if [[ "$type" == "v3" ]]; then
                 ${lib.getExe injectPluginLoader}
             fi
+
+            echo "${source.sha256}" > ${affinityPath}/installed-hash
           '';
       };
     };
