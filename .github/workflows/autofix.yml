@@ -18,4 +18,4 @@ jobs:
       - name: nix fmt
         run: nix develop --print-build-logs -v --command pre-commit run --all-files
         continue-on-error: true
-      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
+      - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8
