@@ -5,15 +5,17 @@
       pkgs,
       affinityPathV3,
       affinityPathV2,
-      system,
       stdPath,
       ...
     }:
     let
       wineUnstable =
-        (inputs.nixpkgs-wine.legacyPackages.${system}.wineWow64Packages.full.override {
-          wineRelease = "unstable";
-        }).overrideAttrs
+        (
+          inputs.nixpkgs-wine.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wineWow64Packages.full.override
+          {
+            wineRelease = "unstable";
+          }
+        ).overrideAttrs
           {
             src = inputs.elemental-wine-source;
             version = "9.13-part3";
