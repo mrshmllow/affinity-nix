@@ -224,7 +224,8 @@
         "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
         "plugin-loader": "plugin-loader",
-        "treefmt-nix": "treefmt-nix"
+        "treefmt-nix": "treefmt-nix",
+        "wine": "wine"
       }
     },
     "treefmt-nix": {
@@ -243,6 +244,25 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "wine": {
+      "flake": false,
+      "locked": {
+        "host": "gitlab.winehq.org",
+        "lastModified": 1771620632,
+        "narHash": "sha256-Ma1lLS84aN7KCT3bOdAslDv2Cd/pUwPkKsW+KMlTnXk=",
+        "owner": "wine",
+        "repo": "wine",
+        "rev": "222c976140d1b66c71769296f856f6523782b6c9",
+        "type": "gitlab"
+      },
+      "original": {
+        "host": "gitlab.winehq.org",
+        "owner": "wine",
+        "ref": "wine-11.3",
+        "repo": "wine",
+        "type": "gitlab"
       }
     }
   },

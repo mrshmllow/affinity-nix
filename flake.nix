@@ -25,6 +25,11 @@
       flake = false;
     };
 
+    wine = {
+      url = "gitlab:wine/wine?host=gitlab.winehq.org&ref=wine-11.3";
+      flake = false;
+    };
+
     flake-compat.url = "https://git.lix.systems/lix-project/flake-compat/archive/main.tar.gz";
   };
 
