@@ -27,8 +27,6 @@ rec {
           if [[ "$installed_hash" != "${sources.v3.sha256}" ]] && zenity --question --text="New update found, would you like to install it?"; then
             ${lib.getExe installer} || exit 1
           fi
-      else
-          ${lib.getExe check} || exit 1
       fi
 
       if [ "$1" != "--verbose" ]; then
@@ -37,6 +35,7 @@ rec {
         shift
       fi
 
+      ${lib.getExe check} || exit 1
       ${lib.getExe wine} "${affinityPathV3}/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe" "$@"
     '';
 
