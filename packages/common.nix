@@ -33,7 +33,7 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            latestRevision = "7";
+            latestRevision = "8";
             verbs = [
               "vcrun2022"
               "dotnet48"
@@ -113,6 +113,16 @@
                      [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociations]
                      "Enable"="N"
                    '').outPath}"
+                fi
+
+                if [[ "$prefixRevision" -le 7 ]]; then
+                   echo "affinity-nix: Removing old APL Plugins directory"
+
+                   # will delete the user's plugins, unfortunate.
+                   # i dont know how many other plugins even exist, anyway
+                   # they will be unsupported by newer apl, anyway.
+                   # source: https://github.com/noahc3/AffinityPluginLoader/releases/tag/v0.3.0
+                   rm -rf "${affinityPath}/drive_c/Program Files/Affinity/Affinity/plugins"
                 fi
 
                 echo "${latestRevision}" > "${revisionPath}"
