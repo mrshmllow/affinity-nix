@@ -20,7 +20,7 @@
             src = inputs.elemental-wine-source;
             version = "9.13-part3";
 
-            prePatch = ''
+            postInstall = ''
               patchShebangs $out
             '';
           };
