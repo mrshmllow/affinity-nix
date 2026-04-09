@@ -5,7 +5,7 @@
 }:
 rec {
   icon = fetchurl {
-    url = "https://static.canva.com/domain-assets/affinity/static/images/apple-touch-180x180-1.png";
+    url = "https://web.archive.org/web/20260310003857/https://static.canva.com/domain-assets/affinity/static/images/apple-touch-180x180-1.png";
     sha256 = "sha256-KLT9loFiD2y8uNXNzc27DZ4A73yEs6Ntr4h3WULG5HM=";
   };
 
