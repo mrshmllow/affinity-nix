@@ -1,4 +1,4 @@
-{ runCommand, pkgs }:
+{ runCommand }:
 { wine }:
 runCommand "wine-symlink" { inherit wine; } ''
   mkdir -p $out/bin
