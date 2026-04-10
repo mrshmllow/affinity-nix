@@ -44,7 +44,7 @@
                 name = "vcrun2022/vc_redist.x86.exe";
                 path = pkgs.fetchurl {
                   url = "https://web.archive.org/web/20260330091736/https://aka.ms/vs/17/release/vc_redist.x86.exe";
-                  hash = "sha256-rHWoLYc+a2+YsdKTBCOAdk19JjxDQ45Q1WT6WMn4kcI=";
+                  hash = "sha256-DAnyYRZgRBCEzg30JcUcEeFH5kR5Y8NpD5fgslxV7WQ=";
                 };
               }
               {
