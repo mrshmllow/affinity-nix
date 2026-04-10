@@ -26,7 +26,7 @@
     };
 
     wine = {
-      url = "gitlab:wine/wine?host=gitlab.winehq.org&ref=wine-11.3";
+      url = "gitlab:wine/wine?host=gitlab.winehq.org&ref=wine-11.6";
       flake = false;
     };
 

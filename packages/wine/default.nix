@@ -18,7 +18,7 @@
         ).overrideAttrs
           {
             src = inputs.wine;
-            version = "11.3";
+            version = "11.6";
           };
 
       symlink = pkgs.callPackage ./symlink.nix { };

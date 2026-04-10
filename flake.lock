@@ -250,17 +250,17 @@
       "flake": false,
       "locked": {
         "host": "gitlab.winehq.org",
-        "lastModified": 1771620632,
-        "narHash": "sha256-Ma1lLS84aN7KCT3bOdAslDv2Cd/pUwPkKsW+KMlTnXk=",
+        "lastModified": 1775246601,
+        "narHash": "sha256-al/NlGl7upSg+vzRZvsUONfUh/4oMHb3YczDThF1AZM=",
         "owner": "wine",
         "repo": "wine",
-        "rev": "222c976140d1b66c71769296f856f6523782b6c9",
+        "rev": "6e073d28dee3af7f4c965daec94644e0f9f92727",
         "type": "gitlab"
       },
       "original": {
         "host": "gitlab.winehq.org",
         "owner": "wine",
-        "ref": "wine-11.3",
+        "ref": "wine-11.6",
         "repo": "wine",
         "type": "gitlab"
       }
