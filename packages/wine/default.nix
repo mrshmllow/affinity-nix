@@ -44,13 +44,11 @@
           v2 = {
             wine = wrapWithPrefix-v2 wineUnwrapped "wine";
             winetricks = wrapWithPrefix-v2 pkgs.winetricks "winetricks";
-            wineboot = wrapWithPrefix-v2 wineUnwrapped "wineboot";
             wineserver = wrapWithPrefix-v2 wineUnwrapped "wineserver";
           };
           v3 = {
             wine = wrapWithPrefix-v3 wineUnwrapped "wine";
             winetricks = wrapWithPrefix-v3 pkgs.winetricks "winetricks";
-            wineboot = wrapWithPrefix-v3 wineUnwrapped "wineboot";
             wineserver = wrapWithPrefix-v3 wineUnwrapped "wineserver";
           };
         };

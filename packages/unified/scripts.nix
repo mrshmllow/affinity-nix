@@ -15,7 +15,6 @@ rec {
       type = if v3 then "v3" else "v2";
       inherit (wine-stuff."${type}")
         wine
-        wineboot
         winetricks
         wineserver
         ;
@@ -53,7 +52,7 @@ rec {
               ;;
           wineboot)
               shift
-              exec ${lib.getExe wineboot} "$@"
+              exec ${lib.getExe wine} wineboot "$@"
               ;;
           wineserver)
               shift

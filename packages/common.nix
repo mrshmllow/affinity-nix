@@ -46,7 +46,6 @@
 
             inherit (wine-stuff."${type}")
               wine
-              wineboot
               winetricks
               wineserver
               ;
@@ -65,7 +64,7 @@
                 if [[ "$prefixRevision" -le 3 ]]; then
                     echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
-                    ${lib.getExe wineboot} --update
+                    ${lib.getExe wine} wineboot --update
                     ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
                     ${lib.getExe winetricks} renderer=vulkan
