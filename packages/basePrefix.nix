@@ -6,7 +6,6 @@
       lib,
       wine-stuff,
       wineUnwrapped,
-      mkPrefixBase,
       ...
     }:
     {

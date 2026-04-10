@@ -4,7 +4,6 @@
   lib,
   wine,
   wineserver,
-  affinityPathV3,
   stdShellArgs,
   mkInstaller,
   mkGraphicalCheck,

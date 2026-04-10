@@ -2,7 +2,6 @@
   stdenv,
   lib,
   pkgs,
-  affinityPath,
   wineUnwrapped,
   stdPath,
 }:

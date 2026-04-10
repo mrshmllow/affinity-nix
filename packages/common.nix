@@ -17,7 +17,7 @@
     {
       _module.args = rec {
         mkInjectPluginLoader =
-          affinityPath:
+          _affinityPath:
           pkgs.writeShellScriptBin "inject-plugin-loader" ''
             set -x
             # Must be inserted after installer
