@@ -18,7 +18,7 @@
         ).overrideAttrs
           {
             src = inputs.elemental-wine-source;
-            version = "9.13-part3";
+            version = "10.18";
           };
 
       symlink = pkgs.callPackage ./symlink.nix { };

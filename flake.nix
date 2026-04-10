@@ -21,7 +21,7 @@
     git-hooks.url = "github:cachix/git-hooks.nix";
 
     elemental-wine-source = {
-      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
+      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=wine-10.18-winmd";
       flake = false;
     };
 

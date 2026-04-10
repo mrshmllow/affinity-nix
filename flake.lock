@@ -4,17 +4,17 @@
       "flake": false,
       "locked": {
         "host": "gitlab.winehq.org",
-        "lastModified": 1722747031,
-        "narHash": "sha256-XVhz9p2kgFBoJ376vg8OaFXxcMEjAe9AK1hk0I1rb1Q=",
+        "lastModified": 1762569511,
+        "narHash": "sha256-3mJtnOUqQPRou52tWHlSfHuxqSDs3dXminZLwAX6/VE=",
         "owner": "ElementalWarrior",
         "repo": "wine",
-        "rev": "a7c9b19e1a26cf49c63a7c19189a3e2bbe2c6ac2",
+        "rev": "8d61f4c37350575f06d073b4fa999e6200be11d6",
         "type": "gitlab"
       },
       "original": {
         "host": "gitlab.winehq.org",
         "owner": "ElementalWarrior",
-        "ref": "affinity-photo3-wine9.13-part3",
+        "ref": "wine-10.18-winmd",
         "repo": "wine",
         "type": "gitlab"
       }
