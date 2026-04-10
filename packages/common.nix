@@ -33,8 +33,9 @@
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             revisionPath = "${affinityPath}/.revision";
-            latestRevision = "8";
+            latestRevision = "9";
             verbs = [
+              "remove_mono"
               "vcrun2022"
               "dotnet48"
               "corefonts"
@@ -65,11 +66,16 @@
                     echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
                     ${lib.getExe wine} wineboot --update
-                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+
+                    if [[ "$type" == "v2" ]]; then
+                        ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+                    fi
 
                     ${lib.getExe winetricks} renderer=vulkan
 
-                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+                    if [[ "$type" == "v2" ]]; then
+                        install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+                    fi
                 fi
 
                 if [[ "$prefixRevision" -le 4 ]]; then
@@ -122,6 +128,14 @@
                    # they will be unsupported by newer apl, anyway.
                    # source: https://github.com/noahc3/AffinityPluginLoader/releases/tag/v0.3.0
                    rm -rf "${affinityPath}/drive_c/Program Files/Affinity/Affinity/plugins"
+                fi
+
+                if [[ "$prefixRevision" -le 8 && "$type" == "v2" ]]; then
+                   echo "affinity-nix: Deleting Windows.{Services,System}.winmd if they exist"
+
+                   # since modern wine, >= 11, these cause a tonn of problems.
+                   rm "${affinityPath}/drive_c/windows/system32/WinMetadata/Windows.Services.winmd" || true
+                   rm "${affinityPath}/drive_c/windows/system32/WinMetadata/Windows.System.winmd" || true
                 fi
 
                 echo "${latestRevision}" > "${revisionPath}"
