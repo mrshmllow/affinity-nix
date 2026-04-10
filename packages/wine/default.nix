@@ -3,8 +3,6 @@
   perSystem =
     {
       pkgs,
-      affinityPathV3,
-      affinityPathV2,
       stdPath,
       ...
     }:
@@ -28,12 +26,10 @@
 
       wrapWithPrefix-v2 = pkgs.callPackage ./wrapWithPrefix.nix {
         inherit wineUnwrapped stdPath;
-        affinityPath = affinityPathV2;
       };
 
       wrapWithPrefix-v3 = pkgs.callPackage ./wrapWithPrefix.nix {
         inherit wineUnwrapped stdPath;
-        affinityPath = affinityPathV3;
       };
     in
     {

@@ -2,7 +2,6 @@
   perSystem =
     {
       pkgs,
-      affinityPathV3,
       stdShellArgs,
       mkGraphicalCheck,
       mkInstaller,
@@ -17,7 +16,6 @@
 
         inherit
           sources
-          affinityPathV3
           stdShellArgs
           mkGraphicalCheck
           mkInstaller
