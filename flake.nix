@@ -26,6 +26,11 @@
     };
 
     flake-compat.url = "https://git.lix.systems/lix-project/flake-compat/archive/main.tar.gz";
+
+    corefonts = {
+      url = "github:pushcx/corefonts";
+      flake = false;
+    };
   };
 
   outputs =

@@ -11,6 +11,7 @@
       wine-stuff,
       wineUnwrapped,
       self',
+      mkPrefixBase,
       ...
     }:
     {
@@ -35,89 +36,29 @@
           let
             type = if v3 then "v3" else "v2";
             affinityPath = if v3 then affinityPathV3 else affinityPathV2;
-            revisionPath = "${affinityPath}/.revision";
             latestRevision = "8";
-            verbs = [
-              "vcrun2022"
-              "dotnet48"
-              "corefonts"
-              "win11"
-              "tahoma"
-            ];
-            dependencies = pkgs.callPackage ./dependencies.nix { };
             injectPluginLoader = mkInjectPluginLoader affinityPath;
 
             inherit (wine-stuff."${type}")
               wine
-              wineboot
-              winetricks
-              wineserver
               ;
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e
             ${lib.strings.toShellVars {
-              inherit verbs type;
+              inherit type;
               tricksInstalled = 0;
-              apps = [ "Photo" "Designer" "Publisher" ];
+              apps = [
+                "Photo"
+                "Designer"
+                "Publisher"
+              ];
             }}
 
             ${lib.getExe wine} --version
 
             function setup {
                 local prefixRevision="$1"
-                if [[ "$prefixRevision" -le 3 ]]; then
-                    echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
-
-                    ${lib.getExe wineboot} --update
-                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
-
-                    ${lib.getExe winetricks} renderer=vulkan
-
-                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
-                fi
-
-                if [[ "$prefixRevision" -le 4 ]]; then
-                   echo "affinity-nix: Installing Microsoft WebView2 Runtime"
-
-                   ${lib.getExe wine} winecfg -v win7
-                   ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
-                   ${lib.getExe wine} winecfg -v win11
-
-                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
-                     Windows Registry Editor Version 5.00
-
-                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
-                     "Start"=dword:00000004
-
-                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
-                     "Start"=dword:00000004
-
-                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
-
-                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
-                     "Version"="win7"
-                   '').outPath}"
-
-                   # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
-                   ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
-                fi
-
-                if [[ "$prefixRevision" -le 6 ]]; then
-                   echo "affinity-nix: PROPERLY disabling the menubuilder"
-
-                   # by diffing a registry dump we found that you can disable the file association
-                   # through a registry key.
-                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
-                     Windows Registry Editor Version 5.00
-
-                     [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
-                     "winemenubuilder.exe"=""
-
-                     [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociations]
-                     "Enable"="N"
-                   '').outPath}"
-                fi
 
                 if [[ "$prefixRevision" -le 7 ]]; then
                    echo "affinity-nix: Removing old APL Plugins directory"
@@ -126,19 +67,19 @@
                    # i dont know how many other plugins even exist, anyway
                    # they will be unsupported by newer apl, anyway.
                    # source: https://github.com/noahc3/AffinityPluginLoader/releases/tag/v0.3.0
-                   rm -rf "${affinityPath}/drive_c/Program Files/Affinity/Affinity/plugins"
+                   rm -rf "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/plugins"
                 fi
 
-                echo "${latestRevision}" > "${revisionPath}"
+                echo "${latestRevision}" > $MERGED_PREFIX/.revision
             }
 
             # older prefix with no revision number
-            if [ ! -f "${revisionPath}" ]; then
+            if [ ! -f "$MERGED_PREFIX/.revision" ]; then
                 echo "affinity-nix: Running setup, no revision"
 
                 setup "0"
             else
-                prefixRevision=$(<"${revisionPath}")
+                prefixRevision=$(<"$MERGED_PREFIX/.revision")
 
                 # only install deps if the revision number is higher than the
                 # one found in the prefix
@@ -153,40 +94,15 @@
                 for app in "${"\${apps[@]}"}"; do
                     echo "affinity-nix: Installing settings for $app"
 
-                    mkdir -p "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                    mkdir -p "$MERGED_PREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
 
                     ${lib.getExe pkgs.rsync} -v \
                         --ignore-existing \
                         --chmod=644 \
                         --recursive \
                         "${inputs.on-linux}/Auxillary/Settings/$app/2.0/" \
-                        "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                        "$MERGED_PREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
-            fi
-
-            installed_tricks=$(${lib.getExe winetricks} list-installed)
-
-            # kinda stolen from the nix-citizen project, tysm
-            # we can be more smart about installing verbs other than relying on the revision number
-            for verb in "${"\${verbs[@]}"}"; do
-                # skip if verb is installed
-                if ! echo "$installed_tricks" | grep -qw "$verb"; then
-                    echo "winetricks: Installing $verb"
-
-                    if ! ${lib.getExe winetricks} -q -f "$verb"; then
-                        zenity --error \
-                            --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
-
-                        exit 1
-                    fi
-
-                    tricksInstalled=1
-                fi
-            done
-
-            # Ensure wineserver is restarted after tricks are installed
-            if [ "$tricksInstalled" -eq 1 ]; then
-                ${lib.getExe wineserver} -k
             fi
 
             if [[ "$type" == "v3" ]]; then
@@ -325,7 +241,7 @@
                 ${lib.getExe injectPluginLoader}
             fi
 
-            echo "${source.sha256}" > ${affinityPath}/installed-hash
+            echo "${source.sha256}" > $MERGED_PREFIX/installed-hash
           '';
       };
     };
