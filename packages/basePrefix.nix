@@ -33,7 +33,7 @@
 
             injectPluginLoader = mkInjectPluginLoader;
 
-            msix = import ./affinity_sources.nix pkgs;
+            msix = import ./sources.nix pkgs;
 
             dependencies = pkgs.callPackage ./dependencies.nix { };
 
