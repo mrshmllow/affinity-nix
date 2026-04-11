@@ -2,9 +2,7 @@
   pkgs,
   writeShellScriptBin,
   lib,
-  sources,
   apps,
-  updateApps,
   stdShellArgs,
   wine-stuff,
 }:
@@ -32,7 +30,6 @@ rec {
         winetricks
         wineboot
         wineserver
-        update|repair|install   Update or repair the application
         help                    Show this
         (nothing)               Launch Affinity ${name}
       EOF
@@ -59,10 +56,6 @@ rec {
               shift
               exec ${lib.getExe wineserver} "$@"
               ;;
-          update|repair|install)
-              shift
-              exec ${lib.getExe updateApps.${lib.toLower name}} "$@"
-              ;;
           *)
               exec ${lib.getExe apps.${lib.toLower name}} "$@"
               ;;
@@ -77,8 +70,9 @@ rec {
       app = apps.${lib.toLower name};
       pkg = createScript v3 name;
 
-      version = if v3 then "" else sources._version;
-      postfix = if v3 then "" else "-2";
+      # last version of affinity v2 released
+      version = if v3 then "" else "2.6.5";
+      postfix = if v3 then "" else "";
     in
     pkgs.symlinkJoin {
       name = "Affinity ${name} ${version}";

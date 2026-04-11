@@ -12,8 +12,6 @@ We also install https://github.com/noahc3/AffinityPluginLoader for a far more pl
 
 There is a sister project which allows you to run these packages on any Linux distro through AppImages, [affinity-everywhere](https://github.com/mrshmllow/affinity-everywhere).
 
-Note: A kernel of atleast 6.10+ is required.
-
 ## Recent Breaking Changes
 
 With the release of v3, there has been some changes:

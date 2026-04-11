@@ -10,7 +10,6 @@
   ];
   perSystem =
     {
-      sources,
       lib,
       pkgs,
       stdPath,
@@ -18,8 +17,6 @@
     }:
     {
       _module.args = {
-        sources = import ./sources.nix;
-        version = sources._version;
         stdPath = [
           pkgs.zenity
           pkgs.curl
@@ -38,14 +35,5 @@
           export PATH=${lib.makeBinPath stdPath}
         '';
       };
-    };
-
-  flake =
-    let
-      sources = import ./sources.nix;
-      version = sources._version;
-    in
-    {
-      inherit version;
     };
 }

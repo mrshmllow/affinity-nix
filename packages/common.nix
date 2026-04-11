@@ -4,7 +4,6 @@
     {
       pkgs,
       lib,
-      sources,
       stdShellArgs,
       wine-stuff,
       wineUnwrapped,
@@ -131,108 +130,102 @@
             fi
           '';
 
-        mkInstaller =
-          name:
+        mkOverlayfsRunner =
+          name: executable_name:
           let
-            source = sources.${lib.toLower name};
             check = mkGraphicalCheck name;
-            injectPluginLoader = mkInjectPluginLoader;
-            type = if name == "v3" then "v3" else "v2";
+            prefixBase = mkPrefixBase (name == "v3");
 
-            inherit (wine-stuff."${type}")
+            inherit (wine-stuff.${if name == "v3" then "v3" else "v2"})
               wine
               wineserver
               ;
           in
-          pkgs.writeShellScriptBin "install-Affinity-${name}" ''
+          pkgs.writeShellScriptBin "affinity-${lib.toLower name}" ''
             set -x
             ${stdShellArgs}
-            ${lib.strings.toShellVars {
-              inherit type;
-              download_url = source.url;
-            }}
 
-            cache_dir="${"\${XDG_CACHE_HOME:-$HOME/.cache}"}"/affinity
+            export USER_WORK=$([[ -z "$XDG_STATE_HOME" ]] && echo "$HOME/.local/state/affinity-nix-2" || echo "$XDG_DATA_HOME/affinity-nix-2")
 
-            mkdir -p "$cache_dir"
-
-            function matches {
-                echo "${source.sha256} $cache_dir/${source.name}" | sha256sum --check --status
+            ${
+              if name == "v3" then
+                ''
+                  export USER_UPPER=$([[ -z "$XDG_DATA_HOME" ]] && echo "$HOME/.local/share/affinity-v3" || echo "$XDG_DATA_HOME/affinity-v3")
+                ''
+              else
+                ''
+                  export USER_UPPER=$([[ -z "$XDG_DATA_HOME" ]] && echo "$HOME/.local/share/affinity" || echo "$XDG_DATA_HOME/affinity")
+                ''
             }
 
-            function ensure_exists {
-                if matches; then
-                    return 0
-                fi
+            mkdir -p "$USER_UPPER" "$USER_WORK"
 
-                echo "download: Downloading $download_url"
+            if [ -d "$USER_WORK/work" ]; then
+                chmod 700 "$USER_WORK/work"
+                rm -rf "$USER_WORK/work"
+            fi
 
-                # excerpt stolen from https://github.com/mactan-sc/rsilauncher/blob/main/scripts/rsi-run.sh
-                FIFO=$(mktemp -u)
+            export MERGED_PREFIX=$(mktemp -d)
 
-                mkfifo "$FIFO"
+            function launch() {
+              if [ "$1" != "--verbose" ]; then
+                  export WINEDEBUG=-all,fixme-all
+              else
+                  shift
+              fi
 
-                curl -#L "$download_url" -o "$cache_dir/${source.name}" > "$FIFO" 2>&1 & curlpid="$!"
+              # this is necessary for the current user to have "permission" to read anything
+              # inside the overlayfs
+              (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
 
-                stdbuf -oL tr '\r' '\n' < "$FIFO" | \
-                grep --line-buffered -ve "100" | grep --line-buffered -o "[0-9]*\.[0-9]" | \
-                (
-                    trap 'kill "$curlpid"' ERR
-                    zenity --progress \
-                      --auto-close \
-                      --title="Affinity ${name} (${type})" \
-                      --text="Downloading the installer for ${name}.\n\nThis might take a moment.\n" 2>/dev/null
-                )
-
-                if [ "$?" -eq 1 ]; then
-                    # user clicked cancel
-                    echo "download: user aborted. removing $cache_dir/${source.name}..."
-                    rm --interactive=never "$cache_dir/${source.name}"
-                    rm --interactive=never "$FIFO"
-                    exit 1
-                fi
-
-                rm --interactive=never "$FIFO"
-
-                if matches; then
-                    echo "download: Downloaded file matches sha256"
-
-                    return 0
-                fi
-
-                echo "download: Failed to verify the downloaded file"
-                return 1
+              ${lib.getExe check} || exit 1
+              ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${executable_name}" "$@"
             }
 
-            if ! ensure_exists; then
-                read -r -d ''' message << EOM
-            Could not successfully download ${source.name}
-            Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new?template=bug_report.md.
+            export -f launch
 
-            In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
-            EOM
+            echo "affinity-nix: attempting to mount via kernel"
 
-                zenity --error --text="$message"
-                echo -e "-------------------\n\n$message\n\n-------------------"
+            export WINEPREFIX="$MERGED_PREFIX"
+
+            if ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
+                set -x
 
                 exit 1
+
+                # exits so we can trigger the FUSE fallback if kernel does not support this.
+                mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+
+                echo "warming up upperdir"
+
+                launch "$@"
+            ' -- "$@"; then
+                echo "affinity-nix: kernel overlayfs session ended cleanly"
+            else
+                echo "affinity-nix: kernel mount blocked by host! falling back to FUSE overlayfs"
+
+                function cleanup_fuse() {
+                    ${lib.getExe wineserver} -k
+
+                    # must use host binary because of setuid
+                    if mountpoint -q "$MERGED_PREFIX"; then
+                        /usr/bin/env fusermount3 -u -z "$MERGED_PREFIX" 2>/dev/null || \
+                        /usr/bin/env fusermount -u -z "$MERGED_PREFIX" 2>/dev/null
+                    fi
+                }
+
+                trap cleanup_fuse EXIT
+
+                ${lib.getExe pkgs.fuse-overlayfs} -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+
+                launch "$@"
+
+                ${lib.getExe wineserver} -w
+
+                exit
             fi
 
-            ${lib.getExe check} || exit 1
-            ${lib.getExe wine} winecfg -v win11
-            ${lib.getExe wineserver} -w
-
-            zenity --info \
-                --title="Affinity ${name} (${type})" \
-                --text="You will be prompted to install ${name}.\n\nPlease do not change the installation path."
-
-            ${lib.getExe wine} "$cache_dir/${source.name}"
-
-            if [[ "$type" == "v3" ]]; then
-                ${lib.getExe injectPluginLoader}
-            fi
-
-            echo "${source.sha256}" > $MERGED_PREFIX/installed-hash
+            rmdir $MERGED_PREFIX
           '';
       };
     };

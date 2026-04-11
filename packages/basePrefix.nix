@@ -33,10 +33,7 @@
 
             injectPluginLoader = mkInjectPluginLoader;
 
-            v3_msix = pkgs.fetchurl {
-              url = "https://web.archive.org/web/20260206191533/https://downloads.affinity.studio/Affinity%20x64.msix";
-              hash = "sha256-Ys2YarvIjfWlEIGZyft3M0o+4tLAcfhn89t7ucRq+vY=";
-            };
+            msix = import ./affinity_sources.nix pkgs;
 
             dependencies = pkgs.callPackage ./dependencies.nix { };
 
@@ -82,6 +79,8 @@
               set -x -e
               mkdir -p $out
               export WINEPREFIX="$out"
+              export WINETRICKS_UPDATE_CHECK=0
+              export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
               echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
@@ -118,7 +117,8 @@
                 ''
                   set -x -e
 
-                  cp -a ${layer_1} $out
+                  mkdir -p $out
+                  cp -a ${layer_1}/* $out
                   chmod -R +w $out
                   export WINEPREFIX="$out"
 
@@ -163,14 +163,16 @@
                     inherit verbs;
                   }}
 
-                  mkdir -p $out
                   mkdir -p /tmp/cache/winetricks/corefonts
 
-                  cp -a ${layer_2} $out
+                  mkdir -p $out
+                  cp -a ${layer_2}/* $out
                   chmod -R +w $out
-
                   export WINEPREFIX="$out"
+
                   export XDG_CACHE_HOME="/tmp/cache"
+                  export WINETRICKS_UPDATE_CHECK=0
+                  export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
                   cp -R ${winetricksCache}/* /tmp/cache/winetricks
                   cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
@@ -191,20 +193,30 @@
                 inherit type;
               }}
 
-              cp -a ${layer_3} $out
-              chmod -R +w $out
-
               mkdir -p $out
-              mkdir -p /tmp/cache/winetricks/corefonts
-
+              cp -a ${layer_3}/* $out
+              chmod -R +w $out
               export WINEPREFIX="$out"
 
-              ${lib.getExe pkgs._7zz} x -y "${v3_msix}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
-              mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+              mkdir -p $WINEPREFIX/drive_c/Program Files/Affinity
 
-              if [[ "$type" == "v3" ]]; then
-                  ${lib.getExe injectPluginLoader}
-              fi
+              ${lib.optionalString v3 ''
+                ${lib.getExe pkgs._7zz} x -y "${msix.v3}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
+                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+
+                ${lib.getExe injectPluginLoader}
+              ''}
+
+              ${lib.optionalString (!v3) ''
+                ${lib.getExe pkgs._7zz} x -y "${msix.photo}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
+                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Photo 2"
+
+                ${lib.getExe pkgs._7zz} x -y "${msix.designer}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
+                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Designer 2"
+
+                ${lib.getExe pkgs._7zz} x -y "${msix.publisher}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
+                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Publisher 2"
+              ''}
 
               echo "removing nixbld directory"
               rm -rf $WINEPREFIX/drive_c/users/nixbld
