@@ -3,10 +3,8 @@
   writeShellScriptBin,
   lib,
   wine,
-  wineserver,
   stdShellArgs,
   mkGraphicalCheck,
-  sources,
   mkPrefixBase,
 }:
 rec {

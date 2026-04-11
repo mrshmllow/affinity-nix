@@ -2,8 +2,6 @@
 {
   perSystem =
     {
-      affinityPathV2,
-      affinityPathV3,
       pkgs,
       lib,
       sources,
