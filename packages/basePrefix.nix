@@ -6,6 +6,7 @@
       lib,
       wine-stuff,
       wineUnwrapped,
+      mkInjectPluginLoader,
       ...
     }:
     {
@@ -29,6 +30,13 @@
               winetricks
               wineserver
               ;
+
+            injectPluginLoader = mkInjectPluginLoader;
+
+            v3_msix = pkgs.fetchurl {
+              url = "https://web.archive.org/web/20260206191533/https://downloads.affinity.studio/Affinity%20x64.msix";
+              hash = "sha256-Ys2YarvIjfWlEIGZyft3M0o+4tLAcfhn89t7ucRq+vY=";
+            };
 
             dependencies = pkgs.callPackage ./dependencies.nix { };
 
@@ -83,34 +91,23 @@
                 inherit verbs type;
               }}
 
-              mkdir -p $out
+              mkdir -p $out/prefix
               mkdir -p /tmp/cache/winetricks/corefonts
 
               cp -R ${winetricksCache}/* /tmp/cache/winetricks
               cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
 
-              export WINEPREFIX="$out"
+              export WINEPREFIX="$out/prefix"
               export XDG_CACHE_HOME="/tmp/cache"
 
               echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
               ${lib.getExe wineboot} --update
-
-              installed_tricks=$(${lib.getExe winetricks} list-installed)
-
-              # kinda stolen from the nix-citizen project, tysm
-              # we can be more smart about installing verbs other than relying on the revision number
-              for verb in "${"\${verbs[@]}"}"; do
-                  echo "winetricks: Installing $verb"
-
-                  xvfb-run ${lib.getExe winetricks} -q -f "$verb"
-              done
-
               ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
               ${lib.getExe winetricks} renderer=vulkan
 
-              install -D -t "$out/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+              install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
 
               echo "affinity-nix: Installing Microsoft WebView2 Runtime"
 
@@ -160,9 +157,24 @@
                   xvfb-run ${lib.getExe winetricks} -q -f "$verb"
               done
 
+              ${lib.getExe pkgs._7zz} x -y "${v3_msix}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
+              mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+
+              if [[ "$type" == "v3" ]]; then
+                  ${lib.getExe injectPluginLoader}
+              fi
+
+              # kill wineserver to hopefully clear out any impurities
               ${lib.getExe wineserver} -k || true
 
-              echo "created base prefix @ $out"
+              echo "removing nixbld directory"
+              rm -rf $WINEPREFIX/drive_c/users/nixbld
+
+              echo "created base prefix @ $WINEPREFIX"
+
+              echo "compressing..."
+              ${lib.getExe' pkgs.erofs-utils "mkfs.erofs"} -zzstd $out/base.erofs.img $WINEPREFIX
+              rm -rf $WINEPREFIX
             '';
       };
     };

@@ -18,7 +18,6 @@
           sources
           stdShellArgs
           mkGraphicalCheck
-          mkInstaller
           mkPrefixBase
           ;
       };

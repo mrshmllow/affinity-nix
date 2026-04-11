@@ -35,9 +35,7 @@
           v3:
           let
             type = if v3 then "v3" else "v2";
-            affinityPath = if v3 then affinityPathV3 else affinityPathV2;
             latestRevision = "8";
-            injectPluginLoader = mkInjectPluginLoader affinityPath;
 
             inherit (wine-stuff."${type}")
               wine
@@ -104,10 +102,6 @@
                         "$MERGED_PREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
             fi
-
-            if [[ "$type" == "v3" ]]; then
-                ${lib.getExe injectPluginLoader}
-            fi
           '';
 
         mkGraphicalCheck =
@@ -144,8 +138,7 @@
           let
             source = sources.${lib.toLower name};
             check = mkGraphicalCheck name;
-            affinityPath = if name == "v3" then affinityPathV3 else affinityPathV2;
-            injectPluginLoader = mkInjectPluginLoader affinityPath;
+            injectPluginLoader = mkInjectPluginLoader;
             type = if name == "v3" then "v3" else "v2";
 
             inherit (wine-stuff."${type}")

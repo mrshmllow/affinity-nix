@@ -5,7 +5,6 @@
   wine,
   wineserver,
   stdShellArgs,
-  mkInstaller,
   mkGraphicalCheck,
   sources,
   mkPrefixBase,
@@ -13,7 +12,6 @@
 rec {
   createRunner =
     let
-      installer = mkInstaller "v3";
       check = mkGraphicalCheck "v3";
       prefixBase = mkPrefixBase true;
     in
@@ -21,63 +19,50 @@ rec {
       set -x
       ${stdShellArgs}
 
-      export USER_UPPER="$HOME/.local/share/affinity/upper"
-      export USER_WORK="$HOME/.local/share/affinity/work"
+      export USER_WORK=$([[ -z "$XDG_STATE_HOME" ]] && echo "$HOME/.local/state/affinity-nix" || echo "$XDG_DATA_HOME/affinity-nix")
+      export USER_UPPER=$([[ -z "$XDG_DATA_HOME" ]] && echo "$HOME/.local/share/affinity-nix" || echo "$XDG_DATA_HOME/affinity-nix")
+
       mkdir -p "$USER_UPPER" "$USER_WORK"
 
-      (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
-
       export MERGED_PREFIX=$(mktemp -d)
-
-      mkdir -p $MERGED_PREFIX
 
       echo "affinity-nix: attempting to mount via kernel"
 
       function launch_v3() {
-        if [ ! -f "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/Affinity.exe" ]; then
-            ${lib.getExe installer} || exit 1
-        elif [ -f "$MERGED_PREFIX/installed-hash" ]; then
-            installed_hash=$(<"$MERGED_PREFIX/installed-hash")
-
-            if [[ "$installed_hash" != "${sources.v3.sha256}" ]] && zenity --question --text="New update found, would you like to install it?"; then
-              ${lib.getExe installer} || exit 1
-            fi
-        fi
-
         if [ "$1" != "--verbose" ]; then
             export WINEDEBUG=-all,fixme-all
         else
-          shift
+            shift
         fi
 
         ${lib.getExe check} || exit 1
-        ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe" "$@"
+        ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/Affinity.exe" "$@"
       }
 
       export -f launch_v3
 
+      export OVERLAY_LOWER_DIR=$(mktemp -d)
+
       if ${lib.getExe' pkgs.util-linux "unshare"} -U -m --map-root-user ${lib.getExe pkgs.bash} -c '
           set -x
 
+          ${lib.getExe' pkgs.erofs-utils "erofsfuse"} ${prefixBase}/base.erofs.img $OVERLAY_LOWER_DIR
+
           # exits so we can trigger the FUSE fallback if kernel does not support this.
-          mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+          mount -t overlay overlay -o lowerdir="$OVERLAY_LOWER_DIR",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+
+          echo "warming up upperdir"
+          # this is necessary for the current user to have "permission" to read anything
+          (cd "$OVERLAY_LOWER_DIR" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
           
           export WINEPREFIX="$MERGED_PREFIX"
+
           launch_v3 "$@"
       ' -- "$@"; then
           echo "affinity-nix: kernel overlayfs session ended cleanly"
       else
-          echo "affinity-nix: kernel mount blocked by host. falling back to FUSE"
-          
-          ${lib.getExe pkgs.fuse-overlayfs} -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX"
-          
-          export WINEPREFIX="$MERGED_PREFIX"
-          
-          launch_v3 "$@"
-          
-          # unmount FUSE when wine closes
-          ${lib.getExe wineserver} -w
-          mount -l "$MERGED_PREFIX"
+          echo "affinity-nix: kernel mount blocked by host!!!"
+          exit
       fi
 
       rmdir "$MERGED_PREFIX"
