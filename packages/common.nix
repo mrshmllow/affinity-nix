@@ -13,20 +13,12 @@
     }:
     {
       _module.args = rec {
-        mkInjectPluginLoader =
-          _affinityPath:
-          pkgs.writeShellScriptBin "inject-plugin-loader" ''
-            set -x
-            # Must be inserted after installer
-            # installer gets mad if we make the directory for it, so only install
-            # if it put something there
-            if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
-                pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
-                cp -r "${self'.packages.apl-combined}/." .
-                chmod 755 -R ./apl/
-                popd
-            fi
-          '';
+        mkInjectPluginLoader = pkgs.writeShellScriptBin "inject-plugin-loader" ''
+          set -x -e
+          pushd "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+          cp -r "${self'.packages.apl-combined}/." .
+          popd
+        '';
 
         mkCheck =
           v3:
@@ -190,8 +182,6 @@
 
             if ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
                 set -x
-
-                exit 1
 
                 # exits so we can trigger the FUSE fallback if kernel does not support this.
                 mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1

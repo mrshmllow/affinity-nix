@@ -8,7 +8,7 @@
     let
       createPackage =
         let
-          pkg = mkOverlayfsRunner "v3" "Affinity/AffinityHook.exe";
+          pkg = mkOverlayfsRunner "v3" "Affinity/Affinity.exe";
           desktop = pkgs.callPackage ./desktopItems.nix {
             affinity-v3 = pkg;
           };

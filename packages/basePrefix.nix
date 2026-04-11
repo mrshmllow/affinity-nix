@@ -201,27 +201,20 @@
               mkdir -p $WINEPREFIX/drive_c/Program Files/Affinity
 
               ${lib.optionalString v3 ''
-                ${lib.getExe pkgs._7zz} x -y "${msix.v3}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
-                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
-
+                ${lib.getExe pkgs.xorg.lndir} ${msix.v3} "$WINEPREFIX/drive_c/Program Files/"
                 ${lib.getExe injectPluginLoader}
               ''}
 
               ${lib.optionalString (!v3) ''
-                ${lib.getExe pkgs._7zz} x -y "${msix.photo}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
-                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Photo 2"
-
-                ${lib.getExe pkgs._7zz} x -y "${msix.designer}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
-                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Designer 2"
-
-                ${lib.getExe pkgs._7zz} x -y "${msix.publisher}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
-                mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Publisher 2"
+                ${lib.getExe pkgs.xorg.lndir} ${msix.photo} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${msix.designer} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${msix.publisher} "$WINEPREFIX/drive_c/Program Files/"
               ''}
+
+              ${lib.getExe wineserver} -w
 
               echo "removing nixbld directory"
               rm -rf $WINEPREFIX/drive_c/users/nixbld
-
-              ${lib.getExe wineserver} -w
             '';
           in
           layer_4;
