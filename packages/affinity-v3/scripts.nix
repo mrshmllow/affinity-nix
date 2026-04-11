@@ -39,15 +39,11 @@ rec {
 
       export -f launch_v3
 
-      export OVERLAY_LOWER_DIR=$(mktemp -d)
-
       if ${lib.getExe' pkgs.util-linux "unshare"} -U -m --map-root-user ${lib.getExe pkgs.bash} -c '
           set -x
 
-          ${lib.getExe' pkgs.erofs-utils "erofsfuse"} ${prefixBase}/base.erofs.img $OVERLAY_LOWER_DIR
-
           # exits so we can trigger the FUSE fallback if kernel does not support this.
-          mount -t overlay overlay -o lowerdir="$OVERLAY_LOWER_DIR",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+          mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
 
           echo "warming up upperdir"
           # this is necessary for the current user to have "permission" to read anything

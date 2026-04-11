@@ -77,64 +77,18 @@
                 };
               }
             ];
-          in
-          pkgs.runCommand "build-base-prefix"
-            {
-              buildInputs = [
-                pkgs.xvfb-run
-              ];
-            }
-            ''
+
+            layer_1 = pkgs.runCommand "base-prefix-1" { } ''
               set -x -e
-
-              ${lib.strings.toShellVars {
-                inherit verbs type;
-              }}
-
-              mkdir -p $out/prefix
-              mkdir -p /tmp/cache/winetricks/corefonts
-
-              cp -R ${winetricksCache}/* /tmp/cache/winetricks
-              cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
-
-              export WINEPREFIX="$out/prefix"
-              export XDG_CACHE_HOME="/tmp/cache"
+              mkdir -p $out
+              export WINEPREFIX="$out"
 
               echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
               ${lib.getExe wineboot} --update
               ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
-              ${lib.getExe winetricks} renderer=vulkan
-
-              install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
-
-              echo "affinity-nix: Installing Microsoft WebView2 Runtime"
-
-              ${lib.getExe wine} winecfg -v win7
-              xvfb-run ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
-              ${lib.getExe wine} winecfg -v win11
-
-              ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
-                Windows Registry Editor Version 5.00
-
-                [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
-                "Start"=dword:00000004
-
-                [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
-                "Start"=dword:00000004
-
-                [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
-
-                [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
-                "Version"="win7"
-              '').outPath}"
-
-              # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
-              ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
-
               echo "affinity-nix: PROPERLY disabling the menubuilder"
-
               # by diffing a registry dump we found that you can disable the file association
               # through a registry key.
               ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
@@ -147,15 +101,103 @@
                 "Enable"="N"
               '').outPath}"
 
-              installed_tricks=$(${lib.getExe winetricks} list-installed)
+              ${lib.getExe winetricks} renderer=vulkan
 
-              # kinda stolen from the nix-citizen project, tysm
-              # we can be more smart about installing verbs other than relying on the revision number
-              for verb in "${"\${verbs[@]}"}"; do
-                  echo "winetricks: Installing $verb"
+              install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
 
-                  xvfb-run ${lib.getExe winetricks} -q -f "$verb"
-              done
+              ${lib.getExe wineserver} -k || true
+            '';
+
+            layer_2 =
+              pkgs.runCommand "base-prefix-2"
+                {
+                  buildInputs = [
+                    pkgs.xvfb-run
+                  ];
+                }
+                ''
+                  set -x -e
+
+                  cp -a ${layer_1} $out
+                  chmod -R +w $out
+                  export WINEPREFIX="$out"
+
+                  echo "affinity-nix: Installing Microsoft WebView2 Runtime"
+
+                  ${lib.getExe wine} winecfg -v win7
+                  xvfb-run ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
+                  ${lib.getExe wine} winecfg -v win11
+
+                  ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
+                    Windows Registry Editor Version 5.00
+
+                    [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
+                    "Start"=dword:00000004
+
+                    [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
+                    "Start"=dword:00000004
+
+                    [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
+
+                    [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
+                    "Version"="win7"
+                  '').outPath}"
+
+                  # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
+                  ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
+
+                  ${lib.getExe wineserver} -k || true
+                '';
+
+            layer_3 =
+              pkgs.runCommand "base-prefix-3"
+                {
+                  buildInputs = [
+                    pkgs.xvfb-run
+                  ];
+                }
+                ''
+                  set -x -e
+
+                  ${lib.strings.toShellVars {
+                    inherit verbs;
+                  }}
+
+                  mkdir -p $out
+                  mkdir -p /tmp/cache/winetricks/corefonts
+
+                  cp -a ${layer_2} $out
+                  chmod -R +w $out
+
+                  export WINEPREFIX="$out"
+                  export XDG_CACHE_HOME="/tmp/cache"
+
+                  cp -R ${winetricksCache}/* /tmp/cache/winetricks
+                  cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
+
+                  for verb in "${"\${verbs[@]}"}"; do
+                      echo "winetricks: Installing $verb"
+
+                      xvfb-run ${lib.getExe winetricks} -q -f "$verb"
+                  done
+
+                  ${lib.getExe wineserver} -k || true
+                '';
+
+            layer_4 = pkgs.runCommand "base-prefix-4" { } ''
+              set -x -e
+
+              ${lib.strings.toShellVars {
+                inherit type;
+              }}
+
+              cp -a ${layer_3} $out
+              chmod -R +w $out
+
+              mkdir -p $out
+              mkdir -p /tmp/cache/winetricks/corefonts
+
+              export WINEPREFIX="$out"
 
               ${lib.getExe pkgs._7zz} x -y "${v3_msix}" "App/" -o"$WINEPREFIX/drive_c/Program Files/Affinity"
               mv "$WINEPREFIX/drive_c/Program Files/Affinity/App" "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
@@ -164,18 +206,13 @@
                   ${lib.getExe injectPluginLoader}
               fi
 
-              # kill wineserver to hopefully clear out any impurities
-              ${lib.getExe wineserver} -k || true
-
               echo "removing nixbld directory"
               rm -rf $WINEPREFIX/drive_c/users/nixbld
 
-              echo "created base prefix @ $WINEPREFIX"
-
-              echo "compressing..."
-              ${lib.getExe' pkgs.erofs-utils "mkfs.erofs"} -zzstd $out/base.erofs.img $WINEPREFIX
-              rm -rf $WINEPREFIX
+              ${lib.getExe wineserver} -k || true
             '';
+          in
+          layer_4;
       };
     };
 }
