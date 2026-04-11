@@ -6,16 +6,14 @@
       mkGraphicalCheck,
       mkInstaller,
       wine-stuff,
-      sources,
       mkPrefixBase,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit (wine-stuff.v3) wine wineserver;
+        inherit (wine-stuff.v3) wine;
 
         inherit
-          sources
           stdShellArgs
           mkGraphicalCheck
           mkPrefixBase
