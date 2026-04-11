@@ -104,7 +104,7 @@
 
               install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
 
-              ${lib.getExe wineserver} -k || true
+              ${lib.getExe wineserver} -w
             '';
 
             layer_2 =
@@ -146,7 +146,7 @@
                   # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
                   ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
 
-                  ${lib.getExe wineserver} -k || true
+                  ${lib.getExe wineserver} -w
                 '';
 
             layer_3 =
@@ -183,7 +183,7 @@
                       xvfb-run ${lib.getExe winetricks} -q -f "$verb"
                   done
 
-                  ${lib.getExe wineserver} -k || true
+                  ${lib.getExe wineserver} -w
                 '';
 
             layer_4 = pkgs.runCommand "base-prefix-4" { } ''
@@ -221,7 +221,7 @@
               echo "removing nixbld directory"
               rm -rf $WINEPREFIX/drive_c/users/nixbld
 
-              ${lib.getExe wineserver} -k || true
+              ${lib.getExe wineserver} -w
             '';
           in
           layer_4;
