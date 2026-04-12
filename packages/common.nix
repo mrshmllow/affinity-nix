@@ -195,6 +195,8 @@
                 mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
 
                 launch "$@"
+
+                ${lib.getExe wineserver} -w
             ' -- "$@"; then
                 echo "affinity-nix: kernel overlayfs session ended cleanly"
             else
