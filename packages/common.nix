@@ -23,7 +23,7 @@
             # if it put something there
             if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
                 pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
-                cp ${self'.packages.apl-combined}/* .
+                cp -r "${self'.packages.apl-combined}/." .
                 popd
             fi
           '';
