@@ -24,7 +24,7 @@
           v3:
           let
             type = if v3 then "v3" else "v2";
-            latestRevision = "8";
+            latestRevision = "9";
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e
@@ -41,15 +41,7 @@
             function setup {
                 local prefixRevision="$1"
 
-                if [[ "$prefixRevision" -le 7 ]]; then
-                   echo "affinity-nix: Removing old APL Plugins directory"
-
-                   # will delete the user's plugins, unfortunate.
-                   # i dont know how many other plugins even exist, anyway
-                   # they will be unsupported by newer apl, anyway.
-                   # source: https://github.com/noahc3/AffinityPluginLoader/releases/tag/v0.3.0
-                   rm -rf "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/plugins"
-                fi
+                # no upgrade migrations currently exist
 
                 echo "${latestRevision}" > $MERGED_PREFIX/.revision
             }
@@ -143,6 +135,20 @@
             }
 
             mkdir -p "$USER_UPPER" "$USER_WORK"
+
+            # migrate from the pre-overlayfs ssystem before the overlayfs is mounted
+            if [[ -f "$USER_UPPER/.revision" && $(<"$USER_UPPER/.revision") -le 9 ]]; then
+               echo "affinity-nix: migrating to overlayfs"
+
+               backup_location="$HOME/affinity-nix-backup.tar.zst"
+
+               if ! zenity --question --width 480 --text="There have been upgrades to affinity-nix! To migrate we need to delete everything in your wine prefix besides registry files and user data. A backup will be created in at $backup_location. Is that OK?"; then
+                   exit 1
+               fi
+
+               ${lib.getExe pkgs.gnutar} -cpf "$backup_location" $USER_UPPER || exit 1
+               find "$USER_UPPER/drive_c" -mindepth 1 -maxdepth 1 ! -name "users" -print -exec rm -rf {} +
+            fi
 
             if [ -d "$USER_WORK/work" ]; then
                 chmod 700 "$USER_WORK/work"
