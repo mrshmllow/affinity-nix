@@ -1,0 +1,3 @@
+[type.nix.extend-words]
+# this is a 7zz argument...
+tpe = "tpe"
