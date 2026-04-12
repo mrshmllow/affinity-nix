@@ -48,6 +48,7 @@
         ./nix/fmt.nix
         ./nix/shells.nix
         ./packages
+        ./tests/default.nix
       ];
       systems = [
         "x86_64-linux"

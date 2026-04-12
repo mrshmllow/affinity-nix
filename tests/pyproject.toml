@@ -1,0 +1,18 @@
+[project]
+name = "wire-vm-tests"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "colorama>=0.4.6",
+  "ipython>=9.8.0",
+  "junit-xml>=1.9",
+  "nixos-test-driver",
+  "ptpython>=3.0.32",
+  "remote-pdb>=2.1.0",
+]
+
+[tool.uv.sources]
+nixos-test-driver = { git = "https://github.com/NixOS/nixpkgs", subdirectory = "nixos/lib/test-driver/src", branch = "nixos-25.11" }
+
+[dependency-groups]
+dev = ["ty>=0.0.4"]
