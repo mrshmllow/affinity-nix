@@ -117,17 +117,16 @@
           '';
 
         mkOverlayfsRunner =
-          name: executable_name:
+          name: script:
           let
             check = mkGraphicalCheck name;
             prefixBase = mkPrefixBase (name == "v3");
 
-            inherit (wine-stuff.${if name == "v3" then "v3" else "v2"})
-              wine
+            inherit (wine-stuff)
               wineserver
               ;
           in
-          pkgs.writeShellScriptBin "affinity-${lib.toLower name}" ''
+          pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
             set -x
             ${stdShellArgs}
 
@@ -181,7 +180,7 @@
                 --auto-kill
 
               ${lib.getExe check} || exit 1
-              ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${executable_name}" "$@"
+              ${script}
             }
 
             export -f launch

@@ -8,12 +8,13 @@
       directPhoto,
       directDesigner,
       directPublisher,
+      mkOverlayfsRunner,
       directV3,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit stdShellArgs wine-stuff;
+        inherit stdShellArgs wine-stuff mkOverlayfsRunner;
         apps = {
           photo = directPhoto;
           designer = directDesigner;

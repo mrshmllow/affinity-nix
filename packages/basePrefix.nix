@@ -24,7 +24,7 @@
 
             type = if v3 then "v3" else "v2";
 
-            inherit (wine-stuff."${type}")
+            inherit (wine-stuff)
               wine
               wineboot
               winetricks

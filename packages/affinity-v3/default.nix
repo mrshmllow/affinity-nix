@@ -2,13 +2,22 @@
   perSystem =
     {
       pkgs,
+      lib,
       mkOverlayfsRunner,
+      wine-stuff,
       ...
     }:
     let
       createPackage =
         let
-          pkg = mkOverlayfsRunner "v3" "Affinity/AffinityHook.exe";
+          inherit (wine-stuff)
+            wine
+            ;
+
+          pkg = mkOverlayfsRunner "v3" ''
+            ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe" "$@"
+          '';
+
           desktop = pkgs.callPackage ./desktopItems.nix {
             affinity-v3 = pkg;
           };
@@ -30,7 +39,7 @@
             # license = lib.licenses.unfree;
             # maintainers = with pkgs.lib.maintainers; [marshmallow];
             platforms = [ "x86_64-linux" ];
-            mainProgram = "affinity-v3";
+            mainProgram = "af-overlay-v3";
           };
         };
     in

@@ -4,13 +4,21 @@
       pkgs,
       lib,
       mkOverlayfsRunner,
+      wine-stuff,
       ...
     }:
     let
       createPackage =
         name:
         let
-          pkg = mkOverlayfsRunner name "${name} 2/${name}.exe";
+          inherit (wine-stuff)
+            wine
+            ;
+
+          pkg = mkOverlayfsRunner name ''
+            ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
+          '';
+
           desktop = pkgs.callPackage ./desktopItems.nix {
             ${lib.toLower name} = pkg;
           };
@@ -32,7 +40,7 @@
             # license = lib.licenses.unfree;
             # maintainers = with pkgs.lib.maintainers; [marshmallow];
             platforms = [ "x86_64-linux" ];
-            mainProgram = "affinity-${lib.toLower name}";
+            mainProgram = "af-overlay-${lib.toLower name}";
           };
         };
     in

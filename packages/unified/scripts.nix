@@ -1,6 +1,7 @@
 {
   pkgs,
   writeShellScriptBin,
+  mkOverlayfsRunner,
   lib,
   apps,
   stdShellArgs,
@@ -8,10 +9,9 @@
 }:
 rec {
   createScript =
-    v3: name:
+    type: name:
     let
-      type = if v3 then "v3" else "v2";
-      inherit (wine-stuff."${type}")
+      inherit (wine-stuff)
         wine
         wineboot
         winetricks
@@ -42,19 +42,35 @@ rec {
               ;;
           wine)
               shift
-              exec ${lib.getExe wine} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wine} "$@"
+                ''
+              )} "$@"
               ;;
           winetricks)
               shift
-              exec ${lib.getExe winetricks} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe winetricks} "$@"
+                ''
+              )} "$@"
               ;;
           wineboot)
               shift
-              exec ${lib.getExe wineboot} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wineboot} "$@"
+                ''
+              )} "$@"
               ;;
           wineserver)
               shift
-              exec ${lib.getExe wineserver} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wineserver} "$@"
+                ''
+              )} "$@"
               ;;
           *)
               exec ${lib.getExe apps.${lib.toLower name}} "$@"
@@ -65,13 +81,11 @@ rec {
   createUnifiedPackage =
     name:
     let
-      v3 = name == "v3";
-
       app = apps.${lib.toLower name};
-      pkg = createScript v3 name;
+      pkg = createScript (lib.toLower name) name;
 
       # last version of affinity v2 released
-      version = if v3 then null else "2.6.5";
+      version = if (name == "v3") then null else "2.6.5";
     in
     pkgs.symlinkJoin {
       name = "Affinity ${name}${lib.optionalString (version != null) " ${version}"}}";
