@@ -2,10 +2,7 @@
 {
   perSystem =
     {
-      sources,
-      lib,
       pkgs,
-      stdPath,
       self',
       ...
     }:
