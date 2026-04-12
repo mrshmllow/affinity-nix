@@ -137,7 +137,7 @@
             mkdir -p "$USER_UPPER" "$USER_WORK"
 
             # migrate from the pre-overlayfs ssystem before the overlayfs is mounted
-            if [[ -f "$USER_UPPER/.revision" && $(<"$USER_UPPER/.revision") -le 9 ]]; then
+            if [[ -f "$USER_UPPER/.revision" && $(<"$USER_UPPER/.revision") -lt 9 ]]; then
                echo "affinity-nix: migrating to overlayfs"
 
                backup_location="$HOME/affinity-nix-backup.tar.zst"
