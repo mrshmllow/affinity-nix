@@ -25,10 +25,6 @@
           let
             type = if v3 then "v3" else "v2";
             latestRevision = "8";
-
-            inherit (wine-stuff."${type}")
-              wine
-              ;
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e
@@ -41,8 +37,6 @@
                 "Publisher"
               ];
             }}
-
-            ${lib.getExe wine} --version
 
             function setup {
                 local prefixRevision="$1"
@@ -166,18 +160,25 @@
                   shift
               fi
 
-              # this is necessary for the current user to have "permission" to read anything
-              # inside the overlayfs
-              echo "warming up upperdir"
-              (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
+              (
+                  # this is necessary for the current user to have "permission" to read anything
+                  # inside the overlayfs
+                  echo "warming up upperdir"
+                  (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
 
-              # this lets the user change their registry files
-              for regfile in system.reg user.reg userdef.reg .update-timestamp; do
-                  if [ -f "''${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
-                      cp "''${prefixBase}/$regfile" "$USER_UPPER/$regfile"
-                      chmod u+w "$USER_UPPER/$regfile"
-                  fi
-              done
+                  # this lets the user change their registry files
+                  for regfile in system.reg user.reg userdef.reg .update-timestamp; do
+                      if [ -f "''${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
+                          cp "''${prefixBase}/$regfile" "$USER_UPPER/$regfile"
+                          chmod u+w "$USER_UPPER/$regfile"
+                      fi
+                  done
+              ) | zenity --progress \
+                --pulsate \
+                --title="Affinity Setup" \
+                --text="Initializing environment..." \
+                --auto-close \
+                --auto-kill
 
               ${lib.getExe check} || exit 1
               ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${executable_name}" "$@"
