@@ -118,7 +118,7 @@
                   set -x -e
 
                   mkdir -p $out
-                  cp -a ${layer_1}/* $out
+                  cp -a ${layer_1}/. $out
                   chmod -R +w $out
                   export WINEPREFIX="$out"
 
@@ -166,7 +166,7 @@
                   mkdir -p /tmp/cache/winetricks/corefonts
 
                   mkdir -p $out
-                  cp -a ${layer_2}/* $out
+                  cp -a ${layer_2}/. $out
                   chmod -R +w $out
                   export WINEPREFIX="$out"
 
@@ -194,11 +194,9 @@
               }}
 
               mkdir -p $out
-              cp -a ${layer_3}/* $out
+              cp -a ${layer_3}/. $out
               chmod -R +w $out
               export WINEPREFIX="$out"
-
-              mkdir -p $WINEPREFIX/drive_c/Program Files/Affinity
 
               ${lib.optionalString v3 ''
                 ${lib.getExe pkgs.xorg.lndir} ${msix.v3} "$WINEPREFIX/drive_c/Program Files/"

@@ -131,7 +131,7 @@
             set -x
             ${stdShellArgs}
 
-            export USER_WORK=$([[ -z "$XDG_STATE_HOME" ]] && echo "$HOME/.local/state/affinity-nix-2" || echo "$XDG_DATA_HOME/affinity-nix-2")
+            export USER_WORK=$([[ -z "$XDG_STATE_HOME" ]] && echo "$HOME/.local/state/affinity-nix-2" || echo "$XDG_STATE_HOME/affinity-nix-2")
 
             ${
               if name == "v3" then

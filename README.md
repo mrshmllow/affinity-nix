@@ -31,7 +31,7 @@ User preferences are located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/af
 ## How it works
 
 A wine prefix containing all the necessary dependencies and the affinity installation is built in nix and mounted at runtime.
-Overlayfs is used to keep your user preferences in-tact.
+Overlayfs is used to keep your user preferences intact.
 
 [fuse-overlayfs](https://github.com/containers/fuse-overlayfs) will be fallen back on if your kernel rejects unprivileged user namespaces, common on hardened systems. This can reduce performance.
 
