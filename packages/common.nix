@@ -168,7 +168,16 @@
 
               # this is necessary for the current user to have "permission" to read anything
               # inside the overlayfs
+              echo "warming up upperdir"
               (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
+
+              # this lets the user change their registry files
+              for regfile in system.reg user.reg userdef.reg .update-timestamp; do
+                  if [ -f "''${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
+                      cp "''${prefixBase}/$regfile" "$USER_UPPER/$regfile"
+                      chmod u+w "$USER_UPPER/$regfile"
+                  fi
+              done
 
               ${lib.getExe check} || exit 1
               ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${executable_name}" "$@"
@@ -185,8 +194,6 @@
 
                 # exits so we can trigger the FUSE fallback if kernel does not support this.
                 mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
-
-                echo "warming up upperdir"
 
                 launch "$@"
             ' -- "$@"; then
