@@ -166,8 +166,8 @@
 
                   # this lets the user change their registry files
                   for regfile in system.reg user.reg userdef.reg .update-timestamp; do
-                      if [ -f "''${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
-                          cp "''${prefixBase}/$regfile" "$USER_UPPER/$regfile"
+                      if [ -f "${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
+                          cp "${prefixBase}/$regfile" "$USER_UPPER/$regfile"
                           chmod u+w "$USER_UPPER/$regfile"
                       fi
                   done
