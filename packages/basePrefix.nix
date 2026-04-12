@@ -33,7 +33,7 @@
 
             injectPluginLoader = mkInjectPluginLoader;
 
-            msix = import ./sources.nix pkgs;
+            installers = import ./sources.nix pkgs;
 
             dependencies = pkgs.callPackage ./dependencies.nix { };
 
@@ -199,14 +199,14 @@
               export WINEPREFIX="$out"
 
               ${lib.optionalString v3 ''
-                ${lib.getExe pkgs.xorg.lndir} ${msix.v3} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${installers.v3} "$WINEPREFIX/drive_c/Program Files/"
                 ${lib.getExe injectPluginLoader}
               ''}
 
               ${lib.optionalString (!v3) ''
-                ${lib.getExe pkgs.xorg.lndir} ${msix.photo} "$WINEPREFIX/drive_c/Program Files/"
-                ${lib.getExe pkgs.xorg.lndir} ${msix.designer} "$WINEPREFIX/drive_c/Program Files/"
-                ${lib.getExe pkgs.xorg.lndir} ${msix.publisher} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${installers.photo} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${installers.designer} "$WINEPREFIX/drive_c/Program Files/"
+                ${lib.getExe pkgs.xorg.lndir} ${installers.publisher} "$WINEPREFIX/drive_c/Program Files/"
               ''}
 
               ${lib.getExe wineserver} -w
