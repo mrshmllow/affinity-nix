@@ -173,10 +173,11 @@
                   done
               ) | zenity --progress \
                 --pulsate \
-                --title="Affinity Setup" \
-                --text="Initializing environment..." \
+                --no-cancel \
                 --auto-close \
-                --auto-kill
+                --auto-kill \
+                --title="Affinity Setup" \
+                --text="Initializing environment..."
 
               ${script}
             }
