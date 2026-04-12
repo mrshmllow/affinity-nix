@@ -146,7 +146,7 @@
                    exit 1
                fi
 
-               ${lib.getExe pkgs.gnutar} -cpf "$backup_location" $USER_UPPER || exit 1
+               ${lib.getExe pkgs.gnutar} --zstd -cpf "$backup_location" $USER_UPPER || exit 1
                find "$USER_UPPER/drive_c" -mindepth 1 -maxdepth 1 ! -name "users" -print -exec rm -rf {} +
             fi
 

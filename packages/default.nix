@@ -21,6 +21,7 @@
           pkgs.zenity
           pkgs.curl
 
+          pkgs.zstd
           pkgs.coreutils
           pkgs.gnused
           pkgs.gnugrep
