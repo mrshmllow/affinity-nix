@@ -5,6 +5,7 @@
       lib,
       mkOverlayfsRunner,
       wine-stuff,
+      mkGraphicalCheck,
       ...
     }:
     let
@@ -16,6 +17,7 @@
             ;
 
           pkg = mkOverlayfsRunner name ''
+            ${lib.getExe (mkGraphicalCheck name)} || exit 1
             ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
           '';
 

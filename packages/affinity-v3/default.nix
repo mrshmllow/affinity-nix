@@ -4,6 +4,7 @@
       pkgs,
       lib,
       mkOverlayfsRunner,
+      mkGraphicalCheck,
       wine-stuff,
       ...
     }:
@@ -15,6 +16,7 @@
             ;
 
           pkg = mkOverlayfsRunner "v3" ''
+            ${lib.getExe (mkGraphicalCheck "v3")} || exit 1
             ${lib.getExe wine} "$MERGED_PREFIX/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe" "$@"
           '';
 

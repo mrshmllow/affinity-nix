@@ -119,7 +119,6 @@
         mkOverlayfsRunner =
           name: script:
           let
-            check = mkGraphicalCheck name;
             prefixBase = mkPrefixBase (name == "v3");
 
             inherit (wine-stuff)
@@ -179,7 +178,6 @@
                 --auto-close \
                 --auto-kill
 
-              ${lib.getExe check} || exit 1
               ${script}
             }
 
