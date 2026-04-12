@@ -142,7 +142,7 @@
 
                backup_location="$HOME/affinity-nix-backup.tar.zst"
 
-               if ! zenity --question --width 480 --text="There have been upgrades to affinity-nix! To migrate we need to delete everything in your wine prefix besides registry files and user data. A backup will be created in at $backup_location. Is that OK?"; then
+               if ! zenity --question --width 480 --text="There have been upgrades to affinity-nix!\n\nAffinity and it's dependencies are no longer installed directly, reducing startup time and manual updating.\n\nTo migrate, we need to delete the old installation. Your registry files and user data won't be touched. A backup will be created in at $backup_location. Is that OK?"; then
                    exit 1
                fi
 
