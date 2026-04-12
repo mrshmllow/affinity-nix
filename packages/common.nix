@@ -10,6 +10,7 @@
       stdShellArgs,
       wine-stuff,
       wineUnwrapped,
+      self',
       ...
     }:
     {
@@ -22,7 +23,7 @@
             # if it put something there
             if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
                 pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
-                tar -xvf ${inputs.plugin-loader}
+                cp ${self'.packages.apl-combined}/* .
                 popd
             fi
           '';

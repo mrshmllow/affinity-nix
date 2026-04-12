@@ -11,8 +11,8 @@
       flake = false;
     };
 
-    plugin-loader = {
-      url = "file+https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.3.0/affinitypluginloader-plus-winefix.tar.xz";
+    plugin-loader-src = {
+      url = "github:noahc3/AffinityPluginLoader/v0.3.0";
       flake = false;
     };
 

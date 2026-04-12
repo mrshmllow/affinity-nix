@@ -5,6 +5,7 @@
     ./affinity-v3
     ./unified
     ./common.nix
+    ./apl
   ];
   perSystem =
     {

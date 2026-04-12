@@ -1,0 +1,17 @@
+[
+  {
+    "pname": "Lib.Harmony",
+    "version": "2.4.2",
+    "hash": "sha256-1kWS5TCQRkVZ/OSGEsnKfI3HMROEE3a3qjRV9G/F1Xk="
+  },
+  {
+    "pname": "Microsoft.NETFramework.ReferenceAssemblies",
+    "version": "1.0.3",
+    "hash": "sha256-FBoJP5DHZF0QHM0xLm9yd4HJZVQOuSpSKA+VQRpphEE="
+  },
+  {
+    "pname": "Microsoft.NETFramework.ReferenceAssemblies.net48",
+    "version": "1.0.3",
+    "hash": "sha256-in40hTjn65E1FpaRFon0nj1PY/i6tRdDK74Vm4sRBKI="
+  }
+]
