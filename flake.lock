@@ -202,16 +202,21 @@
         "type": "github"
       }
     },
-    "plugin-loader": {
+    "plugin-loader-src": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-kNkJdzyH7hWjFNuXohGNYazYaqNgJQSpWFT3fRIdcsg=",
-        "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.3.0/affinitypluginloader-plus-winefix.tar.xz"
+        "lastModified": 1775508798,
+        "narHash": "sha256-cD2G3M83wCEXVMMl9YoHMLxPIvbXeESgQTkXiM+lzns=",
+        "owner": "noahc3",
+        "repo": "AffinityPluginLoader",
+        "rev": "bd93bbf9f84735d8ba6538596620bbe8d8b90efd",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://github.com/noahc3/AffinityPluginLoader/releases/download/v0.3.0/affinitypluginloader-plus-winefix.tar.xz"
+        "owner": "noahc3",
+        "ref": "v0.3.0",
+        "repo": "AffinityPluginLoader",
+        "type": "github"
       }
     },
     "root": {
@@ -223,7 +228,7 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
-        "plugin-loader": "plugin-loader",
+        "plugin-loader-src": "plugin-loader-src",
         "treefmt-nix": "treefmt-nix"
       }
     },

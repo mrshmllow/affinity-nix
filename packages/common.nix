@@ -10,6 +10,7 @@
       stdShellArgs,
       wine-stuff,
       wineUnwrapped,
+      self',
       ...
     }:
     {
@@ -17,12 +18,14 @@
         mkInjectPluginLoader =
           affinityPath:
           pkgs.writeShellScriptBin "inject-plugin-loader" ''
+            set -x
             # Must be inserted after installer
             # installer gets mad if we make the directory for it, so only install
             # if it put something there
             if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
                 pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
-                tar -xvf ${inputs.plugin-loader}
+                cp -r "${self'.packages.apl-combined}/." .
+                chmod 755 -R ./apl/
                 popd
             fi
           '';
