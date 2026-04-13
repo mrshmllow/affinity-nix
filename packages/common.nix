@@ -229,8 +229,6 @@
                 launch "$@"
 
                 ${lib.getExe wineserver} -w
-
-                exit
             fi
 
             rmdir $MERGED_PREFIX
