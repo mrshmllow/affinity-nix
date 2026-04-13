@@ -25,9 +25,42 @@
           postInstall = ''
             pushd $out/lib/${pname}
             rm *.pdb
+            rm *.config
 
             mkdir -p ./apl/plugins
             mv ./WineFix.dll ./apl/plugins
+          '';
+        };
+
+        bootstrap = pkgs.pkgsCross.mingwW64.stdenv.mkDerivation {
+          pname = "affinity-bootstrap";
+
+          inherit version;
+
+          src = "${inputs.plugin-loader-src}/AffinityBootstrap";
+
+          nativeBuildInputs = [ pkgs.wine64 ];
+
+          buildPhase = ''
+            mkdir -p build
+
+            cat << 'EOF' > mscoree.def
+            LIBRARY mscoree.dll
+            EXPORTS
+            CLRCreateInstance
+            EOF
+
+            x86_64-w64-mingw32-dlltool -d mscoree.def -l build/libmscoree.a
+
+            $CC -shared -o build/AffinityBootstrap.dll bootstrap.c \
+              -I${pkgs.wine64}/include/wine/windows \
+              -Lbuild \
+              -lole32 -loleaut32 -luuid -lmscoree
+          '';
+
+          installPhase = ''
+            mkdir -p $out/lib/AffinityPluginLoader
+            cp build/AffinityBootstrap.dll $out/lib/AffinityPluginLoader
           '';
         };
 
@@ -36,9 +69,7 @@
           pname = "d2d1";
           inherit version;
 
-          nativeBuildInputs = with pkgs; [
-            wine64
-          ];
+          nativeBuildInputs = [ pkgs.wine64 ];
 
           TARGET = "x86_64-unix";
 
@@ -59,6 +90,7 @@
           paths = [
             self'.packages.apl
             self'.packages.d2d1
+            self'.packages.bootstrap
           ];
 
           postBuild = ''
