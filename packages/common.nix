@@ -114,6 +114,7 @@
 
             inherit (wine-stuff)
               wineserver
+              wineboot
               ;
           in
           pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
@@ -172,10 +173,14 @@
                   # this lets the user change their registry files
                   for regfile in system.reg user.reg userdef.reg .update-timestamp; do
                       if [ -f "${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
-                          cp "${prefixBase}/$regfile" "$USER_UPPER/$regfile"
+                          sed "s/nixbld/$USER/g" "${prefixBase}/$regfile" > "$USER_UPPER/$regfile"
                           chmod u+w "$USER_UPPER/$regfile"
                       fi
                   done
+
+                  # this update is required to fix memory corruption crashes when opening and
+                  # saving files with a file selection prompt.
+                  ${lib.getExe wineboot} --update
               ) | zenity --progress \
                 --pulsate \
                 --no-cancel \

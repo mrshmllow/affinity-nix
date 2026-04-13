@@ -17,6 +17,7 @@
             verbs = [
               "tahoma"
               "vcrun2022"
+              "dotnet20"
               "dotnet48"
               "corefonts"
               "win11"
@@ -71,6 +72,13 @@
                 path = pkgs.fetchurl {
                   url = "https://downloads.sourceforge.net/corefonts/OldFiles/IELPKTH.CAB";
                   hash = "sha256-wb4/uPAEJXC+duxtqgOpkULIg2fBvIECQLhYJ8cVlho=";
+                };
+              }
+              {
+                name = "dotnet20/NetFx64.exe";
+                path = pkgs.fetchurl {
+                  url = "https://web.archive.org/web/20060509045320/https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe";
+                  hash = "sha256-fqhtyo7q7cqkoXNwVHyizqnptndJcrjgPSyx+w55hmk=";
                 };
               }
             ];
