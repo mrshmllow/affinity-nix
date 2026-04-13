@@ -6,7 +6,6 @@
       lib,
       stdShellArgs,
       wine-stuff,
-      wineUnwrapped,
       self',
       mkPrefixBase,
       ...
