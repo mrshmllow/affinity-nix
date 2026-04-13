@@ -26,7 +26,13 @@
           enableOCR = true;
           inherit defaults;
 
+          virtualisation.memorySize = 4096 * 2;
+
           nodes.machine.environment.systemPackages = [ self'.packages.v3 ];
+
+          environment.etc."file" = {
+            source = ./v3-test-file.af;
+          };
 
           testScript = stripTyping (builtins.readFile ./v3.py);
         };
@@ -35,7 +41,6 @@
           name = "test-affinity-v2";
           enableOCR = true;
           inherit defaults;
-
           nodes = {
             photo.environment.systemPackages = [ self'.packages.photo ];
             publisher.environment.systemPackages = [ self'.packages.publisher ];
