@@ -42,16 +42,16 @@
 
                 # no upgrade migrations currently exist
 
-                echo "${latestRevision}" > $MERGED_PREFIX/.revision
+                echo "${latestRevision}" > $WINEPREFIX/.revision
             }
 
             # older prefix with no revision number
-            if [ ! -f "$MERGED_PREFIX/.revision" ]; then
+            if [ ! -f "$WINEPREFIX/.revision" ]; then
                 echo "affinity-nix: Running setup, no revision"
 
                 setup "0"
             else
-                prefixRevision=$(<"$MERGED_PREFIX/.revision")
+                prefixRevision=$(<"$WINEPREFIX/.revision")
 
                 # only install deps if the revision number is higher than the
                 # one found in the prefix
@@ -66,14 +66,14 @@
                 for app in "${"\${apps[@]}"}"; do
                     echo "affinity-nix: Installing settings for $app"
 
-                    mkdir -p "$MERGED_PREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                    mkdir -p "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
 
                     ${lib.getExe pkgs.rsync} -v \
                         --ignore-existing \
                         --chmod=644 \
                         --recursive \
                         "${inputs.on-linux}/Auxillary/Settings/$app/2.0/" \
-                        "$MERGED_PREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                        "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
             fi
           '';
@@ -155,7 +155,7 @@
                 rm -rf "$USER_WORK/work"
             fi
 
-            export MERGED_PREFIX=$(mktemp -d)
+            export WINEPREFIX="$(mktemp -d)"
 
             function launch() {
               if [ "$1" != "--verbose" ]; then
@@ -193,45 +193,54 @@
             }
 
             export -f launch
+            unshare_status=0
 
             echo "affinity-nix: attempting to mount via kernel"
-
-            export WINEPREFIX="$MERGED_PREFIX"
-
-            if ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
+            ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
                 set -x
 
                 # exits so we can trigger the FUSE fallback if kernel does not support this.
-                mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+                if ! mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$WINEPREFIX"; then
+                    exit 111
+                fi
 
                 launch "$@"
 
                 ${lib.getExe wineserver} -w
-            ' -- "$@"; then
+            ' -- "$@" || unshare_status=$?
+
+            if [ $unshare_status -eq 0 ]; then
                 echo "affinity-nix: kernel overlayfs session ended cleanly"
-            else
+            elif [ $unshare_status -eq 111 ]; then
                 echo "affinity-nix: kernel mount blocked by host! falling back to FUSE overlayfs"
 
                 function cleanup_fuse() {
                     ${lib.getExe wineserver} -k
 
                     # must use host binary because of setuid
-                    if mountpoint -q "$MERGED_PREFIX"; then
-                        /usr/bin/env fusermount3 -u -z "$MERGED_PREFIX" 2>/dev/null || \
-                        /usr/bin/env fusermount -u -z "$MERGED_PREFIX" 2>/dev/null
+                    if ! /usr/bin/env fusermount3 -u -z "$WINEPREFIX" 2>/dev/null; then
+                        if ! /usr/bin/env fusermount -u -z "$WINEPREFIX" 2>/dev/null; then
+                            echo "affinity-nix: both fusermount and fusermount3 failed to unmount"
+                            return 1
+                        fi
                     fi
+
+                    return 0
                 }
 
                 trap cleanup_fuse EXIT
 
-                ${lib.getExe pkgs.fuse-overlayfs} -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$MERGED_PREFIX" || exit 1
+                ${lib.getExe pkgs.fuse-overlayfs} -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$WINEPREFIX" || exit 1
 
                 launch "$@"
 
                 ${lib.getExe wineserver} -w
+            else
+                echo "affinity-nix: application exited with error ($unshare_status) inside kernel overlayfs"
+                exit $unshare_status
             fi
 
-            rmdir $MERGED_PREFIX
+            rmdir $WINEPREFIX
           '';
       };
     };
