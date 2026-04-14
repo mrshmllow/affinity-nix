@@ -59,7 +59,11 @@
             ${lib.strings.toShellVars {
               inherit verbs type;
               tricksInstalled = 0;
-              apps = [ "Photo" "Designer" "Publisher" ];
+              apps = [
+                "Photo"
+                "Designer"
+                "Publisher"
+              ];
             }}
 
             ${lib.getExe wine} --version
