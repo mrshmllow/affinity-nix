@@ -197,7 +197,7 @@
 
             echo "affinity-nix: attempting to mount via kernel"
             ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
-                set -euo pipefail
+                set -x
 
                 # exits so we can trigger the FUSE fallback if kernel does not support this.
                 if ! mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$WINEPREFIX"; then
