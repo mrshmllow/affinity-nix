@@ -3,33 +3,23 @@
     {
       pkgs,
       self',
-      sources,
       stdShellArgs,
       wine-stuff,
-      updatePhoto,
-      updateDesigner,
-      updatePublisher,
-      updateV3,
       directPhoto,
       directDesigner,
       directPublisher,
+      mkOverlayfsRunner,
       directV3,
       ...
     }:
     let
       scripts = pkgs.callPackage ./scripts.nix {
-        inherit sources stdShellArgs wine-stuff;
+        inherit stdShellArgs wine-stuff mkOverlayfsRunner;
         apps = {
           photo = directPhoto;
           designer = directDesigner;
           publisher = directPublisher;
           v3 = directV3;
-        };
-        updateApps = {
-          photo = updatePhoto;
-          designer = updateDesigner;
-          publisher = updatePublisher;
-          v3 = updateV3;
         };
       };
     in

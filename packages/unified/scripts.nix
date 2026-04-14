@@ -1,19 +1,17 @@
 {
   pkgs,
   writeShellScriptBin,
+  mkOverlayfsRunner,
   lib,
-  sources,
   apps,
-  updateApps,
   stdShellArgs,
   wine-stuff,
 }:
 rec {
   createScript =
-    v3: name:
+    type: name:
     let
-      type = if v3 then "v3" else "v2";
-      inherit (wine-stuff."${type}")
+      inherit (wine-stuff)
         wine
         wineboot
         winetricks
@@ -32,7 +30,6 @@ rec {
         winetricks
         wineboot
         wineserver
-        update|repair|install   Update or repair the application
         help                    Show this
         (nothing)               Launch Affinity ${name}
       EOF
@@ -45,23 +42,35 @@ rec {
               ;;
           wine)
               shift
-              exec ${lib.getExe wine} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wine} "$@"
+                ''
+              )} "$@"
               ;;
           winetricks)
               shift
-              exec ${lib.getExe winetricks} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe winetricks} "$@"
+                ''
+              )} "$@"
               ;;
           wineboot)
               shift
-              exec ${lib.getExe wineboot} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wineboot} "$@"
+                ''
+              )} "$@"
               ;;
           wineserver)
               shift
-              exec ${lib.getExe wineserver} "$@"
-              ;;
-          update|repair|install)
-              shift
-              exec ${lib.getExe updateApps.${lib.toLower name}} "$@"
+              exec ${lib.getExe (
+                mkOverlayfsRunner type ''
+                  ${lib.getExe wineserver} "$@"
+                ''
+              )} "$@"
               ;;
           *)
               exec ${lib.getExe apps.${lib.toLower name}} "$@"
@@ -72,17 +81,15 @@ rec {
   createUnifiedPackage =
     name:
     let
-      v3 = name == "v3";
-
       app = apps.${lib.toLower name};
-      pkg = createScript v3 name;
+      pkg = createScript (lib.toLower name) name;
 
-      version = if v3 then "" else sources._version;
-      postfix = if v3 then "" else "-2";
+      # last version of affinity v2 released
+      version = if (name == "v3") then null else "2.6.5";
     in
     pkgs.symlinkJoin {
-      name = "Affinity ${name} ${version}";
-      pname = "affinity-${lib.toLower name}${postfix}";
+      name = "Affinity ${name}${lib.optionalString (version != null) " ${version}"}}";
+      pname = "affinity-${lib.toLower name}";
       # order is important because the script and the app both use the same
       # binary name...
       paths = [
@@ -90,10 +97,10 @@ rec {
         app
       ];
       meta = {
-        description = "Affinity ${name} ${version}";
+        description = "Affinity ${name}${lib.optionalString (version != null) " ${version}"}";
         homepage = "https://affinity.serif.com/";
         platforms = [ "x86_64-linux" ];
-        mainProgram = "affinity-${lib.toLower name}${postfix}";
+        mainProgram = "affinity-${lib.toLower name}";
       };
     };
 }

@@ -2,34 +2,55 @@
   perSystem =
     {
       pkgs,
-      affinityPathV2,
-      version,
-      stdShellArgs,
-      mkGraphicalCheck,
-      mkInstaller,
+      lib,
+      mkOverlayfsRunner,
       wine-stuff,
+      mkGraphicalCheck,
       ...
     }:
     let
-      scripts = pkgs.callPackage ./scripts.nix {
-        inherit (wine-stuff.v2) wine;
-        inherit
-          affinityPathV2
-          version
-          stdShellArgs
-          mkGraphicalCheck
-          mkInstaller
-          ;
-      };
+      createPackage =
+        name:
+        let
+          inherit (wine-stuff)
+            wine
+            ;
+
+          pkg = mkOverlayfsRunner name ''
+            ${lib.getExe (mkGraphicalCheck name)} || exit 1
+            ${lib.getExe wine} "$WINEPREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
+          '';
+
+          desktop = pkgs.callPackage ./desktopItems.nix {
+            ${lib.toLower name} = pkg;
+          };
+
+          icons = pkgs.callPackage ./icons.nix { };
+          icon-package = icons.mkIconPackageFor name;
+        in
+        pkgs.symlinkJoin {
+          name = "Affinity ${name}";
+          pname = "affinity-${lib.toLower name}";
+          paths = [
+            pkg
+            desktop.${lib.toLower name}
+            icon-package
+          ];
+          meta = {
+            description = "Affinity ${name} 2";
+            homepage = "https://affinity.serif.com/";
+            # license = lib.licenses.unfree;
+            # maintainers = with pkgs.lib.maintainers; [marshmallow];
+            platforms = [ "x86_64-linux" ];
+            mainProgram = "af-overlay-${lib.toLower name}";
+          };
+        };
     in
     {
       _module.args = {
-        updatePhoto = mkInstaller "Photo";
-        directPhoto = scripts.createPackage "Photo";
-        updateDesigner = mkInstaller "Designer";
-        directDesigner = scripts.createPackage "Designer";
-        updatePublisher = mkInstaller "Publisher";
-        directPublisher = scripts.createPackage "Publisher";
+        directPhoto = createPackage "Photo";
+        directDesigner = createPackage "Designer";
+        directPublisher = createPackage "Publisher";
       };
     };
 }

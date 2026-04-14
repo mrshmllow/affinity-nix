@@ -2,62 +2,33 @@
 {
   perSystem =
     {
-      affinityPathV2,
-      affinityPathV3,
       pkgs,
       lib,
-      sources,
       stdShellArgs,
       wine-stuff,
-      wineUnwrapped,
       self',
+      mkPrefixBase,
       ...
     }:
     {
       _module.args = rec {
-        mkInjectPluginLoader =
-          affinityPath:
-          pkgs.writeShellScriptBin "inject-plugin-loader" ''
-            set -x
-            # Must be inserted after installer
-            # installer gets mad if we make the directory for it, so only install
-            # if it put something there
-            if [ -d "${affinityPath}/drive_c/Program Files/Affinity/Affinity" ]; then
-                pushd "${affinityPath}/drive_c/Program Files/Affinity/Affinity"
-                cp -r "${self'.packages.apl-combined}/." .
-                chmod 755 -R ./apl/
-                popd
-            fi
-          '';
+        mkInjectPluginLoader = pkgs.writeShellScriptBin "inject-plugin-loader" ''
+          set -x -e
+          pushd "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+          cp -r "${self'.packages.apl-combined}/." .
+          popd
+        '';
 
         mkCheck =
           v3:
           let
             type = if v3 then "v3" else "v2";
-            affinityPath = if v3 then affinityPathV3 else affinityPathV2;
-            revisionPath = "${affinityPath}/.revision";
-            latestRevision = "8";
-            verbs = [
-              "vcrun2022"
-              "dotnet48"
-              "corefonts"
-              "win11"
-              "tahoma"
-            ];
-            dependencies = pkgs.callPackage ./dependencies.nix { };
-            injectPluginLoader = mkInjectPluginLoader affinityPath;
-
-            inherit (wine-stuff."${type}")
-              wine
-              wineboot
-              winetricks
-              wineserver
-              ;
+            latestRevision = "9";
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e
             ${lib.strings.toShellVars {
-              inherit verbs type;
+              inherit type;
               tricksInstalled = 0;
               apps = [
                 "Photo"
@@ -66,83 +37,21 @@
               ];
             }}
 
-            ${lib.getExe wine} --version
-
             function setup {
                 local prefixRevision="$1"
-                if [[ "$prefixRevision" -le 3 ]]; then
-                    echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
 
-                    ${lib.getExe wineboot} --update
-                    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+                # no upgrade migrations currently exist
 
-                    ${lib.getExe winetricks} renderer=vulkan
-
-                    install -D -t "${affinityPath}/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
-                fi
-
-                if [[ "$prefixRevision" -le 4 ]]; then
-                   echo "affinity-nix: Installing Microsoft WebView2 Runtime"
-
-                   ${lib.getExe wine} winecfg -v win7
-                   ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
-                   ${lib.getExe wine} winecfg -v win11
-
-                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "webview2-regedit-changes.reg" ''
-                     Windows Registry Editor Version 5.00
-
-                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdate]
-                     "Start"=dword:00000004
-
-                     [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\edgeupdatem]
-                     "Start"=dword:00000004
-
-                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults]
-
-                     [HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe]
-                     "Version"="win7"
-                   '').outPath}"
-
-                   # The Edge Update service gets to start before we can deactivate it, so it must be stopped manually
-                   ${lib.getExe wine} taskkill /f /im MicrosoftEdgeUpdate.exe
-                fi
-
-                if [[ "$prefixRevision" -le 6 ]]; then
-                   echo "affinity-nix: PROPERLY disabling the menubuilder"
-
-                   # by diffing a registry dump we found that you can disable the file association
-                   # through a registry key.
-                   ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
-                     Windows Registry Editor Version 5.00
-
-                     [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
-                     "winemenubuilder.exe"=""
-
-                     [HKEY_CURRENT_USER\Software\Wine\FileOpenAssociations]
-                     "Enable"="N"
-                   '').outPath}"
-                fi
-
-                if [[ "$prefixRevision" -le 7 ]]; then
-                   echo "affinity-nix: Removing old APL Plugins directory"
-
-                   # will delete the user's plugins, unfortunate.
-                   # i dont know how many other plugins even exist, anyway
-                   # they will be unsupported by newer apl, anyway.
-                   # source: https://github.com/noahc3/AffinityPluginLoader/releases/tag/v0.3.0
-                   rm -rf "${affinityPath}/drive_c/Program Files/Affinity/Affinity/plugins"
-                fi
-
-                echo "${latestRevision}" > "${revisionPath}"
+                echo "${latestRevision}" > $WINEPREFIX/.revision
             }
 
             # older prefix with no revision number
-            if [ ! -f "${revisionPath}" ]; then
+            if [ ! -f "$WINEPREFIX/.revision" ]; then
                 echo "affinity-nix: Running setup, no revision"
 
                 setup "0"
             else
-                prefixRevision=$(<"${revisionPath}")
+                prefixRevision=$(<"$WINEPREFIX/.revision")
 
                 # only install deps if the revision number is higher than the
                 # one found in the prefix
@@ -157,44 +66,15 @@
                 for app in "${"\${apps[@]}"}"; do
                     echo "affinity-nix: Installing settings for $app"
 
-                    mkdir -p "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                    mkdir -p "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
 
                     ${lib.getExe pkgs.rsync} -v \
                         --ignore-existing \
                         --chmod=644 \
                         --recursive \
                         "${inputs.on-linux}/Auxillary/Settings/$app/2.0/" \
-                        "${affinityPath}/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
+                        "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
-            fi
-
-            installed_tricks=$(${lib.getExe winetricks} list-installed)
-
-            # kinda stolen from the nix-citizen project, tysm
-            # we can be more smart about installing verbs other than relying on the revision number
-            for verb in "${"\${verbs[@]}"}"; do
-                # skip if verb is installed
-                if ! echo "$installed_tricks" | grep -qw "$verb"; then
-                    echo "winetricks: Installing $verb"
-
-                    if ! ${lib.getExe winetricks} -q -f "$verb"; then
-                        zenity --error \
-                            --text="affinity-nix: Failed to install winetricks verb $verb. Please view logs"
-
-                        exit 1
-                    fi
-
-                    tricksInstalled=1
-                fi
-            done
-
-            # Ensure wineserver is restarted after tricks are installed
-            if [ "$tricksInstalled" -eq 1 ]; then
-                ${lib.getExe wineserver} -k
-            fi
-
-            if [[ "$type" == "v3" ]]; then
-                ${lib.getExe injectPluginLoader}
             fi
           '';
 
@@ -227,109 +107,140 @@
             fi
           '';
 
-        mkInstaller =
-          name:
+        mkOverlayfsRunner =
+          name: script:
           let
-            source = sources.${lib.toLower name};
-            check = mkGraphicalCheck name;
-            affinityPath = if name == "v3" then affinityPathV3 else affinityPathV2;
-            injectPluginLoader = mkInjectPluginLoader affinityPath;
-            type = if name == "v3" then "v3" else "v2";
+            prefixBase = mkPrefixBase (name == "v3");
 
-            inherit (wine-stuff."${type}")
-              wine
+            inherit (wine-stuff)
               wineserver
+              wineboot
               ;
           in
-          pkgs.writeShellScriptBin "install-Affinity-${name}" ''
+          pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
             set -x
             ${stdShellArgs}
-            ${lib.strings.toShellVars {
-              inherit type;
-              download_url = source.url;
-            }}
 
-            cache_dir="${"\${XDG_CACHE_HOME:-$HOME/.cache}"}"/affinity
+            export USER_WORK=$([[ -z "$XDG_STATE_HOME" ]] && echo "$HOME/.local/state/affinity-nix-2" || echo "$XDG_STATE_HOME/affinity-nix-2")
 
-            mkdir -p "$cache_dir"
-
-            function matches {
-                echo "${source.sha256} $cache_dir/${source.name}" | sha256sum --check --status
+            ${
+              if name == "v3" then
+                ''
+                  export USER_UPPER=$([[ -z "$XDG_DATA_HOME" ]] && echo "$HOME/.local/share/affinity-v3" || echo "$XDG_DATA_HOME/affinity-v3")
+                ''
+              else
+                ''
+                  export USER_UPPER=$([[ -z "$XDG_DATA_HOME" ]] && echo "$HOME/.local/share/affinity" || echo "$XDG_DATA_HOME/affinity")
+                ''
             }
 
-            function ensure_exists {
-                if matches; then
-                    return 0
-                fi
+            mkdir -p "$USER_UPPER" "$USER_WORK"
 
-                echo "download: Downloading $download_url"
+            # migrate from the pre-overlayfs system before the overlayfs is mounted
+            if [[ -f "$USER_UPPER/.revision" && $(<"$USER_UPPER/.revision") -lt 9 ]]; then
+               echo "affinity-nix: migrating to overlayfs"
 
-                # excerpt stolen from https://github.com/mactan-sc/rsilauncher/blob/main/scripts/rsi-run.sh
-                FIFO=$(mktemp -u)
+               backup_location="$HOME/affinity-nix-backup.tar.zst"
 
-                mkfifo "$FIFO"
+               if ! zenity --question --width 480 --text="There have been upgrades to affinity-nix!\n\nAffinity and it's dependencies are no longer installed directly, reducing startup time and manual updating.\n\nTo migrate, we need to delete the old installation. Your registry files and user data won't be touched. A backup will be created in at $backup_location. Is that OK?"; then
+                   exit 1
+               fi
 
-                curl -#L "$download_url" -o "$cache_dir/${source.name}" > "$FIFO" 2>&1 & curlpid="$!"
+               ${lib.getExe pkgs.gnutar} --zstd -cpf "$backup_location" $USER_UPPER || exit 1
+               find "$USER_UPPER/drive_c" -mindepth 1 -maxdepth 1 ! -name "users" -print -exec rm -rf {} +
+            fi
 
-                stdbuf -oL tr '\r' '\n' < "$FIFO" | \
-                grep --line-buffered -ve "100" | grep --line-buffered -o "[0-9]*\.[0-9]" | \
-                (
-                    trap 'kill "$curlpid"' ERR
-                    zenity --progress \
-                      --auto-close \
-                      --title="Affinity ${name} (${type})" \
-                      --text="Downloading the installer for ${name}.\n\nThis might take a moment.\n" 2>/dev/null
-                )
+            if [ -d "$USER_WORK/work" ]; then
+                chmod 700 "$USER_WORK/work"
+                rm -rf "$USER_WORK/work"
+            fi
 
-                if [ "$?" -eq 1 ]; then
-                    # user clicked cancel
-                    echo "download: user aborted. removing $cache_dir/${source.name}..."
-                    rm --interactive=never "$cache_dir/${source.name}"
-                    rm --interactive=never "$FIFO"
-                    exit 1
-                fi
+            export WINEPREFIX="$(mktemp -d)"
 
-                rm --interactive=never "$FIFO"
+            function launch() {
+              if [ "$1" != "--verbose" ]; then
+                  export WINEDEBUG=-all,fixme-all
+              else
+                  shift
+              fi
 
-                if matches; then
-                    echo "download: Downloaded file matches sha256"
+              (
+                  # this is necessary for the current user to have "permission" to read anything
+                  # inside the overlayfs
+                  echo "warming up upperdir"
+                  (cd "${prefixBase}" && find . -type d -exec mkdir -p "$USER_UPPER/{}" \;)
 
-                    return 0
-                fi
+                  # this lets the user change their registry files
+                  for regfile in system.reg user.reg userdef.reg .update-timestamp; do
+                      if [ -f "${prefixBase}/$regfile" ] && [ ! -f "$USER_UPPER/$regfile" ]; then
+                          sed "s/nixbld/$USER/g" "${prefixBase}/$regfile" > "$USER_UPPER/$regfile"
+                          chmod u+w "$USER_UPPER/$regfile"
+                      fi
+                  done
 
-                echo "download: Failed to verify the downloaded file"
-                return 1
+                  # this update is required to fix memory corruption crashes when opening and
+                  # saving files with a file selection prompt.
+                  ${lib.getExe wineboot} --update
+              ) | zenity --progress \
+                --pulsate \
+                --no-cancel \
+                --auto-close \
+                --auto-kill \
+                --title="Affinity Setup" \
+                --text="Initializing environment..."
+
+              ${script}
             }
 
-            if ! ensure_exists; then
-                read -r -d ''' message << EOM
-            Could not successfully download ${source.name}
-            Please create an issue: https://github.com/mrshmllow/affinity-nix/issues/new?template=bug_report.md.
+            export -f launch
+            unshare_status=0
 
-            In the meantime try again after downloading ${source.name} from ${source.url} and placing it in the path $cache_dir/${source.name}
-            EOM
+            echo "affinity-nix: attempting to mount via kernel"
+            ${lib.getExe' pkgs.util-linux "unshare"} -U -m -p -f --map-root-user ${lib.getExe pkgs.bash} -c '
+                set -x
 
-                zenity --error --text="$message"
-                echo -e "-------------------\n\n$message\n\n-------------------"
+                # exits so we can trigger the FUSE fallback if kernel does not support this.
+                if ! mount -t overlay overlay -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$WINEPREFIX"; then
+                    exit 111
+                fi
 
-                exit 1
+                launch "$@"
+
+                ${lib.getExe wineserver} -w
+            ' -- "$@" || unshare_status=$?
+
+            if [ $unshare_status -eq 0 ]; then
+                echo "affinity-nix: kernel overlayfs session ended cleanly"
+            elif [ $unshare_status -eq 111 ]; then
+                echo "affinity-nix: kernel mount blocked by host! falling back to FUSE overlayfs"
+
+                function cleanup_fuse() {
+                    ${lib.getExe wineserver} -k
+
+                    # must use host binary because of setuid
+                    if ! /usr/bin/env fusermount3 -u -z "$WINEPREFIX" 2>/dev/null; then
+                        if ! /usr/bin/env fusermount -u -z "$WINEPREFIX" 2>/dev/null; then
+                            echo "affinity-nix: both fusermount and fusermount3 failed to unmount"
+                            return 1
+                        fi
+                    fi
+
+                    return 0
+                }
+
+                trap cleanup_fuse EXIT
+
+                ${lib.getExe pkgs.fuse-overlayfs} -o lowerdir="${prefixBase}",upperdir="$USER_UPPER",workdir="$USER_WORK" "$WINEPREFIX" || exit 1
+
+                launch "$@"
+
+                ${lib.getExe wineserver} -w
+            else
+                echo "affinity-nix: application exited with error ($unshare_status) inside kernel overlayfs"
+                exit $unshare_status
             fi
 
-            ${lib.getExe check} || exit 1
-            ${lib.getExe wine} winecfg -v win11
-            ${lib.getExe wineserver} -w
-
-            zenity --info \
-                --title="Affinity ${name} (${type})" \
-                --text="You will be prompted to install ${name}.\n\nPlease do not change the installation path."
-
-            ${lib.getExe wine} "$cache_dir/${source.name}"
-
-            if [[ "$type" == "v3" ]]; then
-                ${lib.getExe injectPluginLoader}
-            fi
-
-            echo "${source.sha256}" > ${affinityPath}/installed-hash
+            rmdir $WINEPREFIX
           '';
       };
     };

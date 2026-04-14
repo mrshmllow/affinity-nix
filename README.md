@@ -26,7 +26,14 @@ With the release of v3, there has been some changes:
 > [!TIP]
 > [Add garnix as a substituter](https://garnix.io/docs/ci/caching/) to avoid compiling yourself.
 
-The prefix is located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/affinity-v3/` falling back to `$HOME/.local/share/affinity/` or `$HOME/.local/share/affinity-v3/`.
+User preferences are located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/affinity-v3/` falling back to `$HOME/.local/share/affinity/` or `$HOME/.local/share/affinity-v3/`.
+
+## How it works
+
+A wine prefix containing all the necessary dependencies and the affinity installation is built in nix and mounted at runtime.
+Overlayfs is used to keep your user preferences intact.
+
+[fuse-overlayfs](https://github.com/containers/fuse-overlayfs) will be fallen back on if your kernel rejects unprivileged user namespaces, common on hardened systems. This can reduce performance.
 
 ## Usage Instructions
 
@@ -125,14 +132,6 @@ The following is an example. **Installing this package does not differ to instal
 
 </details>
 
-### Updating the applications
-
-These will graphically prompt you to update the affinity application.
-
-```bash
-$ nix run github:mrshmllow/affinity-nix#{v3,photo,designer,publisher} -- update
-```
-
 ### Troubleshooting, winetricks, wineboot, and more
 
 Each package (`v3|photo|designer|publisher`) has the following usage:
@@ -146,7 +145,6 @@ Commands:
   winetricks
   wineboot
   wineserver
-  update|repair|install   Update or repair the application
   help                    Show this
   (nothing)               Launch Affinity v3
 
