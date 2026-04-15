@@ -16,6 +16,8 @@
         packages = lib.flatten [
           cfg.settings.enabledPackages
           cfg.settings.package
+
+          pkgs.uv
         ];
 
         shellHook = builtins.concatStringsSep "\n" [
