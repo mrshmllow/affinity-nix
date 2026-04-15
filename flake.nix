@@ -31,6 +31,12 @@
       url = "github:pushcx/corefonts";
       flake = false;
     };
+
+    crane.url = "github:ipetkov/crane";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -38,6 +44,7 @@
       flake-parts,
       git-hooks,
       treefmt-nix,
+      crane,
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -53,5 +60,18 @@
       systems = [
         "x86_64-linux"
       ];
+      perSystem =
+        {
+          inputs',
+          config,
+          pkgs,
+          ...
+        }:
+        {
+          _module.args = {
+            toolchain = inputs'.fenix.packages.complete;
+            craneLib = (crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
+          };
+        };
     };
 }

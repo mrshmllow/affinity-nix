@@ -4,6 +4,8 @@
       config,
       lib,
       pkgs,
+      craneLib,
+      pkgs,
       ...
     }:
     let
@@ -12,7 +14,7 @@
     {
       # Adapted from
       # https://github.com/cachix/git-hooks.nix/blob/dcf5072734cb576d2b0c59b2ac44f5050b5eac82/flake-module.nix#L66-L78
-      devShells.default = pkgs.mkShell {
+      devShells.default = craneLib.devShell {
         packages = lib.flatten [
           cfg.settings.enabledPackages
           cfg.settings.package

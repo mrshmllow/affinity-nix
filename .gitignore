@@ -3,3 +3,4 @@ result
 /.pre-commit-config.yaml
 *.AppImage
 *.exe
+/target
