@@ -1,8 +1,14 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    io::{self, BufRead, BufReader},
+    os::unix::fs::PermissionsExt,
+    path::PathBuf,
+};
 
 use clap::Parser;
+use duct::cmd;
 use nix::{
-    libc,
+    libc::{self, S_IWUSR},
     mount::{MsFlags, mount, umount},
     sched::{CloneFlags, unshare},
     sys::wait::{WaitStatus, waitpid},
@@ -10,6 +16,7 @@ use nix::{
 };
 use tracing::{Level, error, info, instrument};
 use tracing_subscriber::FmtSubscriber;
+use walkdir::WalkDir;
 use xdgdir::BaseDir;
 
 const MOUNT_FAIL_STATUS: i32 = 111;
@@ -17,11 +24,24 @@ const MOUNT_FAIL_STATUS: i32 = 111;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
+    /// absolute path to overlayfs under directory for wineprefix
     #[arg(long)]
     lower: PathBuf,
 
     #[arg(long)]
     v3: bool,
+
+    /// absolute path to wineboot binary
+    #[arg(long)]
+    wineboot: PathBuf,
+
+    /// binary to execute once checking & mounting is complete
+    #[arg(long)]
+    command: String,
+
+    /// arguments to executed command
+    #[arg(last = true)]
+    arguments: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -30,6 +50,8 @@ struct Paths<'a> {
     upper: PathBuf,
     work: PathBuf,
     wine_prefix: PathBuf,
+
+    wineboot: PathBuf,
 }
 
 impl<'a> Paths<'a> {
@@ -51,10 +73,122 @@ fn init_tracing() {
 }
 
 #[instrument]
-fn run_unprivileged() {}
+fn warmup_prefix_directories(source: &PathBuf, destination: &PathBuf) -> io::Result<()> {
+    for entry in WalkDir::new(source).into_iter().filter_map(|e| e.ok()) {
+        if !entry.file_type().is_dir() {
+            continue;
+        }
+
+        let relative_path = entry.path().strip_prefix(source).unwrap();
+        let target_path = destination.join(relative_path);
+
+        if let Err(err) = fs::create_dir_all(&target_path) {
+            error!(target_path = ?target_path, err = ?err, "failed to create");
+        }
+    }
+
+    Ok(())
+}
+
+#[instrument]
+fn warmup_prefix_registry(
+    source: &PathBuf,
+    destination: &PathBuf,
+    user: &String,
+) -> io::Result<()> {
+    let important_files = vec!["system.reg", "user.reg", "userdef.reg", ".update-timestamp"];
+
+    for file in important_files {
+        let src_path = source.join(file);
+        let dst_path = destination.join(file);
+
+        if !(src_path.try_exists()? && !dst_path.try_exists()?) {
+            continue;
+        }
+
+        let content = fs::read_to_string(&src_path)?;
+        let modified_content = content.replace("nixbld", user);
+
+        fs::write(&dst_path, modified_content)?;
+
+        let mut perms = fs::metadata(&dst_path)?.permissions();
+        let current_mode = perms.mode();
+
+        // set write bit
+        perms.set_mode(current_mode | S_IWUSR);
+        fs::set_permissions(&dst_path, perms)?;
+    }
+
+    Ok(())
+}
+
+#[instrument()]
+fn wineboot_update(wine_prefix: &PathBuf, wineboot: &PathBuf) -> anyhow::Result<()> {
+    let wineboot_update = cmd!(wineboot, "--update")
+        .env("WINEPREFIX", wine_prefix)
+        .env("WINEDEBUG", "-all,fixme-all")
+        .stderr_to_stdout()
+        .reader()?;
+
+    let lines = BufReader::new(wineboot_update).lines();
+
+    for line in lines {
+        let line = line?;
+        info!("{line}");
+    }
+
+    Ok(())
+}
 
 #[instrument(skip(paths))]
-fn mount_privileged(paths: &Paths) {
+fn execute(paths: &Paths, command: &String, arguments: &Vec<String>) -> anyhow::Result<()> {
+    let user = std::env::var("USER")?;
+
+    info!(user = ?user);
+
+    let _ = warmup_prefix_directories(paths.lower, &paths.upper);
+    let _ = warmup_prefix_registry(paths.lower, &paths.upper, &user);
+
+    wineboot_update(&paths.wine_prefix, &paths.wineboot)?;
+
+    info!("finished warming & wineboot");
+
+    let affinity_command = cmd(
+        command,
+        arguments
+            .iter()
+            .map(|arg| arg.replace("WINEPREFIX", &paths.wine_prefix.display().to_string())),
+    )
+    .env("WINEPREFIX", paths.wine_prefix.clone())
+    .env("WINEDEBUG", "-all,fixme-all")
+    .stderr_to_stdout()
+    .reader()?;
+
+    let lines = BufReader::new(affinity_command).lines();
+
+    for line in lines {
+        let line = line?;
+        println!("{line}");
+    }
+
+    Ok(())
+}
+
+#[instrument]
+fn run_unprivileged() {
+    // execute(paths);
+}
+
+#[instrument(skip(paths))]
+fn cleanup_privileged(paths: &Paths) {
+    let _ = umount(&paths.wine_prefix)
+        .inspect_err(|err| error!(error = ?err, "failed to unmount wine_prefix"));
+    let _ = fs::remove_dir(&paths.wine_prefix)
+        .inspect_err(|err| error!(error = ?err, "failed to remove wine_prefix"));
+}
+
+#[instrument(skip_all)]
+fn mount_privileged(paths: &Paths, command: &String, arguments: &Vec<String>) {
     let options = format!(
         "lowerdir={},upperdir={},workdir={}",
         paths.lower.display(),
@@ -72,15 +206,11 @@ fn mount_privileged(paths: &Paths) {
         Some(options.as_str()),
     ) {
         Ok(_) => {
-            // launch
-
-            let entries = fs::read_dir(&paths.wine_prefix)
-                .unwrap()
-                .map(|res| res.map(|e| e.path()))
-                .collect::<Result<Vec<_>, std::io::Error>>()
-                .unwrap();
-
-            info!(list = ?entries);
+            if let Err(err) = execute(paths, &command, &arguments) {
+                error!(error = %err, "Running privileged failed.");
+                cleanup_privileged(paths);
+                std::process::exit(1);
+            };
         }
         Err(err) => {
             error!(errorno = %err, "Mount failed.");
@@ -88,27 +218,36 @@ fn mount_privileged(paths: &Paths) {
         }
     }
 
-    let _ = umount(&paths.wine_prefix)
-        .inspect_err(|err| error!(error = ?err, "failed to unmount wine_prefix"));
-    let _ = fs::remove_dir(&paths.wine_prefix)
-        .inspect_err(|err| error!(error = ?err, "failed to remove wine_prefix"));
+    cleanup_privileged(paths);
 }
 
-#[instrument(skip(paths))]
-fn run_privileged(paths: &Paths, uid: u32, gid: u32) {
-    fs::write("/proc/self/setgroups", b"deny\n").unwrap();
+#[instrument(skip_all)]
+fn run_privileged(paths: &Paths, uid: u32, gid: u32, command: &String, arguments: &Vec<String>) {
+    if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
+        error!(error = ?err, "failed to write setgroups");
+        run_unprivileged();
+        return;
+    }
 
-    let uid_map = format!("0 {} 1\n", uid);
-    fs::write("/proc/self/uid_map", uid_map).unwrap();
+    let uid_map = format!("0 {uid} 1\n");
+    if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
+        error!(error = ?err, "failed to write uid_map");
+        run_unprivileged();
+        return;
+    }
 
-    let gid_map = format!("0 {} 1\n", gid);
-    fs::write("/proc/self/gid_map", gid_map).unwrap();
+    let gid_map = format!("0 {gid} 1\n");
+    if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
+        error!(error = ?err, "failed to write gid_map");
+        run_unprivileged();
+        return;
+    }
 
     match unsafe { fork() } {
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
             Ok(WaitStatus::Exited(_, status)) => {
                 if status == MOUNT_FAIL_STATUS {
-                    info!("Falling back on unpriviledged due to failed mount");
+                    info!("Falling back on unprivileged due to failed mount");
                     run_unprivileged();
                 }
             }
@@ -123,11 +262,12 @@ fn run_privileged(paths: &Paths, uid: u32, gid: u32) {
             _ => {}
         },
         Ok(ForkResult::Child) => {
-            mount_privileged(paths);
+            mount_privileged(paths, &command, &arguments);
+            std::process::exit(0);
         }
         Err(err) => {
             error!(errorno = %err, "Fork failed.");
-            info!("Falling back on unpriviledged");
+            info!("Falling back on unprivileged");
             run_unprivileged();
         }
     }
@@ -149,6 +289,7 @@ fn main() {
             .runtime
             .unwrap_or_else(|| std::env::temp_dir())
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
+        wineboot: args.wineboot,
     };
 
     paths
@@ -164,7 +305,7 @@ fn main() {
         unshare(CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID);
 
     match unshare {
-        Ok(()) => run_privileged(&paths, uid, gid),
+        Ok(()) => run_privileged(&paths, uid, gid, &args.command, &args.arguments),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
             run_unprivileged();

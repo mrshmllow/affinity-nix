@@ -7,6 +7,7 @@
     ./common.nix
     ./apl
     ./basePrefix.nix
+    ./runner
   ];
   perSystem =
     {
