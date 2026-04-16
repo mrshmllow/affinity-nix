@@ -8,15 +8,12 @@
     }:
     let
       wineUnstable =
-        (
-          inputs.nixpkgs-wine.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wineWow64Packages.full.override
+        (inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wineWow64Packages.full.override {
+          wineRelease = "unstable";
+        }).overrideAttrs
           {
-            wineRelease = "unstable";
-          }
-        ).overrideAttrs
-          {
-            src = inputs.elemental-wine-source;
-            version = "9.13-part3";
+            src = inputs.wine-source;
+            version = "11.0";
           };
 
       symlink = pkgs.callPackage ./symlink.nix { };

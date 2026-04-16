@@ -5,7 +5,6 @@
       pkgs,
       lib,
       wine-stuff,
-      wineUnwrapped,
       mkInjectPluginLoader,
       ...
     }:
@@ -91,7 +90,6 @@
               export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
               ${lib.getExe wineboot} --update
-              ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
               # by diffing a registry dump we found that you can disable the file association
               # through a registry key.

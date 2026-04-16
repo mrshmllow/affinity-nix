@@ -20,8 +20,8 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     git-hooks.url = "github:cachix/git-hooks.nix";
 
-    elemental-wine-source = {
-      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
+    wine-source = {
+      url = "gitlab:wine/wine?host=gitlab.winehq.org&ref=wine-11.0";
       flake = false;
     };
 

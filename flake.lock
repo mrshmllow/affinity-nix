@@ -16,25 +16,6 @@
         "type": "github"
       }
     },
-    "elemental-wine-source": {
-      "flake": false,
-      "locked": {
-        "host": "gitlab.winehq.org",
-        "lastModified": 1722747031,
-        "narHash": "sha256-XVhz9p2kgFBoJ376vg8OaFXxcMEjAe9AK1hk0I1rb1Q=",
-        "owner": "ElementalWarrior",
-        "repo": "wine",
-        "rev": "a7c9b19e1a26cf49c63a7c19189a3e2bbe2c6ac2",
-        "type": "gitlab"
-      },
-      "original": {
-        "host": "gitlab.winehq.org",
-        "owner": "ElementalWarrior",
-        "ref": "affinity-photo3-wine9.13-part3",
-        "repo": "wine",
-        "type": "gitlab"
-      }
-    },
     "flake-compat": {
       "locked": {
         "lastModified": 1751685974,
@@ -238,7 +219,6 @@
     "root": {
       "inputs": {
         "corefonts": "corefonts",
-        "elemental-wine-source": "elemental-wine-source",
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
@@ -246,7 +226,8 @@
         "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
         "plugin-loader-src": "plugin-loader-src",
-        "treefmt-nix": "treefmt-nix"
+        "treefmt-nix": "treefmt-nix",
+        "wine-source": "wine-source"
       }
     },
     "treefmt-nix": {
@@ -265,6 +246,25 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "wine-source": {
+      "flake": false,
+      "locked": {
+        "host": "gitlab.winehq.org",
+        "lastModified": 1768319767,
+        "narHash": "sha256-3jJ2paulqgMLyLR8g5bxwJuuusAMZSrnw+X+nFhYt+c=",
+        "owner": "wine",
+        "repo": "wine",
+        "rev": "db11d0fe6a169c457e23d007e20404643d067aa8",
+        "type": "gitlab"
+      },
+      "original": {
+        "host": "gitlab.winehq.org",
+        "owner": "wine",
+        "ref": "wine-11.0",
+        "repo": "wine",
+        "type": "gitlab"
       }
     }
   },
