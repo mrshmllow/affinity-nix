@@ -23,8 +23,6 @@
               "win11"
             ];
 
-            type = if v3 then "v3" else "v2";
-
             inherit (wine-stuff)
               wine
               wineboot
@@ -197,10 +195,6 @@
 
             layer_4 = pkgs.runCommand "base-prefix-4" { } ''
               set -x -e
-
-              ${lib.strings.toShellVars {
-                inherit type;
-              }}
 
               mkdir -p $out
               cp -a ${layer_3}/. $out

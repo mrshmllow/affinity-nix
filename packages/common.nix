@@ -29,7 +29,6 @@
             set -x -e
             ${lib.strings.toShellVars {
               inherit type;
-              tricksInstalled = 0;
               apps = [
                 "Photo"
                 "Designer"
