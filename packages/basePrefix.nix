@@ -5,7 +5,6 @@
       pkgs,
       lib,
       wine-stuff,
-      wineUnwrapped,
       mkInjectPluginLoader,
       ...
     }:
