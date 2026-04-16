@@ -5,6 +5,7 @@
       lib,
       mkOverlayfsRunner,
       wine-stuff,
+      mkGraphicalCheck,
       ...
     }:
     let
@@ -15,14 +16,12 @@
             wine
             ;
 
-          # pkg = mkOverlayfsRunner name ''
-          #   ${lib.getExe (mkGraphicalCheck name)} || exit 1
-          #   ${lib.getExe wine} "$WINEPREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe" "$@"
-          # '';
-
-          pkg =
-            mkOverlayfsRunner "v3" wine
-              ''"WINEPREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe"'';
+          pkg = mkOverlayfsRunner {
+            name = lib.toLower name;
+            package = wine;
+            args = ''"WINEPREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe"'';
+            pre_run = lib.getExe (mkGraphicalCheck name);
+          };
 
           desktop = pkgs.callPackage ./desktopItems.nix {
             ${lib.toLower name} = pkg;

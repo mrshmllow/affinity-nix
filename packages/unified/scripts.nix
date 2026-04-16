@@ -42,19 +42,47 @@ rec {
               ;;
           wine)
               shift
-              exec ${lib.getExe (mkOverlayfsRunner type wine "")} "$@"
+              exec ${
+                lib.getExe (mkOverlayfsRunner {
+                  name = type;
+                  package = wine;
+                  args = "";
+                  pre_run = null;
+                })
+              } "$@"
               ;;
           winetricks)
               shift
-              exec ${lib.getExe (mkOverlayfsRunner type winetricks "")} "$@"
+              exec ${
+                lib.getExe (mkOverlayfsRunner {
+                  name = type;
+                  package = winetricks;
+                  args = "";
+                  pre_run = null;
+                })
+              } "$@"
               ;;
           wineboot)
               shift
-              exec ${lib.getExe (mkOverlayfsRunner type wineboot "")} "$@"
+              exec ${
+                lib.getExe (mkOverlayfsRunner {
+                  name = type;
+                  package = wineboot;
+                  args = "";
+                  pre_run = null;
+                })
+              } "$@"
               ;;
           wineserver)
               shift
-              exec ${lib.getExe (mkOverlayfsRunner type wineserver "")} "$@"
+              exec ${
+                lib.getExe (mkOverlayfsRunner {
+                  name = type;
+                  package = wineserver;
+                  args = "";
+                  pre_run = null;
+                })
+              } "$@"
               ;;
           *)
               exec ${lib.getExe apps.${lib.toLower name}} "$@"

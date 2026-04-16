@@ -83,6 +83,8 @@
             check = mkCheck (name == "v3");
           in
           pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
+            ${stdShellArgs}
+
             FIFO=$(mktemp -u)
 
             mkfifo "$FIFO"
@@ -107,7 +109,12 @@
           '';
 
         mkOverlayfsRunner =
-          name: package: args:
+          {
+            name,
+            package,
+            args,
+            pre_run,
+          }:
           let
             prefixBase = mkPrefixBase (name == "v3");
 
@@ -117,8 +124,19 @@
             set -x
             ${stdShellArgs}
 
+            verbose="true"
+
+            if [ "$1" != "--verbose" ]; then
+                verbose="false"
+            else
+                shift
+            fi
+
             ${lib.getExe self'.packages.runner} \
-                --lower="${prefixBase}" \
+                --lower="${prefixBase}" ${
+                  lib.optionalString (!(builtins.isNull pre_run)) "--pre-run ${pre_run}"
+                } \
+                --verbose=$verbose \
                 --wineboot="${lib.getExe wineboot}" ${lib.optionalString (name == "v3") "--v3"} \
                 --command="${lib.getExe package}" -- ${args} "$@"
           '';
