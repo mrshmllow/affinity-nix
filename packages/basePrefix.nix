@@ -90,6 +90,9 @@
               export WINETRICKS_UPDATE_CHECK=0
               export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
+              mkdir -p /tmp/cache
+              export XDG_CACHE_HOME="/tmp/cache"
+
               ${lib.getExe wineboot} --update
               ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
@@ -126,6 +129,9 @@
                   cp -a ${layer_1}/. $out
                   chmod -R +w $out
                   export WINEPREFIX="$out"
+
+                  mkdir -p /tmp/cache
+                  export XDG_CACHE_HOME="/tmp/cache"
 
                   ${lib.getExe wine} winecfg -v win7
                   xvfb-run ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
