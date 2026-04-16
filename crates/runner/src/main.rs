@@ -79,11 +79,7 @@ fn init_tracing() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 }
 
-fn make_env(
-    expression: duct::Expression,
-    wine_prefix: &Path,
-    verbose: bool,
-) -> duct::Expression {
+fn make_env(expression: duct::Expression, wine_prefix: &Path, verbose: bool) -> duct::Expression {
     let expression = expression.env("WINEPREFIX", wine_prefix.display().to_string());
 
     if verbose {
