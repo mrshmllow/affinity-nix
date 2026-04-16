@@ -177,12 +177,14 @@
                   export WINETRICKS_UPDATE_CHECK=0
                   export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
+                  export WINEDEBUG=-all
+                  export WINEESYNC=0
+                  export WINEFSYNC=0
+
                   cp -R ${winetricksCache}/* /tmp/cache/winetricks
                   cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
 
-                  for verb in "${"\${verbs[@]}"}"; do
-                      xvfb-run ${lib.getExe winetricks} -q -f "$verb"
-                  done
+                  xvfb-run ${lib.getExe winetricks} -q -f "''${verbs[@]}"
 
                   ${lib.getExe wineserver} -w
                 '';
