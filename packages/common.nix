@@ -138,6 +138,7 @@
                 } \
                 --verbose=$verbose \
                 --wineboot="${lib.getExe wineboot}" ${lib.optionalString (name == "v3") "--v3"} \
+                --fuse-overlayfs="${lib.getExe pkgs.fuse-overlayfs}" \
                 --command="${lib.getExe package}" -- ${args} "$@"
           '';
       };
