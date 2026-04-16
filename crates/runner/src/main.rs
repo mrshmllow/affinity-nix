@@ -262,7 +262,7 @@ fn execute(
             }
         }
         None => {
-            error!("pre_run child is still running in some way.");
+            error!("application process is still running in some way.");
         }
     }
 
