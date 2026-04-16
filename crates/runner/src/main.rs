@@ -2,10 +2,10 @@ use std::{
     fs,
     io::{self, BufRead, BufReader},
     os::unix::fs::PermissionsExt,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use duct::cmd;
 use nix::{
     libc::{self, S_IWUSR},
@@ -35,6 +35,9 @@ struct Args {
     #[arg(long)]
     wineboot: PathBuf,
 
+    #[arg(long)]
+    pre_run: Option<PathBuf>,
+
     /// binary to execute once checking & mounting is complete
     #[arg(long)]
     command: String,
@@ -42,6 +45,10 @@ struct Args {
     /// arguments to executed command
     #[arg(last = true)]
     arguments: Vec<String>,
+
+    /// set WINEDEBUG
+    #[arg(long, action = ArgAction::Set)]
+    verbose: bool,
 }
 
 #[derive(Debug)]
@@ -70,6 +77,20 @@ fn init_tracing() {
         .finish();
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+}
+
+fn make_env(
+    expression: duct::Expression,
+    wine_prefix: &Path,
+    verbose: bool,
+) -> duct::Expression {
+    let expression = expression.env("WINEPREFIX", wine_prefix.display().to_string());
+
+    if verbose {
+        return expression;
+    }
+
+    expression.env("WINEDEBUG", "-all,fixme-all".to_string())
 }
 
 #[instrument]
@@ -102,7 +123,7 @@ fn warmup_prefix_registry(
         let src_path = source.join(file);
         let dst_path = destination.join(file);
 
-        if !(src_path.try_exists()? && !dst_path.try_exists()?) {
+        if !src_path.try_exists()? || dst_path.try_exists()? {
             continue;
         }
 
@@ -122,53 +143,131 @@ fn warmup_prefix_registry(
     Ok(())
 }
 
-#[instrument()]
-fn wineboot_update(wine_prefix: &PathBuf, wineboot: &PathBuf) -> anyhow::Result<()> {
-    let wineboot_update = cmd!(wineboot, "--update")
-        .env("WINEPREFIX", wine_prefix)
-        .env("WINEDEBUG", "-all,fixme-all")
-        .stderr_to_stdout()
-        .reader()?;
+#[instrument(skip_all)]
+fn wineboot_update(wine_prefix: &Path, wineboot: &PathBuf, verbose: bool) -> anyhow::Result<()> {
+    let handle = make_env(
+        cmd!(wineboot, "--update").stderr_to_stdout().unchecked(),
+        wine_prefix,
+        verbose,
+    )
+    .reader()?;
 
-    let lines = BufReader::new(wineboot_update).lines();
+    let lines = BufReader::new(&handle).lines();
 
     for line in lines {
         let line = line?;
         info!("{line}");
     }
 
+    match handle.try_wait()? {
+        Some(output) => {
+            if !output.status.success() {
+                return Err(anyhow::anyhow!(
+                    "wineboot --update failed: {:?}",
+                    output.status
+                ));
+            }
+        }
+        None => {
+            error!("wineboot child is still running in some way.");
+        }
+    }
+
     Ok(())
 }
 
-#[instrument(skip(paths))]
-fn execute(paths: &Paths, command: &String, arguments: &Vec<String>) -> anyhow::Result<()> {
+#[instrument(skip_all)]
+fn pre_run(wine_prefix: &Path, command: &PathBuf, verbose: bool) -> anyhow::Result<()> {
+    let handle = make_env(
+        cmd!(command).stderr_to_stdout().unchecked(),
+        wine_prefix,
+        verbose,
+    )
+    .reader()?;
+
+    let lines = BufReader::new(&handle).lines();
+
+    for line in lines {
+        let line = line?;
+        println!("{line}");
+    }
+
+    match handle.try_wait()? {
+        Some(output) => {
+            if !output.status.success() {
+                return Err(anyhow::anyhow!(
+                    "wine prefix pre-check failed: {:?}",
+                    output.status
+                ));
+            }
+        }
+        None => {
+            error!("pre_run child is still running in some way.");
+        }
+    }
+
+    Ok(())
+}
+
+#[instrument(skip_all)]
+fn execute(
+    paths: &Paths,
+    pre_run_command: &Option<PathBuf>,
+    command: &String,
+    arguments: &[String],
+    verbose: bool,
+) -> anyhow::Result<()> {
     let user = std::env::var("USER")?;
 
     info!(user = ?user);
 
     let _ = warmup_prefix_directories(paths.lower, &paths.upper);
     let _ = warmup_prefix_registry(paths.lower, &paths.upper, &user);
-
-    wineboot_update(&paths.wine_prefix, &paths.wineboot)?;
+    wineboot_update(&paths.wine_prefix, &paths.wineboot, verbose)?;
 
     info!("finished warming & wineboot");
 
-    let affinity_command = cmd(
-        command,
-        arguments
-            .iter()
-            .map(|arg| arg.replace("WINEPREFIX", &paths.wine_prefix.display().to_string())),
+    if let Some(pre_run_command) = pre_run_command {
+        pre_run(&paths.wine_prefix, pre_run_command, verbose)?;
+
+        info!("finished pre-check");
+    }
+
+    let application_handle = make_env(
+        cmd(
+            command,
+            arguments
+                .iter()
+                .map(|arg| arg.replace("WINEPREFIX", &paths.wine_prefix.display().to_string())),
+        )
+        .stderr_to_stdout()
+        .unchecked(),
+        &paths.wine_prefix,
+        verbose,
     )
-    .env("WINEPREFIX", paths.wine_prefix.clone())
-    .env("WINEDEBUG", "-all,fixme-all")
-    .stderr_to_stdout()
     .reader()?;
 
-    let lines = BufReader::new(affinity_command).lines();
+    let lines = BufReader::new(&application_handle).lines();
 
     for line in lines {
         let line = line?;
         println!("{line}");
+    }
+
+    match application_handle.try_wait()? {
+        Some(output) => {
+            if !output.status.success() {
+                return Err(anyhow::anyhow!(
+                    "application process failed: {:?}",
+                    output.status
+                ));
+            } else {
+                info!(status = ?output.status, "application process ended cleanly");
+            }
+        }
+        None => {
+            error!("pre_run child is still running in some way.");
+        }
     }
 
     Ok(())
@@ -188,7 +287,13 @@ fn cleanup_privileged(paths: &Paths) {
 }
 
 #[instrument(skip_all)]
-fn mount_privileged(paths: &Paths, command: &String, arguments: &Vec<String>) {
+fn mount_privileged(
+    paths: &Paths,
+    pre_run_command: &Option<PathBuf>,
+    command: &String,
+    arguments: &[String],
+    verbose: bool,
+) {
     let options = format!(
         "lowerdir={},upperdir={},workdir={}",
         paths.lower.display(),
@@ -206,7 +311,7 @@ fn mount_privileged(paths: &Paths, command: &String, arguments: &Vec<String>) {
         Some(options.as_str()),
     ) {
         Ok(_) => {
-            if let Err(err) = execute(paths, &command, &arguments) {
+            if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
                 error!(error = %err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
@@ -222,7 +327,15 @@ fn mount_privileged(paths: &Paths, command: &String, arguments: &Vec<String>) {
 }
 
 #[instrument(skip_all)]
-fn run_privileged(paths: &Paths, uid: u32, gid: u32, command: &String, arguments: &Vec<String>) {
+fn run_privileged(
+    paths: &Paths,
+    uid: u32,
+    gid: u32,
+    pre_run_command: &Option<PathBuf>,
+    command: &String,
+    arguments: &[String],
+    verbose: bool,
+) {
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
         run_unprivileged();
@@ -245,11 +358,9 @@ fn run_privileged(paths: &Paths, uid: u32, gid: u32, command: &String, arguments
 
     match unsafe { fork() } {
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
-            Ok(WaitStatus::Exited(_, status)) => {
-                if status == MOUNT_FAIL_STATUS {
-                    info!("Falling back on unprivileged due to failed mount");
-                    run_unprivileged();
-                }
+            Ok(WaitStatus::Exited(_, status)) if status == MOUNT_FAIL_STATUS => {
+                info!("Falling back on unprivileged due to failed mount");
+                run_unprivileged();
             }
             Ok(WaitStatus::Signaled(_, signal, _)) => {
                 info!(signal= ?signal, "child was killed by signal");
@@ -262,7 +373,7 @@ fn run_privileged(paths: &Paths, uid: u32, gid: u32, command: &String, arguments
             _ => {}
         },
         Ok(ForkResult::Child) => {
-            mount_privileged(paths, &command, &arguments);
+            mount_privileged(paths, pre_run_command, command, arguments, verbose);
             std::process::exit(0);
         }
         Err(err) => {
@@ -287,7 +398,7 @@ fn main() {
         work: base.state,
         wine_prefix: base
             .runtime
-            .unwrap_or_else(|| std::env::temp_dir())
+            .unwrap_or_else(std::env::temp_dir)
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
         wineboot: args.wineboot,
     };
@@ -305,7 +416,15 @@ fn main() {
         unshare(CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID);
 
     match unshare {
-        Ok(()) => run_privileged(&paths, uid, gid, &args.command, &args.arguments),
+        Ok(()) => run_privileged(
+            &paths,
+            uid,
+            gid,
+            &args.pre_run,
+            &args.command,
+            &args.arguments,
+            args.verbose,
+        ),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
             run_unprivileged();
