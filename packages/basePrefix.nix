@@ -90,12 +90,9 @@
               export WINETRICKS_UPDATE_CHECK=0
               export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
-              echo "affinity-nix: Initializing wine prefix with mono, vulkan renderer and WinMetadata"
-
               ${lib.getExe wineboot} --update
               ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
-              echo "affinity-nix: PROPERLY disabling the menubuilder"
               # by diffing a registry dump we found that you can disable the file association
               # through a registry key.
               ${lib.getExe wine} regedit /S "${(pkgs.writeText "file-association-disable.reg" ''
@@ -129,8 +126,6 @@
                   cp -a ${layer_1}/. $out
                   chmod -R +w $out
                   export WINEPREFIX="$out"
-
-                  echo "affinity-nix: Installing Microsoft WebView2 Runtime"
 
                   ${lib.getExe wine} winecfg -v win7
                   xvfb-run ${lib.getExe wine} "${dependencies}/MicrosoftEdgeWebView2RuntimeInstallerX64.exe" /silent /install
@@ -186,8 +181,6 @@
                   cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
 
                   for verb in "${"\${verbs[@]}"}"; do
-                      echo "winetricks: Installing $verb"
-
                       xvfb-run ${lib.getExe winetricks} -q -f "$verb"
                   done
 
@@ -219,7 +212,6 @@
 
               ${lib.getExe wineserver} -w
 
-              echo "removing nixbld directory"
               rm -rf $WINEPREFIX/drive_c/users/nixbld
             '';
           in
