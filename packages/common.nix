@@ -70,7 +70,7 @@
 
                     ${lib.getExe pkgs.rsync} -v \
                         --ignore-existing \
-                        --chmod=644 \
+                        --chmod=D755,F644 \
                         --recursive \
                         "${inputs.on-linux}/Auxiliary/Settings/$app/2.0/" \
                         "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
