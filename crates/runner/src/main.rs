@@ -1,10 +1,11 @@
 use std::{
-    fs,
+    fs::{self},
     io::{self, BufRead, BufReader},
     os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
 };
 
+use anyhow::Context;
 use clap::{ArgAction, Parser};
 use duct::cmd;
 use nix::{
@@ -35,6 +36,10 @@ struct Args {
     #[arg(long)]
     wineboot: PathBuf,
 
+    /// absolute path to wineserver binary
+    #[arg(long)]
+    wineserver: PathBuf,
+
     /// absolute path to fuse-overlayfs binary
     #[arg(long)]
     fuse_overlayfs: PathBuf,
@@ -63,14 +68,25 @@ struct Paths<'a> {
     wine_prefix: PathBuf,
 
     wineboot: PathBuf,
+    wineserver: PathBuf,
     fuse_overlayfs: PathBuf,
 }
 
 impl<'a> Paths<'a> {
-    fn ensure_created(&self) -> std::io::Result<()> {
-        fs::create_dir_all(&self.upper)?;
-        fs::create_dir_all(&self.work)?;
-        fs::create_dir_all(&self.wine_prefix)?;
+    fn ensure_created(&self) -> anyhow::Result<()> {
+        let work_dir = self.work.join("work");
+
+        if work_dir.is_dir() {
+            let mut perms = fs::metadata(&work_dir)?.permissions();
+            perms.set_mode(0o700);
+            fs::set_permissions(&work_dir, perms).context("set workdir permissions")?;
+
+            fs::remove_dir_all(&work_dir).context("delete workdir")?;
+        }
+
+        fs::create_dir_all(&self.upper).context("creating upper")?;
+        fs::create_dir_all(&self.work).context("creating work")?;
+        fs::create_dir_all(&self.wine_prefix).context("creating wine_prefix")?;
 
         Ok(())
     }
@@ -271,6 +287,41 @@ fn execute(
         }
     }
 
+    let wineserver_wait = make_env(
+        cmd!(
+            &paths.wineserver,
+            "-w"
+        )
+        .stderr_to_stdout()
+        .unchecked(),
+        &paths.wine_prefix,
+        verbose,
+    )
+    .reader()?;
+
+    let lines = BufReader::new(&wineserver_wait).lines();
+
+    for line in lines {
+        let line = line?;
+        info!("{line}");
+    }
+
+    match wineserver_wait.try_wait()? {
+        Some(output) => {
+            if !output.status.success() {
+                return Err(anyhow::anyhow!(
+                    "wineserver -w failed: {:?}",
+                    output.status
+                ));
+            } else {
+                info!(status = ?output.status, "wineserver -w exited cleanly");
+            }
+        }
+        None => {
+            error!("wineserver child is still running in some way.");
+        }
+    }
+
     Ok(())
 }
 
@@ -286,19 +337,33 @@ fn make_mount_options(paths: &Paths) -> String {
 
 #[instrument(skip(paths))]
 fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
-    let fusermount3 = cmd!("bash", "-c", format!("/usr/bin/env fusermount3 -u -z '{}'", paths.wine_prefix.display())).stdout_to_stderr().stderr_capture().run()?;
+    let fusermount3 = cmd!("/usr/bin/env", "fusermount3", "-u", "-z", paths.wine_prefix.display().to_string()).stdout_to_stderr().stderr_capture().run();
 
-    if !fusermount3.status.success() {
-        error!(status = %fusermount3.status, stderr = ?fusermount3.stderr, "`fusermount3` failed");
+    let success = match &fusermount3 {
+    Ok(output) => {
+        if output.status.success() {
+            true
+        } else {
+            error!(status = %output.status, stderr = ?output.stderr, "`fusermount3` failed");
+            false
+        }
+    },
+    Err(err) => {
+        error!(error = %err, "`fusermount3` failed");
+        false
+    }};
 
-        let fusermount = cmd!("bash", "-c", format!("/usr/bin/env fusermount -u -z '{}'", paths.wine_prefix.display())).stdout_to_stderr().stderr_capture().run()?;
+    if !success {
+        let fusermount = cmd!("/usr/bin/env", "fusermount", "-u", "-z", paths.wine_prefix.display().to_string()).stdout_to_stderr().stderr_capture().run()?;
 
         if !fusermount.status.success() {
-            error!(status = %fusermount3.status, stderr = ?String::from_utf8_lossy(&fusermount.stderr), "`fusermount2` failed");
+            error!(status = %fusermount.status, stderr = ?String::from_utf8_lossy(&fusermount.stderr), "`fusermount2` failed");
 
-            return Err(anyhow::anyhow!("both `fusermount3` & `fusermount` failed! fusermount2: {:?}, {:?}", fusermount.status, String::from_utf8_lossy(&fusermount.stderr)));
+            return Err(anyhow::anyhow!("both `fusermount3` & `fusermount` failed! fusermount2: {:?}", String::from_utf8_lossy(&fusermount.stderr)));
         }
     }
+
+    info!("unmounted fuse cleanly");
 
     let _ = fs::remove_dir(&paths.wine_prefix)
         .inspect_err(|err| error!(error = ?err, "failed to remove wine_prefix"));
@@ -339,9 +404,11 @@ fn run_unprivileged(
 
     if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
         error!(error = %err, "Running with fuse failed.");
-        cleanup_fuse(paths)?;
+        let _ = cleanup_fuse(paths);
         return Err(anyhow::anyhow!("failed to run application with `fuse-overlayfs`: {:?}", err));
     };
+
+    cleanup_fuse(paths)?;
 
     Ok(())
 }
@@ -421,6 +488,9 @@ fn run_privileged(
                 info!("Falling back on unprivileged due to failed mount");
                 run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
             }
+            Ok(WaitStatus::Exited(_, status)) => {
+                std::process::exit(status);
+            }
             Ok(WaitStatus::Signaled(_, signal, _)) => {
                 info!(signal= ?signal, "child was killed by signal");
                 std::process::exit(1);
@@ -432,6 +502,10 @@ fn run_privileged(
             _ => {}
         },
         Ok(ForkResult::Child) => {
+            unsafe {
+                // make sure this namespace dies if the parent ends
+                nix::libc::prctl(nix::libc::PR_SET_PDEATHSIG, nix::libc::SIGKILL);
+            }
             mount_privileged(paths, pre_run_command, command, arguments, verbose);
             std::process::exit(0);
         }
@@ -462,12 +536,11 @@ fn main() -> anyhow::Result<()> {
             .unwrap_or_else(std::env::temp_dir)
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
         wineboot: args.wineboot,
+        wineserver: args.wineserver,
         fuse_overlayfs: args.fuse_overlayfs
     };
 
-    paths
-        .ensure_created()
-        .expect("failed to create temp directories");
+    paths.ensure_created().context("setting up tmp directories")?;
 
     info!(paths = ?paths);
 
