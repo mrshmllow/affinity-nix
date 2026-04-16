@@ -35,6 +35,10 @@ struct Args {
     #[arg(long)]
     wineboot: PathBuf,
 
+    /// absolute path to fuse-overlayfs binary
+    #[arg(long)]
+    fuse_overlayfs: PathBuf,
+
     #[arg(long)]
     pre_run: Option<PathBuf>,
 
@@ -59,6 +63,7 @@ struct Paths<'a> {
     wine_prefix: PathBuf,
 
     wineboot: PathBuf,
+    fuse_overlayfs: PathBuf,
 }
 
 impl<'a> Paths<'a> {
@@ -269,9 +274,76 @@ fn execute(
     Ok(())
 }
 
+#[instrument(skip_all, ret)]
+fn make_mount_options(paths: &Paths) -> String {
+    format!(
+        "lowerdir={},upperdir={},workdir={}",
+        paths.lower.display(),
+        paths.upper.display(),
+        paths.work.display()
+    )
+}
+
+#[instrument(skip(paths))]
+fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
+    let fusermount3 = cmd!("bash", "-c", format!("/usr/bin/env fusermount3 -u -z '{}'", paths.wine_prefix.display())).stdout_to_stderr().stderr_capture().run()?;
+
+    if !fusermount3.status.success() {
+        error!(status = %fusermount3.status, stderr = ?fusermount3.stderr, "`fusermount3` failed");
+
+        let fusermount = cmd!("bash", "-c", format!("/usr/bin/env fusermount -u -z '{}'", paths.wine_prefix.display())).stdout_to_stderr().stderr_capture().run()?;
+
+        if !fusermount.status.success() {
+            error!(status = %fusermount3.status, stderr = ?String::from_utf8_lossy(&fusermount.stderr), "`fusermount2` failed");
+
+            return Err(anyhow::anyhow!("both `fusermount3` & `fusermount` failed! fusermount2: {:?}, {:?}", fusermount.status, String::from_utf8_lossy(&fusermount.stderr)));
+        }
+    }
+
+    let _ = fs::remove_dir(&paths.wine_prefix)
+        .inspect_err(|err| error!(error = ?err, "failed to remove wine_prefix"));
+
+    Ok(())
+}
+
 #[instrument]
-fn run_unprivileged() {
-    // execute(paths);
+fn run_unprivileged(
+    paths: &Paths,
+    pre_run_command: &Option<PathBuf>,
+    command: &String,
+    arguments: &[String],
+    verbose: bool,
+) -> anyhow::Result<()> {
+    let handle = cmd!(&paths.fuse_overlayfs, "-o", make_mount_options(paths), &paths.wine_prefix).stderr_to_stdout().unchecked().reader()?;
+
+    let lines = BufReader::new(&handle).lines();
+
+    for line in lines {
+        let line = line?;
+        info!("{line}");
+    }
+
+    match handle.try_wait()? {
+        Some(output) => {
+            if !output.status.success() {
+                return Err(anyhow::anyhow!(
+                    "fuse-overlayfs failed to mount: {:?}",
+                    output.status
+                ));
+            }
+        }
+        None => {
+            error!("fuse-overlayfs child is still running in some way.");
+        }
+    }
+
+    if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
+        error!(error = %err, "Running with fuse failed.");
+        cleanup_fuse(paths)?;
+        return Err(anyhow::anyhow!("failed to run application with `fuse-overlayfs`: {:?}", err));
+    };
+
+    Ok(())
 }
 
 #[instrument(skip(paths))]
@@ -290,21 +362,12 @@ fn mount_privileged(
     arguments: &[String],
     verbose: bool,
 ) {
-    let options = format!(
-        "lowerdir={},upperdir={},workdir={}",
-        paths.lower.display(),
-        paths.upper.display(),
-        paths.work.display()
-    );
-
-    info!(mount_options = ?options);
-
     match mount(
         Some("overlay"),
         &paths.wine_prefix,
         Some("overlay"),
         MsFlags::empty(),
-        Some(options.as_str()),
+        Some(make_mount_options(paths).as_str()),
     ) {
         Ok(_) => {
             if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
@@ -331,32 +394,32 @@ fn run_privileged(
     command: &String,
     arguments: &[String],
     verbose: bool,
-) {
+) -> anyhow::Result<()> {
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
-        run_unprivileged();
-        return;
+        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        return Ok(());
     }
 
     let uid_map = format!("0 {uid} 1\n");
     if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
         error!(error = ?err, "failed to write uid_map");
-        run_unprivileged();
-        return;
+        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        return Ok(());
     }
 
     let gid_map = format!("0 {gid} 1\n");
     if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
         error!(error = ?err, "failed to write gid_map");
-        run_unprivileged();
-        return;
+        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        return Ok(());
     }
 
     match unsafe { fork() } {
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
             Ok(WaitStatus::Exited(_, status)) if status == MOUNT_FAIL_STATUS => {
                 info!("Falling back on unprivileged due to failed mount");
-                run_unprivileged();
+                run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
             }
             Ok(WaitStatus::Signaled(_, signal, _)) => {
                 info!(signal= ?signal, "child was killed by signal");
@@ -375,12 +438,14 @@ fn run_privileged(
         Err(err) => {
             error!(errorno = %err, "Fork failed.");
             info!("Falling back on unprivileged");
-            run_unprivileged();
+            run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
         }
     }
+
+    Ok(())
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     init_tracing();
 
     let args = Args::parse();
@@ -397,6 +462,7 @@ fn main() {
             .unwrap_or_else(std::env::temp_dir)
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
         wineboot: args.wineboot,
+        fuse_overlayfs: args.fuse_overlayfs
     };
 
     paths
@@ -423,7 +489,9 @@ fn main() {
         ),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
-            run_unprivileged();
+            run_unprivileged(&paths, &args.pre_run, &args.command, &args.arguments, args.verbose)?;
+
+            Ok(())
         }
     }
 }
