@@ -29,6 +29,7 @@
       runner = craneLib.buildPackage (
         commonArgs
         // {
+          inherit cargoArtifacts;
           pname = "runner";
           cargoExtraArgs = "-p runner";
           src = fileSetForCrate ../../crates/runner;
