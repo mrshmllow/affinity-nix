@@ -140,6 +140,8 @@
                 --wineboot="${lib.getExe wineboot}" ${lib.optionalString (name == "v3") "--v3"} \
                 --wineserver="${lib.getExe wineserver}" \
                 --fuse-overlayfs="${lib.getExe pkgs.fuse-overlayfs}" \
+                --gnutar="${lib.getExe pkgs.gnutar}" \
+                --zenity="${lib.getExe pkgs.zenity}" \
                 --command="${lib.getExe package}" -- ${args} "$@"
           '';
       };
