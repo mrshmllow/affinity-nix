@@ -391,7 +391,7 @@ fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn run_unprivileged(
     paths: &Paths,
     binaries: &Binaries,
