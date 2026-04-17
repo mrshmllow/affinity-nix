@@ -543,10 +543,10 @@ fn main() -> anyhow::Result<()> {
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
     };
 
+    info!(paths = ?paths);
+
     paths.ensure_created().context("setting up tmp directories")?;
     migrate::migrate(&paths, &args.binaries).context("migrating to new overlayfs runner")?;
-
-    info!(paths = ?paths);
 
     let uid = unsafe { libc::getuid() };
     let gid = unsafe { libc::getgid() };
