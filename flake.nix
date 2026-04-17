@@ -2,8 +2,6 @@
   description = "An attempt at packaging affinity photo for nix";
 
   inputs = {
-    # a known working revision of nixpkgs for wine. somewhat tracked by #63
-    nixpkgs-wine.url = "github:nixos/nixpkgs/6df24922a1400241dae323af55f30e4318a6ca65";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     on-linux = {
