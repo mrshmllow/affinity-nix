@@ -31,25 +31,6 @@
         "type": "github"
       }
     },
-    "elemental-wine-source": {
-      "flake": false,
-      "locked": {
-        "host": "gitlab.winehq.org",
-        "lastModified": 1762569511,
-        "narHash": "sha256-3mJtnOUqQPRou52tWHlSfHuxqSDs3dXminZLwAX6/VE=",
-        "owner": "ElementalWarrior",
-        "repo": "wine",
-        "rev": "8d61f4c37350575f06d073b4fa999e6200be11d6",
-        "type": "gitlab"
-      },
-      "original": {
-        "host": "gitlab.winehq.org",
-        "owner": "ElementalWarrior",
-        "ref": "wine-10.18-winmd",
-        "repo": "wine",
-        "type": "gitlab"
-      }
-    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -275,7 +256,6 @@
       "inputs": {
         "corefonts": "corefonts",
         "crane": "crane",
-        "elemental-wine-source": "elemental-wine-source",
         "fenix": "fenix",
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts",
@@ -284,7 +264,8 @@
         "nixpkgs-wine": "nixpkgs-wine",
         "on-linux": "on-linux",
         "plugin-loader-src": "plugin-loader-src",
-        "treefmt-nix": "treefmt-nix"
+        "treefmt-nix": "treefmt-nix",
+        "wine-source": "wine-source"
       }
     },
     "rust-analyzer-src": {
@@ -320,6 +301,25 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "wine-source": {
+      "flake": false,
+      "locked": {
+        "host": "gitlab.winehq.org",
+        "lastModified": 1743026552,
+        "narHash": "sha256-Xx7Dn42tMEQiYG8LKBFK3JFt2QqWEdc2yu/+4sFuZ0U=",
+        "owner": "wine",
+        "repo": "wine",
+        "rev": "29ac0c67ba129216328b600f642baaae353acbe8",
+        "type": "gitlab"
+      },
+      "original": {
+        "host": "gitlab.winehq.org",
+        "owner": "wine",
+        "repo": "wine",
+        "rev": "29ac0c67ba129216328b600f642baaae353acbe8",
+        "type": "gitlab"
       }
     }
   },

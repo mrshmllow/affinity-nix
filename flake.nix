@@ -20,8 +20,8 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     git-hooks.url = "github:cachix/git-hooks.nix";
 
-    elemental-wine-source = {
-      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=wine-10.18-winmd";
+    wine-source = {
+      url = "gitlab:wine/wine?host=gitlab.winehq.org&ref=29ac0c67ba129216328b600f642baaae353acbe8";
       flake = false;
     };
 
