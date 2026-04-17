@@ -23,7 +23,11 @@
           v3:
           let
             type = if v3 then "v3" else "v2";
-            latestRevision = "9";
+            latestRevision = "10";
+
+            registry-patches = pkgs.callPackage ./registry-patches.nix { };
+
+            inherit (wine-stuff) wine;
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e
@@ -39,7 +43,9 @@
             function setup {
                 local prefixRevision="$1"
 
-                # no upgrade migrations currently exist
+                if [ $prefixRevision -lt 10 ]; then
+                    ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
+                fi
 
                 echo "${latestRevision}" > $WINEPREFIX/.revision
             }

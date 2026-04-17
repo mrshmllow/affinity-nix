@@ -35,6 +35,7 @@
             installers = import ./sources.nix pkgs;
 
             dependencies = pkgs.callPackage ./dependencies.nix { };
+            registry-patches = pkgs.callPackage ./registry-patches.nix { };
 
             winetricksCache = pkgs.linkFarm "winetricks-cache" [
               {
@@ -80,6 +81,12 @@
                 };
               }
             ];
+
+            vkd3d = pkgs.fetchzip {
+              url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0b/vkd3d-proton-3.0b.tar.zst";
+              nativeBuildInputs = [ pkgs.zstd ];
+              hash = "sha256-/W5gmh+RrvCytjIL0CkqOepygrz2wHn2pJf0VAGj1Hs=";
+            };
 
             layer_1 = pkgs.runCommand "base-prefix-1" { } ''
               set -x -e
@@ -200,6 +207,11 @@
               cp -a ${layer_3}/. $out
               chmod -R +w $out
               export WINEPREFIX="$out"
+
+              cp ${vkd3d}/x64/d3d12.dll "$WINEPREFIX/drive_c/windows/system32"
+              cp ${vkd3d}/x64/d3d12core.dll "$WINEPREFIX/drive_c/windows/system32"
+
+              ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
 
               ${lib.optionalString v3 ''
                 ${lib.getExe pkgs.lndir} ${installers.v3} "$WINEPREFIX/drive_c/Program Files/"
