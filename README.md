@@ -178,3 +178,13 @@ Or `winecfg`:
 ```sh
 $ affinity-v3 wine winecfg
 ```
+
+## Driver Support
+
+I (the maintainer of this repo) currently only have an AMD GPU to test OpenCL support for Affinity. On AMD, I can attest that
+
+```nix
+hardware.amdgpu.opencl.enable = true;
+```
+
+appears to be all that is required to get OpenCL to work with affinity-nix.
