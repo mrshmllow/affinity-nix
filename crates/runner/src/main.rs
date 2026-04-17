@@ -56,7 +56,7 @@ struct Arguments {
 #[derive(Debug, Args)]
 struct Binaries {
     #[arg(long)]
-    wineboot: PathBuf,
+    wine: PathBuf,
     #[arg(long)]
     wineserver: PathBuf,
     #[arg(long)]
@@ -164,9 +164,11 @@ fn warmup_prefix_registry(
 }
 
 #[instrument(skip_all)]
-fn wineboot_update(wine_prefix: &Path, wineboot: &PathBuf, verbose: bool) -> anyhow::Result<()> {
+fn wineboot_update(wine_prefix: &Path, wine: &PathBuf, verbose: bool) -> anyhow::Result<()> {
     let handle = make_env(
-        cmd!(wineboot, "--update").stderr_to_stdout().unchecked(),
+        cmd!(wine, "wineboot", "--update")
+            .stderr_to_stdout()
+            .unchecked(),
         wine_prefix,
         verbose,
     )
@@ -183,7 +185,7 @@ fn wineboot_update(wine_prefix: &Path, wineboot: &PathBuf, verbose: bool) -> any
         Some(output) => {
             if !output.status.success() {
                 return Err(anyhow::anyhow!(
-                    "wineboot --update failed: {:?}",
+                    "wine wineboot --update failed: {:?}",
                     output.status
                 ));
             }
@@ -244,7 +246,7 @@ fn execute(
 
     let _ = warmup_prefix_directories(paths.lower, &paths.upper);
     let _ = warmup_prefix_registry(paths.lower, &paths.upper, &user);
-    wineboot_update(&paths.wine_prefix, &binaries.wineboot, verbose)?;
+    wineboot_update(&paths.wine_prefix, &binaries.wine, verbose)?;
 
     info!("finished warming & wineboot");
 

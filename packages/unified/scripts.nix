@@ -13,7 +13,6 @@ rec {
     let
       inherit (wine-stuff)
         wine
-        wineboot
         winetricks
         wineserver
         ;
@@ -67,11 +66,11 @@ rec {
               exec ${
                 lib.getExe (mkOverlayfsRunner {
                   name = type;
-                  package = wineboot;
+                  package = wine;
                   args = "";
                   pre_run = null;
                 })
-              } "$@"
+              } wineboot "$@"
               ;;
           wineserver)
               shift

@@ -16,7 +16,7 @@
         ).overrideAttrs
           {
             src = inputs.elemental-wine-source;
-            version = "9.13-part3";
+            version = "10.18-winmd";
           };
 
       symlink = pkgs.callPackage ./symlink.nix { };
@@ -35,7 +35,6 @@
         wine-stuff = {
           wine = wrapWithPrefix wineUnwrapped "wine";
           winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
-          wineboot = wrapWithPrefix wineUnwrapped "wineboot";
           wineserver = wrapWithPrefix wineUnwrapped "wineserver";
         };
       };

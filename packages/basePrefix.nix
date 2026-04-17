@@ -5,7 +5,6 @@
       pkgs,
       lib,
       wine-stuff,
-      wineUnwrapped,
       mkInjectPluginLoader,
       ...
     }:
@@ -25,7 +24,6 @@
 
             inherit (wine-stuff)
               wine
-              wineboot
               winetricks
               wineserver
               ;
@@ -90,6 +88,7 @@
 
             layer_1 = pkgs.runCommand "base-prefix-1" { } ''
               set -x -e
+
               mkdir -p $out
               export WINEPREFIX="$out"
               export WINETRICKS_UPDATE_CHECK=0
@@ -98,8 +97,7 @@
               mkdir -p /tmp/cache
               export XDG_CACHE_HOME="/tmp/cache"
 
-              ${lib.getExe wineboot} --update
-              ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
+              ${lib.getExe wine} wineboot --update
 
               # by diffing a registry dump we found that you can disable the file association
               # through a registry key.
@@ -114,8 +112,6 @@
               '').outPath}"
 
               ${lib.getExe winetricks} renderer=vulkan
-
-              install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
 
               ${lib.getExe wineserver} -w
             '';
@@ -212,17 +208,27 @@
               cp ${vkd3d}/x64/d3d12core.dll "$WINEPREFIX/drive_c/windows/system32"
 
               ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
+              ${lib.getExe wine} regedit /S "${registry-patches.two-wintypes}"
 
               ${lib.optionalString v3 ''
                 ${lib.getExe pkgs.lndir} ${installers.v3} "$WINEPREFIX/drive_c/Program Files/"
                 ${lib.getExe injectPluginLoader}
+
+                cp ${dependencies}/wintypes.dll "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
               ''}
 
               ${lib.optionalString (!v3) ''
                 ${lib.getExe pkgs.lndir} ${installers.photo} "$WINEPREFIX/drive_c/Program Files/"
                 ${lib.getExe pkgs.lndir} ${installers.designer} "$WINEPREFIX/drive_c/Program Files/"
                 ${lib.getExe pkgs.lndir} ${installers.publisher} "$WINEPREFIX/drive_c/Program Files/"
+
+                cp ${dependencies}/wintypes.dll "$WINEPREFIX/drive_c/Program Files/Affinity/Photo 2"
+                cp ${dependencies}/wintypes.dll "$WINEPREFIX/drive_c/Program Files/Affinity/Designer 2"
+                cp ${dependencies}/wintypes.dll "$WINEPREFIX/drive_c/Program Files/Affinity/Publisher 2"
               ''}
+
+              mkdir -p "$WINEPREFIX/drive_c/windows/system32/WinMetadata/"
+              cp ${dependencies}/Windows.winmd "$WINEPREFIX/drive_c/windows/system32/WinMetadata/"
 
               ${lib.getExe wineserver} -w
 
