@@ -25,22 +25,24 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
         return Ok(());
     }
 
-    let revision: u32 = fs::read_to_string(revision_file).context("reading revision file")?.parse().context("parsing revision to u32")?;
+    let revision: u32 = fs::read_to_string(revision_file).context("reading revision file")?.split_whitespace().collect::<String>().parse().context("parsing revision to u32")?;
+
+    info!(revision = %revision);
 
     if revision >= 9 {
         info!("revision more than or equal to 9, skipping backup");
         return Ok(());
     }
 
-    let backup_path = Path::new(&env::var("HOME").context("finding $HOME var")?).join("affinity-nix-backup.tar.zst");
+    let backup_path = Path::new(&env::var("HOME").context("finding $HOME var")?).join(format!("affinity-nix-backup-{}.tar.zst", std::process::id()));
 
-    let question = cmd!(&binaries.zenity, "--question", "--width", "480", format!("-text=\"{}\"", make_message(&backup_path))).run()?;
+    let question = cmd!(&binaries.zenity, "--question", "--width", "480", format!("--text={}", make_message(&backup_path))).unchecked().run()?;
 
     if !question.status.success() {
         return Err(anyhow::anyhow!("User refused to migrate, we cannot continue or there may be data loss."));
     }
 
-    let tar_handle = cmd!(&binaries.gnutar, "--zstd", "-cpf", backup_path, &paths.upper).stdout_to_stderr().stderr_capture().reader()?;
+    let tar_handle = cmd!(&binaries.gnutar, "--zstd", "-cvpf", backup_path, &paths.upper).stdout_to_stderr().stderr_capture().reader()?;
 
     let lines = BufReader::new(&tar_handle).lines();
 
@@ -57,6 +59,8 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
                     output.status
                 ));
             }
+
+            info!(status = %output.status, "tar ended cleanly");
         }
         None => {
             error!("tar child is still running in some way.");
