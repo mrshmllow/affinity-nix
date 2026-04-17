@@ -6,7 +6,7 @@ use std::{
 };
 
 use anyhow::Context;
-use clap::{ArgAction, Parser};
+use clap::{ArgAction, Args, Parser};
 use duct::cmd;
 use nix::{
     libc::{self, S_IWUSR},
@@ -20,29 +20,22 @@ use tracing_subscriber::FmtSubscriber;
 use walkdir::WalkDir;
 use xdgdir::BaseDir;
 
+mod migrate;
+
 const MOUNT_FAIL_STATUS: i32 = 111;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-struct Args {
+struct Arguments {
     /// absolute path to overlayfs under directory for wineprefix
     #[arg(long)]
     lower: PathBuf,
 
+    #[command(flatten)]
+    binaries: Binaries,
+
     #[arg(long)]
     v3: bool,
-
-    /// absolute path to wineboot binary
-    #[arg(long)]
-    wineboot: PathBuf,
-
-    /// absolute path to wineserver binary
-    #[arg(long)]
-    wineserver: PathBuf,
-
-    /// absolute path to fuse-overlayfs binary
-    #[arg(long)]
-    fuse_overlayfs: PathBuf,
 
     #[arg(long)]
     pre_run: Option<PathBuf>,
@@ -60,16 +53,26 @@ struct Args {
     verbose: bool,
 }
 
+#[derive(Debug, Args)]
+struct Binaries {
+    #[arg(long)]
+    wineboot: PathBuf,
+    #[arg(long)]
+    wineserver: PathBuf,
+    #[arg(long)]
+    fuse_overlayfs: PathBuf,
+    #[arg(long)]
+    gnutar: PathBuf,
+    #[arg(long)]
+    zenity: PathBuf,
+}
+
 #[derive(Debug)]
 struct Paths<'a> {
     lower: &'a PathBuf,
     upper: PathBuf,
     work: PathBuf,
     wine_prefix: PathBuf,
-
-    wineboot: PathBuf,
-    wineserver: PathBuf,
-    fuse_overlayfs: PathBuf,
 }
 
 impl<'a> Paths<'a> {
@@ -229,6 +232,7 @@ fn pre_run(wine_prefix: &Path, command: &PathBuf, verbose: bool) -> anyhow::Resu
 #[instrument(skip_all)]
 fn execute(
     paths: &Paths,
+    binaries: &Binaries,
     pre_run_command: &Option<PathBuf>,
     command: &String,
     arguments: &[String],
@@ -240,7 +244,7 @@ fn execute(
 
     let _ = warmup_prefix_directories(paths.lower, &paths.upper);
     let _ = warmup_prefix_registry(paths.lower, &paths.upper, &user);
-    wineboot_update(&paths.wine_prefix, &paths.wineboot, verbose)?;
+    wineboot_update(&paths.wine_prefix, &binaries.wineboot, verbose)?;
 
     info!("finished warming & wineboot");
 
@@ -289,7 +293,7 @@ fn execute(
 
     let wineserver_wait = make_env(
         cmd!(
-            &paths.wineserver,
+            &binaries.wineserver,
             "-w"
         )
         .stderr_to_stdout()
@@ -374,12 +378,13 @@ fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
 #[instrument]
 fn run_unprivileged(
     paths: &Paths,
+    binaries: &Binaries,
     pre_run_command: &Option<PathBuf>,
     command: &String,
     arguments: &[String],
     verbose: bool,
 ) -> anyhow::Result<()> {
-    let handle = cmd!(&paths.fuse_overlayfs, "-o", make_mount_options(paths), &paths.wine_prefix).stderr_to_stdout().unchecked().reader()?;
+    let handle = cmd!(&binaries.fuse_overlayfs, "-o", make_mount_options(paths), &paths.wine_prefix).stderr_to_stdout().unchecked().reader()?;
 
     let lines = BufReader::new(&handle).lines();
 
@@ -402,7 +407,7 @@ fn run_unprivileged(
         }
     }
 
-    if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
+    if let Err(err) = execute(paths, binaries, pre_run_command, command, arguments, verbose) {
         error!(error = %err, "Running with fuse failed.");
         let _ = cleanup_fuse(paths);
         return Err(anyhow::anyhow!("failed to run application with `fuse-overlayfs`: {:?}", err));
@@ -424,6 +429,7 @@ fn cleanup_privileged(paths: &Paths) {
 #[instrument(skip_all)]
 fn mount_privileged(
     paths: &Paths,
+    binaries: &Binaries,
     pre_run_command: &Option<PathBuf>,
     command: &String,
     arguments: &[String],
@@ -437,7 +443,7 @@ fn mount_privileged(
         Some(make_mount_options(paths).as_str()),
     ) {
         Ok(_) => {
-            if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
+            if let Err(err) = execute(paths, binaries, pre_run_command, command, arguments, verbose) {
                 error!(error = %err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
@@ -455,8 +461,8 @@ fn mount_privileged(
 #[instrument(skip_all)]
 fn run_privileged(
     paths: &Paths,
-    uid: u32,
-    gid: u32,
+    binaries: &Binaries,
+    ids: (u32, u32),
     pre_run_command: &Option<PathBuf>,
     command: &String,
     arguments: &[String],
@@ -464,21 +470,21 @@ fn run_privileged(
 ) -> anyhow::Result<()> {
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
         return Ok(());
     }
 
-    let uid_map = format!("0 {uid} 1\n");
+    let uid_map = format!("0 {} 1\n", ids.0);
     if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
         error!(error = ?err, "failed to write uid_map");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
         return Ok(());
     }
 
-    let gid_map = format!("0 {gid} 1\n");
+    let gid_map = format!("0 {} 1\n", ids.1);
     if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
         error!(error = ?err, "failed to write gid_map");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
         return Ok(());
     }
 
@@ -486,7 +492,7 @@ fn run_privileged(
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
             Ok(WaitStatus::Exited(_, status)) if status == MOUNT_FAIL_STATUS => {
                 info!("Falling back on unprivileged due to failed mount");
-                run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+                run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
             }
             Ok(WaitStatus::Exited(_, status)) => {
                 std::process::exit(status);
@@ -506,13 +512,13 @@ fn run_privileged(
                 // make sure this namespace dies if the parent ends
                 nix::libc::prctl(nix::libc::PR_SET_PDEATHSIG, nix::libc::SIGKILL);
             }
-            mount_privileged(paths, pre_run_command, command, arguments, verbose);
+            mount_privileged(paths, binaries, pre_run_command, command, arguments, verbose);
             std::process::exit(0);
         }
         Err(err) => {
             error!(errorno = %err, "Fork failed.");
             info!("Falling back on unprivileged");
-            run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+            run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
         }
     }
 
@@ -522,7 +528,7 @@ fn run_privileged(
 fn main() -> anyhow::Result<()> {
     init_tracing();
 
-    let args = Args::parse();
+    let args = Arguments::parse();
 
     let base = BaseDir::new(if args.v3 { "affinity-v3" } else { "affinity" })
         .expect("obtaining xdg basedir failed");
@@ -535,12 +541,10 @@ fn main() -> anyhow::Result<()> {
             .runtime
             .unwrap_or_else(std::env::temp_dir)
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
-        wineboot: args.wineboot,
-        wineserver: args.wineserver,
-        fuse_overlayfs: args.fuse_overlayfs
     };
 
     paths.ensure_created().context("setting up tmp directories")?;
+    migrate::migrate(&paths, &args.binaries).context("migrating to new overlayfs runner")?;
 
     info!(paths = ?paths);
 
@@ -553,8 +557,8 @@ fn main() -> anyhow::Result<()> {
     match unshare {
         Ok(()) => run_privileged(
             &paths,
-            uid,
-            gid,
+            &args.binaries,
+            (uid, gid),
             &args.pre_run,
             &args.command,
             &args.arguments,
@@ -562,7 +566,7 @@ fn main() -> anyhow::Result<()> {
         ),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
-            run_unprivileged(&paths, &args.pre_run, &args.command, &args.arguments, args.verbose)?;
+            run_unprivileged(&paths, &args.binaries, &args.pre_run, &args.command, &args.arguments, args.verbose)?;
 
             Ok(())
         }
