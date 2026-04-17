@@ -22,7 +22,6 @@ let
 
   inherit (wine-packages)
     wine
-    wineUnwrapped
     winetricks
     wineserver
     ;
@@ -84,7 +83,6 @@ let
     export XDG_CACHE_HOME="/tmp/cache"
 
     ${lib.getExe wine} wineboot --update
-    ${lib.getExe wine} msiexec /i "${wineUnwrapped}/share/wine/mono/wine-mono-9.3.0-x86.msi"
 
     # by diffing a registry dump we found that you can disable the file association
     # through a registry key.
