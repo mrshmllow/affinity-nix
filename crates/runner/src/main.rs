@@ -633,6 +633,26 @@ fn main() -> anyhow::Result<()> {
         .context("setting up tmp directories")?;
     migrate::migrate(&paths, &args.binaries).context("migrating to new overlayfs runner")?;
 
+    if std::env::var("APPIMAGE").is_ok() {
+        info!("Running within an appimage! Skipping directly to a privileged mount.");
+
+        let uid = unsafe { libc::getuid() };
+        let gid = unsafe { libc::getgid() };
+
+        info!(uid = uid, gid = gid);
+
+        mount_privileged(
+            &paths,
+            &args.binaries,
+            &args.pre_run,
+            &args.command,
+            &args.arguments,
+            args.verbose,
+        );
+
+        return Ok(());
+    }
+
     let uid = unsafe { libc::getuid() };
     let gid = unsafe { libc::getgid() };
 
