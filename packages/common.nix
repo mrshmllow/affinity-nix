@@ -23,7 +23,7 @@
           v3:
           let
             type = if v3 then "v3" else "v2";
-            latestRevision = "10";
+            latestRevision = "11";
 
             registry-patches = pkgs.callPackage ./registry-patches.nix { };
 
@@ -45,6 +45,10 @@
 
                 if [ $prefixRevision -lt 10 ]; then
                     ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
+                fi
+
+                if [ $prefixRevision -lt 10 ]; then
+                    ${lib.getExe wine} regedit /S "${registry-patches.two-wintypes}"
                 fi
 
                 echo "${latestRevision}" > $WINEPREFIX/.revision
@@ -124,7 +128,10 @@
           let
             prefixBase = mkPrefixBase (name == "v3");
 
-            inherit (wine-stuff) wineboot wineserver;
+            inherit (wine-stuff)
+              wine
+              wineserver
+              ;
           in
           pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
             set -x
@@ -143,7 +150,7 @@
                   lib.optionalString (!(builtins.isNull pre_run)) "--pre-run ${pre_run}"
                 } \
                 --verbose=$verbose \
-                --wineboot="${lib.getExe wineboot}" ${lib.optionalString (name == "v3") "--v3"} \
+                --wine="${lib.getExe wine}" ${lib.optionalString (name == "v3") "--v3"} \
                 --wineserver="${lib.getExe wineserver}" \
                 --fuse-overlayfs="${lib.getExe pkgs.fuse-overlayfs}" \
                 --gnutar="${lib.getExe pkgs.gnutar}" \
