@@ -1,4 +1,8 @@
-use std::{env, fs, io::{BufRead, BufReader}, path::Path};
+use std::{
+    env, fs,
+    io::{BufRead, BufReader},
+    path::Path,
+};
 
 use anyhow::Context;
 use duct::cmd;
@@ -13,7 +17,10 @@ Affinity and it's dependencies are no longer installed directly, reducing startu
 To migrate, we need to delete the old installation. Your registry files and user data won't be touched.";
 
 fn make_message(backup_location: &Path) -> String {
-    format!("{MESSAGE} A backup will be created in at {}. Is that OK?", backup_location.display())
+    format!(
+        "{MESSAGE} A backup will be created in at {}. Is that OK?",
+        backup_location.display()
+    )
 }
 
 #[instrument(skip_all)]
@@ -25,7 +32,12 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
         return Ok(());
     }
 
-    let revision: u32 = fs::read_to_string(revision_file).context("reading revision file")?.split_whitespace().collect::<String>().parse().context("parsing revision to u32")?;
+    let revision: u32 = fs::read_to_string(revision_file)
+        .context("reading revision file")?
+        .split_whitespace()
+        .collect::<String>()
+        .parse()
+        .context("parsing revision to u32")?;
 
     info!(revision = %revision);
 
@@ -34,15 +46,37 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
         return Ok(());
     }
 
-    let backup_path = Path::new(&env::var("HOME").context("finding $HOME var")?).join(format!("affinity-nix-backup-{}.tar.zst", std::process::id()));
+    let backup_path = Path::new(&env::var("HOME").context("finding $HOME var")?).join(format!(
+        "affinity-nix-backup-{}.tar.zst",
+        std::process::id()
+    ));
 
-    let question = cmd!(&binaries.zenity, "--question", "--width", "480", format!("--text={}", make_message(&backup_path))).unchecked().run()?;
+    let question = cmd!(
+        &binaries.zenity,
+        "--question",
+        "--width",
+        "480",
+        format!("--text={}", make_message(&backup_path))
+    )
+    .unchecked()
+    .run()?;
 
     if !question.status.success() {
-        return Err(anyhow::anyhow!("User refused to migrate, we cannot continue or there may be data loss."));
+        return Err(anyhow::anyhow!(
+            "User refused to migrate, we cannot continue or there may be data loss."
+        ));
     }
 
-    let tar_handle = cmd!(&binaries.gnutar, "--zstd", "-cvpf", backup_path, &paths.upper).stdout_to_stderr().stderr_capture().reader()?;
+    let tar_handle = cmd!(
+        &binaries.gnutar,
+        "--zstd",
+        "-cvpf",
+        backup_path,
+        &paths.upper
+    )
+    .stdout_to_stderr()
+    .stderr_capture()
+    .reader()?;
 
     let lines = BufReader::new(&tar_handle).lines();
 
@@ -84,12 +118,15 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
 
         info!(path = ?path, "removing entry");
 
-        if entry.file_type().context("reading entry filetype")?.is_dir() {
+        if entry
+            .file_type()
+            .context("reading entry filetype")?
+            .is_dir()
+        {
             fs::remove_dir_all(&path)
-                    .with_context(|| format!("removing directory {}", path.display()))?;
+                .with_context(|| format!("removing directory {}", path.display()))?;
         } else {
-            fs::remove_file(&path)
-                    .with_context(|| format!("removing file {}", path.display()))?;
+            fs::remove_file(&path).with_context(|| format!("removing file {}", path.display()))?;
         }
     }
 

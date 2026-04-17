@@ -292,12 +292,9 @@ fn execute(
     }
 
     let wineserver_wait = make_env(
-        cmd!(
-            &binaries.wineserver,
-            "-w"
-        )
-        .stderr_to_stdout()
-        .unchecked(),
+        cmd!(&binaries.wineserver, "-w")
+            .stderr_to_stdout()
+            .unchecked(),
         &paths.wine_prefix,
         verbose,
     )
@@ -313,10 +310,7 @@ fn execute(
     match wineserver_wait.try_wait()? {
         Some(output) => {
             if !output.status.success() {
-                return Err(anyhow::anyhow!(
-                    "wineserver -w failed: {:?}",
-                    output.status
-                ));
+                return Err(anyhow::anyhow!("wineserver -w failed: {:?}", output.status));
             } else {
                 info!(status = ?output.status, "wineserver -w exited cleanly");
             }
@@ -341,29 +335,51 @@ fn make_mount_options(paths: &Paths) -> String {
 
 #[instrument(skip(paths))]
 fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
-    let fusermount3 = cmd!("/usr/bin/env", "fusermount3", "-u", "-z", paths.wine_prefix.display().to_string()).stdout_to_stderr().stderr_capture().run();
+    let fusermount3 = cmd!(
+        "/usr/bin/env",
+        "fusermount3",
+        "-u",
+        "-z",
+        paths.wine_prefix.display().to_string()
+    )
+    .stdout_to_stderr()
+    .stderr_capture()
+    .run();
 
     let success = match &fusermount3 {
-    Ok(output) => {
-        if output.status.success() {
-            true
-        } else {
-            error!(status = %output.status, stderr = ?output.stderr, "`fusermount3` failed");
+        Ok(output) => {
+            if output.status.success() {
+                true
+            } else {
+                error!(status = %output.status, stderr = ?output.stderr, "`fusermount3` failed");
+                false
+            }
+        }
+        Err(err) => {
+            error!(error = %err, "`fusermount3` failed");
             false
         }
-    },
-    Err(err) => {
-        error!(error = %err, "`fusermount3` failed");
-        false
-    }};
+    };
 
     if !success {
-        let fusermount = cmd!("/usr/bin/env", "fusermount", "-u", "-z", paths.wine_prefix.display().to_string()).stdout_to_stderr().stderr_capture().run()?;
+        let fusermount = cmd!(
+            "/usr/bin/env",
+            "fusermount",
+            "-u",
+            "-z",
+            paths.wine_prefix.display().to_string()
+        )
+        .stdout_to_stderr()
+        .stderr_capture()
+        .run()?;
 
         if !fusermount.status.success() {
             error!(status = %fusermount.status, stderr = ?String::from_utf8_lossy(&fusermount.stderr), "`fusermount2` failed");
 
-            return Err(anyhow::anyhow!("both `fusermount3` & `fusermount` failed! fusermount2: {:?}", String::from_utf8_lossy(&fusermount.stderr)));
+            return Err(anyhow::anyhow!(
+                "both `fusermount3` & `fusermount` failed! fusermount2: {:?}",
+                String::from_utf8_lossy(&fusermount.stderr)
+            ));
         }
     }
 
@@ -384,7 +400,15 @@ fn run_unprivileged(
     arguments: &[String],
     verbose: bool,
 ) -> anyhow::Result<()> {
-    let handle = cmd!(&binaries.fuse_overlayfs, "-o", make_mount_options(paths), &paths.wine_prefix).stderr_to_stdout().unchecked().reader()?;
+    let handle = cmd!(
+        &binaries.fuse_overlayfs,
+        "-o",
+        make_mount_options(paths),
+        &paths.wine_prefix
+    )
+    .stderr_to_stdout()
+    .unchecked()
+    .reader()?;
 
     let lines = BufReader::new(&handle).lines();
 
@@ -407,10 +431,20 @@ fn run_unprivileged(
         }
     }
 
-    if let Err(err) = execute(paths, binaries, pre_run_command, command, arguments, verbose) {
+    if let Err(err) = execute(
+        paths,
+        binaries,
+        pre_run_command,
+        command,
+        arguments,
+        verbose,
+    ) {
         error!(error = %err, "Running with fuse failed.");
         let _ = cleanup_fuse(paths);
-        return Err(anyhow::anyhow!("failed to run application with `fuse-overlayfs`: {:?}", err));
+        return Err(anyhow::anyhow!(
+            "failed to run application with `fuse-overlayfs`: {:?}",
+            err
+        ));
     };
 
     cleanup_fuse(paths)?;
@@ -443,7 +477,14 @@ fn mount_privileged(
         Some(make_mount_options(paths).as_str()),
     ) {
         Ok(_) => {
-            if let Err(err) = execute(paths, binaries, pre_run_command, command, arguments, verbose) {
+            if let Err(err) = execute(
+                paths,
+                binaries,
+                pre_run_command,
+                command,
+                arguments,
+                verbose,
+            ) {
                 error!(error = %err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
@@ -470,21 +511,42 @@ fn run_privileged(
 ) -> anyhow::Result<()> {
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
-        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(
+            paths,
+            binaries,
+            pre_run_command,
+            command,
+            arguments,
+            verbose,
+        )?;
         return Ok(());
     }
 
     let uid_map = format!("0 {} 1\n", ids.0);
     if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
         error!(error = ?err, "failed to write uid_map");
-        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(
+            paths,
+            binaries,
+            pre_run_command,
+            command,
+            arguments,
+            verbose,
+        )?;
         return Ok(());
     }
 
     let gid_map = format!("0 {} 1\n", ids.1);
     if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
         error!(error = ?err, "failed to write gid_map");
-        run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
+        run_unprivileged(
+            paths,
+            binaries,
+            pre_run_command,
+            command,
+            arguments,
+            verbose,
+        )?;
         return Ok(());
     }
 
@@ -492,7 +554,14 @@ fn run_privileged(
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
             Ok(WaitStatus::Exited(_, status)) if status == MOUNT_FAIL_STATUS => {
                 info!("Falling back on unprivileged due to failed mount");
-                run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
+                run_unprivileged(
+                    paths,
+                    binaries,
+                    pre_run_command,
+                    command,
+                    arguments,
+                    verbose,
+                )?;
             }
             Ok(WaitStatus::Exited(_, status)) => {
                 std::process::exit(status);
@@ -512,13 +581,27 @@ fn run_privileged(
                 // make sure this namespace dies if the parent ends
                 nix::libc::prctl(nix::libc::PR_SET_PDEATHSIG, nix::libc::SIGKILL);
             }
-            mount_privileged(paths, binaries, pre_run_command, command, arguments, verbose);
+            mount_privileged(
+                paths,
+                binaries,
+                pre_run_command,
+                command,
+                arguments,
+                verbose,
+            );
             std::process::exit(0);
         }
         Err(err) => {
             error!(errorno = %err, "Fork failed.");
             info!("Falling back on unprivileged");
-            run_unprivileged(paths, binaries, pre_run_command, command, arguments, verbose)?;
+            run_unprivileged(
+                paths,
+                binaries,
+                pre_run_command,
+                command,
+                arguments,
+                verbose,
+            )?;
         }
     }
 
@@ -545,7 +628,9 @@ fn main() -> anyhow::Result<()> {
 
     info!(paths = ?paths);
 
-    paths.ensure_created().context("setting up tmp directories")?;
+    paths
+        .ensure_created()
+        .context("setting up tmp directories")?;
     migrate::migrate(&paths, &args.binaries).context("migrating to new overlayfs runner")?;
 
     let uid = unsafe { libc::getuid() };
@@ -566,7 +651,14 @@ fn main() -> anyhow::Result<()> {
         ),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
-            run_unprivileged(&paths, &args.binaries, &args.pre_run, &args.command, &args.arguments, args.verbose)?;
+            run_unprivileged(
+                &paths,
+                &args.binaries,
+                &args.pre_run,
+                &args.command,
+                &args.arguments,
+                args.verbose,
+            )?;
 
             Ok(())
         }
