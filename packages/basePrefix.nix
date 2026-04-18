@@ -15,6 +15,7 @@
           v3:
           let
             verbs = [
+              "dxvk2071"
               "tahoma"
               "vcrun2022"
               "dotnet20"
@@ -78,6 +79,13 @@
                 path = pkgs.fetchurl {
                   url = "https://web.archive.org/web/20060509045320/https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe";
                   hash = "sha256-fqhtyo7q7cqkoXNwVHyizqnptndJcrjgPSyx+w55hmk=";
+                };
+              }
+              {
+                name = "dxvk2071/dxvk-2.7.1.tar.gz";
+                path = pkgs.fetchurl {
+                  url = "https://github.com/doitsujin/dxvk/releases/download/v2.7.1/dxvk-2.7.1.tar.gz";
+                  hash = "sha256-2Fznx59X7NdlqqG55wB8uHXm/en20zHfeZvOc9UTzoc=";
                 };
               }
             ];
