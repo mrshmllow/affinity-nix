@@ -3,7 +3,6 @@
     {
       pkgs,
       mkOverlayfsRunner,
-      wine-stuff,
       lib,
       mkGraphicalCheck,
       self',

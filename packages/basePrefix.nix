@@ -17,7 +17,7 @@
         # are used. this seperation exists for build caching, as the affinity sources
         # are marked unfree.
         mkPrefixPreAffinity =
-          v3:
+          _v3:
           let
             verbs = [
               "tahoma"
