@@ -97,11 +97,10 @@ rec {
       pkg = createScript (lib.toLower name) name;
 
       # last version of affinity v2 released
-      version = if (name == "v3") then null else "2.6.5";
+      lastV2Version = "2.6.5";
     in
     pkgs.symlinkJoin {
-      name = "Affinity ${name}${lib.optionalString (version != null) " ${version}"}}";
-      pname = "affinity-${lib.toLower name}";
+      name = "affinity ${if (name == "v3") then "v3" else "${name} ${lastV2Version}"}";
       # order is important because the script and the app both use the same
       # binary name...
       paths = [
@@ -109,7 +108,7 @@ rec {
         app
       ];
       meta = {
-        description = "Affinity ${name}${lib.optionalString (version != null) " ${version}"}";
+        description = "Affinity ${if (name == "v3") then "v3" else "${name} ${lastV2Version}"}";
         homepage = "https://affinity.serif.com/";
         platforms = [ "x86_64-linux" ];
         mainProgram = "affinity-${lib.toLower name}";
