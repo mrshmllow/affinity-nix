@@ -15,6 +15,7 @@
     let
       scripts = pkgs.callPackage ./scripts.nix {
         inherit stdShellArgs wine-stuff mkOverlayfsRunner;
+        inherit (self'.packages) wine;
         apps = {
           photo = directPhoto;
           designer = directDesigner;

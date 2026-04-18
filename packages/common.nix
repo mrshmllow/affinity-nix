@@ -27,7 +27,7 @@
 
             registry-patches = pkgs.callPackage ./registry-patches.nix { };
 
-            inherit (wine-stuff) wine;
+            inherit (self'.packages) wine;
           in
           pkgs.writeShellScriptBin "check" ''
             set -x -e

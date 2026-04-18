@@ -4,17 +4,15 @@
       pkgs,
       lib,
       mkOverlayfsRunner,
-      wine-stuff,
       mkGraphicalCheck,
+      self',
       ...
     }:
     let
       createPackage =
         name:
         let
-          inherit (wine-stuff)
-            wine
-            ;
+          inherit (self'.packages) wine;
 
           pkg = mkOverlayfsRunner {
             name = lib.toLower name;
@@ -38,14 +36,7 @@
             desktop.${lib.toLower name}
             icon-package
           ];
-          meta = {
-            description = "Affinity ${name} 2";
-            homepage = "https://affinity.serif.com/";
-            # license = lib.licenses.unfree;
-            # maintainers = with pkgs.lib.maintainers; [marshmallow];
-            platforms = [ "x86_64-linux" ];
-            mainProgram = "af-overlay-${lib.toLower name}";
-          };
+          meta.mainProgram = "af-overlay-${lib.toLower name}";
         };
     in
     {

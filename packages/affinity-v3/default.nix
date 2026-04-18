@@ -6,12 +6,13 @@
       wine-stuff,
       lib,
       mkGraphicalCheck,
+      self',
       ...
     }:
     let
       createPackage =
         let
-          inherit (wine-stuff)
+          inherit (self'.packages)
             wine
             ;
 
@@ -37,14 +38,7 @@
             desktop.affinity-v3
             icon-package
           ];
-          meta = {
-            description = "Affinity v3";
-            homepage = "https://www.affinity.studio";
-            # license = lib.licenses.unfree;
-            # maintainers = with pkgs.lib.maintainers; [marshmallow];
-            platforms = [ "x86_64-linux" ];
-            mainProgram = "af-overlay-v3";
-          };
+          meta.mainProgram = "af-overlay-v3";
         };
     in
     {
