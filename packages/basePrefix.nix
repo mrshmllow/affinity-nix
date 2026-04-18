@@ -7,7 +7,6 @@
       wine-stuff,
       wineUnwrapped,
       mkInjectPluginLoader,
-      mkPrefixPreAffinity,
       self',
       ...
     }:
@@ -198,7 +197,7 @@
         mkPrefixBase =
           v3:
           let
-            layer_3 = mkPrefixPreAffinity;
+            layer_3 = self'.packages.base-prefix-pre-affinity;
 
             injectPluginLoader = mkInjectPluginLoader;
             installers = pkgs.callPackage ./sources.nix { };
