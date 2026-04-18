@@ -123,8 +123,6 @@
           }:
           let
             prefixBase = mkPrefixBase (name == "v3");
-
-            inherit (wine-stuff) wineboot wineserver;
           in
           pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
             set -x
@@ -142,12 +140,7 @@
                 --lower="${prefixBase}" ${
                   lib.optionalString (!(builtins.isNull pre_run)) "--pre-run ${pre_run}"
                 } \
-                --verbose=$verbose \
-                --wineboot="${lib.getExe wineboot}" ${lib.optionalString (name == "v3") "--v3"} \
-                --wineserver="${lib.getExe wineserver}" \
-                --fuse-overlayfs="${lib.getExe pkgs.fuse-overlayfs}" \
-                --gnutar="${lib.getExe pkgs.gnutar}" \
-                --zenity="${lib.getExe pkgs.zenity}" \
+                --verbose=$verbose ${lib.optionalString (name == "v3") "--v3"} \
                 --command="${lib.getExe package}" -- ${args} "$@"
           '';
       };

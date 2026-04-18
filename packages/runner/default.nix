@@ -2,7 +2,10 @@
   perSystem =
     {
       lib,
+      pkgs,
       craneLib,
+      wine-stuff,
+      runnerEnv,
       ...
     }:
     let
@@ -11,6 +14,8 @@
       commonArgs = {
         inherit src;
         strictDeps = true;
+
+        env = runnerEnv;
       };
 
       cargoArtifacts = craneLib.buildDepsOnly commonArgs;
@@ -38,6 +43,16 @@
       );
     in
     {
+      _module.args = {
+        runnerEnv = {
+          WINEBOOT = lib.getExe wine-stuff.wineboot;
+          WINESERVER = lib.getExe wine-stuff.wineserver;
+          FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
+          GNUTAR = lib.getExe pkgs.gnutar;
+          ZENITY = lib.getExe pkgs.zenity;
+        };
+      };
+
       checks = {
         inherit runner;
 

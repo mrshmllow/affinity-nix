@@ -5,6 +5,7 @@
       lib,
       craneLib,
       pkgs,
+      runnerEnv,
       ...
     }:
     let
@@ -20,6 +21,8 @@
 
           pkgs.uv
         ];
+
+        env = runnerEnv;
 
         shellHook = builtins.concatStringsSep "\n" [
           cfg.installationScript

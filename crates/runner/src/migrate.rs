@@ -8,7 +8,7 @@ use anyhow::Context;
 use duct::cmd;
 use tracing::{error, info, instrument};
 
-use crate::{Binaries, Paths};
+use crate::{GNUTAR, Paths, ZENITY};
 
 const MESSAGE: &str = "There have been upgrades to affinity-nix!
 
@@ -24,7 +24,7 @@ fn make_message(backup_location: &Path) -> String {
 }
 
 #[instrument(skip_all)]
-pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> {
+pub(crate) fn migrate(paths: &Paths) -> anyhow::Result<()> {
     let revision_file = paths.upper.join(".revision");
 
     if !revision_file.is_file() {
@@ -52,7 +52,7 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
     ));
 
     let question = cmd!(
-        &binaries.zenity,
+        ZENITY,
         "--question",
         "--width",
         "480",
@@ -68,7 +68,7 @@ pub(crate) fn migrate(paths: &Paths, binaries: &Binaries) -> anyhow::Result<()> 
     }
 
     let tar_handle = cmd!(
-        &binaries.gnutar,
+        GNUTAR,
         "--zstd",
         "-cvpf",
         backup_path,
