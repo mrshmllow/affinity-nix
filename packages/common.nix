@@ -5,7 +5,6 @@
       pkgs,
       lib,
       stdShellArgs,
-      wine-stuff,
       self',
       mkPrefixBase,
       ...

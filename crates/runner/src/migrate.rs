@@ -67,16 +67,10 @@ pub(crate) fn migrate(paths: &Paths) -> anyhow::Result<()> {
         ));
     }
 
-    let tar_handle = cmd!(
-        GNUTAR,
-        "--zstd",
-        "-cvpf",
-        backup_path,
-        &paths.upper
-    )
-    .stdout_to_stderr()
-    .stderr_capture()
-    .reader()?;
+    let tar_handle = cmd!(GNUTAR, "--zstd", "-cvpf", backup_path, &paths.upper)
+        .stdout_to_stderr()
+        .stderr_capture()
+        .reader()?;
 
     let lines = BufReader::new(&tar_handle).lines();
 
