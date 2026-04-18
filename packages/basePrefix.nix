@@ -13,7 +13,7 @@
     }:
     {
       # this function builds the prefix right up until the affinity sources
-      # are used. this seperation exists for build caching, as the affinity sources
+      # are used. this separation exists for build caching, as the affinity sources
       # should never be exposed to a cache
       packages.base-prefix-pre-affinity =
         let
