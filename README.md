@@ -47,9 +47,6 @@ graph LR;
 
 ## Usage Instructions
 
-> [!IMPORTANT]
-> You will be graphically prompted to install the application: **Leave the installation path default.**
-
 ### Running Ad-hoc
 
 ```bash
