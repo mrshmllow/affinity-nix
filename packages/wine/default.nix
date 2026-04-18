@@ -29,11 +29,12 @@
       };
     in
     {
+      packages.wine = wrapWithPrefix wineUnwrapped "wine";
+
       _module.args = {
         inherit wineUnwrapped;
 
         wine-stuff = {
-          wine = wrapWithPrefix wineUnwrapped "wine";
           winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
           wineboot = wrapWithPrefix wineUnwrapped "wineboot";
           wineserver = wrapWithPrefix wineUnwrapped "wineserver";

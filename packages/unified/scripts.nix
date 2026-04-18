@@ -6,13 +6,13 @@
   apps,
   stdShellArgs,
   wine-stuff,
+  wine,
 }:
 rec {
   createScript =
     type: name:
     let
       inherit (wine-stuff)
-        wine
         wineboot
         winetricks
         wineserver
@@ -100,7 +100,7 @@ rec {
       lastV2Version = "2.6.5";
     in
     pkgs.symlinkJoin {
-      name = "affinity ${if (name == "v3") then "v3" else "${name} ${lastV2Version}"}";
+      name = "affinity-${if (name == "v3") then "v3" else "${lib.toLower name}-${lastV2Version}"}";
       # order is important because the script and the app both use the same
       # binary name...
       paths = [
@@ -109,6 +109,7 @@ rec {
       ];
       meta = {
         description = "Affinity ${if (name == "v3") then "v3" else "${name} ${lastV2Version}"}";
+        license = lib.licenses.unfree;
         homepage = "https://affinity.serif.com/";
         platforms = [ "x86_64-linux" ];
         mainProgram = "affinity-${lib.toLower name}";

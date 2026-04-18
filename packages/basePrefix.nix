@@ -7,11 +7,16 @@
       wine-stuff,
       wineUnwrapped,
       mkInjectPluginLoader,
+      mkPrefixPreAffinity,
+      self',
       ...
     }:
     {
       _module.args = {
-        mkPrefixBase =
+        # this function builds the prefix right up until the affinity sources
+        # are used. this seperation exists for build caching, as the affinity sources
+        # are marked unfree.
+        mkPrefixPreAffinity =
           v3:
           let
             verbs = [
@@ -23,20 +28,15 @@
               "win11"
             ];
 
+            inherit (self'.packages) wine;
+
             inherit (wine-stuff)
-              wine
               wineboot
               winetricks
               wineserver
               ;
 
-            injectPluginLoader = mkInjectPluginLoader;
-
-            installers = import ./sources.nix pkgs;
-
             dependencies = pkgs.callPackage ./dependencies.nix { };
-            registry-patches = pkgs.callPackage ./registry-patches.nix { };
-
             winetricksCache = pkgs.linkFarm "winetricks-cache" [
               {
                 name = "vcrun2022/vc_redist.x64.exe";
@@ -81,12 +81,6 @@
                 };
               }
             ];
-
-            vkd3d = pkgs.fetchzip {
-              url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0b/vkd3d-proton-3.0b.tar.zst";
-              nativeBuildInputs = [ pkgs.zstd ];
-              hash = "sha256-/W5gmh+RrvCytjIL0CkqOepygrz2wHn2pJf0VAGj1Hs=";
-            };
 
             layer_1 = pkgs.runCommand "base-prefix-1" { } ''
               set -x -e
@@ -199,6 +193,26 @@
 
                   ${lib.getExe wineserver} -w
                 '';
+          in
+          layer_3;
+
+        mkPrefixBase =
+          v3:
+          let
+            layer_3 = mkPrefixPreAffinity v3;
+
+            injectPluginLoader = mkInjectPluginLoader;
+            installers = import ./sources.nix pkgs;
+            registry-patches = pkgs.callPackage ./registry-patches.nix { };
+
+            vkd3d = pkgs.fetchzip {
+              url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0b/vkd3d-proton-3.0b.tar.zst";
+              nativeBuildInputs = [ pkgs.zstd ];
+              hash = "sha256-/W5gmh+RrvCytjIL0CkqOepygrz2wHn2pJf0VAGj1Hs=";
+            };
+
+            inherit (wine-stuff) wineserver;
+            inherit (self'.packages) wine;
 
             layer_4 = pkgs.runCommand "base-prefix-4" { } ''
               set -x -e
