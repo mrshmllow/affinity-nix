@@ -27,7 +27,7 @@ With the release of v3, there has been some changes:
 > [Add garnix as a substituter](https://garnix.io/docs/ci/caching/) to avoid compiling yourself.
 
 > [!NOTE]
-> This repo does not attempt to redistribute affinity archives. Any instance of *caching* redistributed affinity sources should be reported as a bug.
+> This repo does not attempt to redistribute affinity archives. Any instance of caching Canva IP should be reported as a bug.
 
 User preferences are located in `$XDG_DATA_HOME/affinity/` or `$XDG_DATA_HOME/affinity-v3/` falling back to `$HOME/.local/share/affinity/` or `$HOME/.local/share/affinity-v3/`.
 
