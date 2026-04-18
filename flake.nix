@@ -65,10 +65,16 @@
           inputs',
           config,
           pkgs,
+          system,
           ...
         }:
         {
           _module.args = {
+            pkgs = import inputs.nixpkgs {
+              inherit system;
+              config.allowUnfree = true;
+            };
+
             toolchain = inputs'.fenix.packages.complete;
             craneLib = (crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
           };

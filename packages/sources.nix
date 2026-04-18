@@ -1,13 +1,19 @@
-pkgs:
+{
+  pkgs,
+  lib,
+  ...
+}:
 let
   mkExtract =
     source: segment:
-    pkgs.runCommand "extract-${segment}"
+    pkgs.runCommand "affinity-extracted-sources"
       {
         buildInputs = [
           pkgs._7zz
           pkgs.msitools
         ];
+
+        meta.license = lib.licenses.unfree;
       }
       ''
         7zz e ${source} -tpe "${segment}"
