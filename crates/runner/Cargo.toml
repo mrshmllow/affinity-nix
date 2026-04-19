@@ -7,6 +7,7 @@ edition.workspace = true
 anyhow = "1.0.102"
 clap = { version = "4.6.0", features = ["derive"] }
 duct = "1.1.1"
+mutually_exclusive_features = "0.1.0"
 nix = { version = "0.31.2", features = ["sched", "mount"] }
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
@@ -14,4 +15,9 @@ walkdir = "2.5.0"
 xdgdir = "0.8.0"
 
 [features]
+default = ["v3"]
+
 v3 = []
+photo = []
+designer = []
+publisher = []
