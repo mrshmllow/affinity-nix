@@ -3,7 +3,6 @@
     ./wine
     ./affinity
     ./affinity-v3
-    ./unified
     ./common.nix
     ./apl
     ./basePrefix.nix

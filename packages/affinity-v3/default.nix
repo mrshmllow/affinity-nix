@@ -2,25 +2,14 @@
   perSystem =
     {
       pkgs,
-      mkOverlayfsRunner,
       lib,
-      mkGraphicalCheck,
       self',
       ...
     }:
     let
       createPackage =
         let
-          inherit (self'.packages)
-            wine
-            ;
-
-          pkg = mkOverlayfsRunner {
-            name = "v3";
-            package = wine;
-            args = ''"WINEPREFIX/drive_c/Program Files/Affinity/Affinity/AffinityHook.exe"'';
-            pre_run = lib.getExe (mkGraphicalCheck "v3");
-          };
+          pkg = self'.packages.runner;
 
           desktop = pkgs.callPackage ./desktopItems.nix {
             affinity-v3 = pkg;
@@ -37,12 +26,20 @@
             desktop.affinity-v3
             icon-package
           ];
-          meta.mainProgram = "af-overlay-v3";
+          meta = {
+            mainProgram = "affinity-v3";
+
+            description = "Affinity v3";
+            license = lib.licenses.unfree;
+            homepage = "https://affinity.serif.com/";
+            platforms = [ "x86_64-linux" ];
+          };
         };
     in
     {
-      _module.args = {
-        directV3 = createPackage;
+      packages = {
+        v3 = createPackage;
+        default = self'.packages.v3;
       };
     };
 }

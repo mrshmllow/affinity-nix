@@ -3,11 +3,13 @@ use std::{
     io::{self, BufRead, BufReader},
     os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
+    sync::LazyLock,
 };
 
 use anyhow::Context;
-use clap::{ArgAction, Parser};
+use clap::{Parser, Subcommand};
 use duct::cmd;
+use mutually_exclusive_features::exactly_one_of;
 use nix::{
     libc::{self, S_IWUSR},
     mount::{MsFlags, mount, umount},
@@ -22,49 +24,80 @@ use xdgdir::BaseDir;
 
 mod migrate;
 
+exactly_one_of!("v3", "photo", "designer", "publisher");
+
 const MOUNT_FAIL_STATUS: i32 = 111;
 
+pub(crate) const WINE: &str = env!("WINE");
 pub(crate) const WINEBOOT: &str = env!("WINEBOOT");
 pub(crate) const WINESERVER: &str = env!("WINESERVER");
+pub(crate) const WINETRICKS: &str = env!("WINETRICKS");
 pub(crate) const FUSE_OVERLAYFS: &str = env!("FUSE_OVERLAYFS");
 pub(crate) const GNUTAR: &str = env!("GNUTAR");
 pub(crate) const ZENITY: &str = env!("ZENITY");
 
+pub(crate) const CHECK_SCRIPT: &str = env!("CHECK_SCRIPT");
+
+pub(crate) static LOWER_DIR: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("LOWER_DIR")));
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Arguments {
-    /// absolute path to overlayfs under directory for wineprefix
+    /// Make Wine far more verbose.
     #[arg(long)]
-    lower: PathBuf,
-
-    #[arg(long)]
-    v3: bool,
-
-    #[arg(long)]
-    pre_run: Option<PathBuf>,
-
-    /// binary to execute once checking & mounting is complete
-    #[arg(long)]
-    command: String,
-
-    /// arguments to executed command
-    #[arg(last = true)]
-    arguments: Vec<String>,
-
-    /// set WINEDEBUG
-    #[arg(long, action = ArgAction::Set)]
     verbose: bool,
+
+    /// Specified tool to use. If none matches, defaults to the affinity application.
+    #[command(subcommand)]
+    subcommand: Option<Program>,
+
+    /// Arguments for affinity application
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    affinity_arguments: Vec<String>,
+}
+
+#[derive(Subcommand, Debug)]
+enum Program {
+    /// Run wine within sandbox
+    Wine {
+        /// arguments to wine
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        arguments: Vec<String>,
+    },
+    /// Run winetricks within sandbox
+    Winetricks {
+        /// arguments to winetricks
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        arguments: Vec<String>,
+    },
+    /// Run wineboot within sandbox
+    Wineboot {
+        /// arguments to wineboot
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        arguments: Vec<String>,
+    },
+    /// Run wineserver within sandbox
+    Wineserver {
+        /// arguments to wineserver
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        arguments: Vec<String>,
+    },
 }
 
 #[derive(Debug)]
-struct Paths<'a> {
-    lower: &'a PathBuf,
+enum ProgramToExecute {
+    Affinity { arguments: Vec<String> },
+    Other(Program),
+}
+
+#[derive(Debug)]
+struct Paths {
     upper: PathBuf,
     work: PathBuf,
     wine_prefix: PathBuf,
 }
 
-impl<'a> Paths<'a> {
+impl Paths {
     fn ensure_created(&self) -> anyhow::Result<()> {
         let work_dir = self.work.join("work");
 
@@ -103,13 +136,13 @@ fn make_env(expression: duct::Expression, wine_prefix: &Path, verbose: bool) -> 
 }
 
 #[instrument]
-fn warmup_prefix_directories(source: &PathBuf, destination: &PathBuf) -> io::Result<()> {
-    for entry in WalkDir::new(source).into_iter().filter_map(|e| e.ok()) {
+fn warmup_prefix_directories(destination: &PathBuf) -> io::Result<()> {
+    for entry in WalkDir::new(&*LOWER_DIR).into_iter().filter_map(|e| e.ok()) {
         if !entry.file_type().is_dir() {
             continue;
         }
 
-        let relative_path = entry.path().strip_prefix(source).unwrap();
+        let relative_path = entry.path().strip_prefix(&*LOWER_DIR).unwrap();
         let target_path = destination.join(relative_path);
 
         if let Err(err) = fs::create_dir_all(&target_path) {
@@ -121,15 +154,11 @@ fn warmup_prefix_directories(source: &PathBuf, destination: &PathBuf) -> io::Res
 }
 
 #[instrument]
-fn warmup_prefix_registry(
-    source: &PathBuf,
-    destination: &PathBuf,
-    user: &String,
-) -> io::Result<()> {
+fn warmup_prefix_registry(destination: &PathBuf, user: &String) -> io::Result<()> {
     let important_files = vec!["system.reg", "user.reg", "userdef.reg", ".update-timestamp"];
 
     for file in important_files {
-        let src_path = source.join(file);
+        let src_path = LOWER_DIR.join(file);
         let dst_path = destination.join(file);
 
         if !src_path.try_exists()? || dst_path.try_exists()? {
@@ -186,9 +215,9 @@ fn wineboot_update(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
 }
 
 #[instrument(skip_all)]
-fn pre_run(wine_prefix: &Path, command: &PathBuf, verbose: bool) -> anyhow::Result<()> {
+fn pre_run(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
     let handle = make_env(
-        cmd!(command).stderr_to_stdout().unchecked(),
+        cmd!(CHECK_SCRIPT).stderr_to_stdout().unchecked(),
         wine_prefix,
         verbose,
     )
@@ -211,7 +240,7 @@ fn pre_run(wine_prefix: &Path, command: &PathBuf, verbose: bool) -> anyhow::Resu
             }
         }
         None => {
-            error!("pre_run child is still running in some way.");
+            error!("check script child is still running in some way.");
         }
     }
 
@@ -219,38 +248,60 @@ fn pre_run(wine_prefix: &Path, command: &PathBuf, verbose: bool) -> anyhow::Resu
 }
 
 #[instrument(skip_all)]
-fn execute(
-    paths: &Paths,
-    pre_run_command: &Option<PathBuf>,
-    command: &String,
-    arguments: &[String],
-    verbose: bool,
-) -> anyhow::Result<()> {
+fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::Result<()> {
     let user = std::env::var("USER")?;
 
     info!(user = ?user);
 
-    let _ = warmup_prefix_directories(paths.lower, &paths.upper);
-    let _ = warmup_prefix_registry(paths.lower, &paths.upper, &user);
+    if let Err(e) = warmup_prefix_directories(&paths.upper) {
+        error!(error = %e, "warmup prefix directories failed (non-fatal)");
+    };
+    if let Err(e) = warmup_prefix_registry(&paths.upper, &user) {
+        error!(error = %e, "warmup prefix registry failed (non-fatal)");
+    };
     wineboot_update(&paths.wine_prefix, verbose)?;
 
     info!("finished warming & wineboot");
 
-    if let Some(pre_run_command) = pre_run_command {
-        pre_run(&paths.wine_prefix, pre_run_command, verbose)?;
+    pre_run(&paths.wine_prefix, verbose)?;
 
-        info!("finished pre-check");
-    }
+    info!("finished pre-check");
+
+    let application_handle = match program {
+        ProgramToExecute::Affinity { arguments } => {
+            let exe_suffix = if cfg!(feature = "v3") {
+                "Affinity/AffinityHook.exe"
+            } else if cfg!(feature = "photo") {
+                "Photo 2/Photo.exe"
+            } else if cfg!(feature = "publisher") {
+                "Publisher 2/Publisher.exe"
+            } else if cfg!(feature = "designer") {
+                "Designer 2/Designer.exe"
+            } else {
+                unreachable!()
+            };
+
+            let exe_path = format!(
+                "{}/drive_c/Program Files/Affinity/{}",
+                paths.wine_prefix.display(),
+                exe_suffix
+            );
+
+            info!("using exe {exe_path:?}");
+
+            let mut cmd_arguments = vec![exe_path];
+            cmd_arguments.extend(arguments.clone());
+
+            cmd(WINE, cmd_arguments)
+        }
+        ProgramToExecute::Other(Program::Wine { arguments }) => cmd(WINE, arguments),
+        ProgramToExecute::Other(Program::Winetricks { arguments }) => cmd(WINETRICKS, arguments),
+        ProgramToExecute::Other(Program::Wineboot { arguments }) => cmd(WINEBOOT, arguments),
+        ProgramToExecute::Other(Program::Wineserver { arguments }) => cmd(WINESERVER, arguments),
+    };
 
     let application_handle = make_env(
-        cmd(
-            command,
-            arguments
-                .iter()
-                .map(|arg| arg.replace("WINEPREFIX", &paths.wine_prefix.display().to_string())),
-        )
-        .stderr_to_stdout()
-        .unchecked(),
+        application_handle.stderr_to_stdout().unchecked(),
         &paths.wine_prefix,
         verbose,
     )
@@ -313,7 +364,7 @@ fn execute(
 fn make_mount_options(paths: &Paths) -> String {
     format!(
         "lowerdir={},upperdir={},workdir={}",
-        paths.lower.display(),
+        LOWER_DIR.display(),
         paths.upper.display(),
         paths.work.display()
     )
@@ -378,11 +429,9 @@ fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
 }
 
 #[instrument(skip_all)]
-fn run_unprivileged(
+fn mount_run_unprivileged(
     paths: &Paths,
-    pre_run_command: &Option<PathBuf>,
-    command: &String,
-    arguments: &[String],
+    program: &ProgramToExecute,
     verbose: bool,
 ) -> anyhow::Result<()> {
     let handle = cmd!(
@@ -416,7 +465,7 @@ fn run_unprivileged(
         }
     }
 
-    if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
+    if let Err(err) = execute(paths, program, verbose) {
         error!(error = %err, "Running with fuse failed.");
         let _ = cleanup_fuse(paths);
         return Err(anyhow::anyhow!(
@@ -439,13 +488,7 @@ fn cleanup_privileged(paths: &Paths) {
 }
 
 #[instrument(skip_all)]
-fn mount_privileged(
-    paths: &Paths,
-    pre_run_command: &Option<PathBuf>,
-    command: &String,
-    arguments: &[String],
-    verbose: bool,
-) {
+fn mount_execute_privileged(paths: &Paths, program: &ProgramToExecute, verbose: bool) {
     match mount(
         Some("overlay"),
         &paths.wine_prefix,
@@ -454,7 +497,7 @@ fn mount_privileged(
         Some(make_mount_options(paths).as_str()),
     ) {
         Ok(_) => {
-            if let Err(err) = execute(paths, pre_run_command, command, arguments, verbose) {
+            if let Err(err) = execute(paths, program, verbose) {
                 error!(error = %err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
@@ -470,31 +513,29 @@ fn mount_privileged(
 }
 
 #[instrument(skip_all)]
-fn run_privileged(
+fn mount_run_privileged(
     paths: &Paths,
     ids: (u32, u32),
-    pre_run_command: &Option<PathBuf>,
-    command: &String,
-    arguments: &[String],
+    program: &ProgramToExecute,
     verbose: bool,
 ) -> anyhow::Result<()> {
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        mount_run_unprivileged(paths, program, verbose)?;
         return Ok(());
     }
 
     let uid_map = format!("0 {} 1\n", ids.0);
     if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
         error!(error = ?err, "failed to write uid_map");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        mount_run_unprivileged(paths, program, verbose)?;
         return Ok(());
     }
 
     let gid_map = format!("0 {} 1\n", ids.1);
     if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
         error!(error = ?err, "failed to write gid_map");
-        run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+        mount_run_unprivileged(paths, program, verbose)?;
         return Ok(());
     }
 
@@ -502,7 +543,7 @@ fn run_privileged(
         Ok(ForkResult::Parent { child }) => match waitpid(child, None) {
             Ok(WaitStatus::Exited(_, status)) if status == MOUNT_FAIL_STATUS => {
                 info!("Falling back on unprivileged due to failed mount");
-                run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+                mount_run_unprivileged(paths, program, verbose)?;
             }
             Ok(WaitStatus::Exited(_, status)) => {
                 std::process::exit(status);
@@ -522,13 +563,13 @@ fn run_privileged(
                 // make sure this namespace dies if the parent ends
                 nix::libc::prctl(nix::libc::PR_SET_PDEATHSIG, nix::libc::SIGKILL);
             }
-            mount_privileged(paths, pre_run_command, command, arguments, verbose);
+            mount_execute_privileged(paths, program, verbose);
             std::process::exit(0);
         }
         Err(err) => {
             error!(errorno = %err, "Fork failed.");
             info!("Falling back on unprivileged");
-            run_unprivileged(paths, pre_run_command, command, arguments, verbose)?;
+            mount_run_unprivileged(paths, program, verbose)?;
         }
     }
 
@@ -540,11 +581,14 @@ fn main() -> anyhow::Result<()> {
 
     let args = Arguments::parse();
 
-    let base = BaseDir::new(if args.v3 { "affinity-v3" } else { "affinity" })
-        .expect("obtaining xdg basedir failed");
+    let base = BaseDir::new(if cfg!(feature = "v3") {
+        "affinity-v3"
+    } else {
+        "affinity"
+    })
+    .expect("obtaining xdg basedir failed");
 
     let paths = Paths {
-        lower: &args.lower,
         upper: base.data,
         work: base.state,
         wine_prefix: base
@@ -566,24 +610,21 @@ fn main() -> anyhow::Result<()> {
     let unshare =
         unshare(CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID);
 
+    let program = if let Some(subcommand) = args.subcommand {
+        ProgramToExecute::Other(subcommand)
+    } else {
+        ProgramToExecute::Affinity {
+            arguments: args.affinity_arguments,
+        }
+    };
+
+    info!(program = ?program);
+
     match unshare {
-        Ok(()) => run_privileged(
-            &paths,
-            (uid, gid),
-            &args.pre_run,
-            &args.command,
-            &args.arguments,
-            args.verbose,
-        ),
+        Ok(()) => mount_run_privileged(&paths, (uid, gid), &program, args.verbose),
         Err(err) => {
             error!(errorno = %err, "Unshare failed.");
-            run_unprivileged(
-                &paths,
-                &args.pre_run,
-                &args.command,
-                &args.arguments,
-                args.verbose,
-            )?;
+            mount_run_unprivileged(&paths, &program, args.verbose)?;
 
             Ok(())
         }

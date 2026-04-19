@@ -3,8 +3,6 @@
     {
       pkgs,
       lib,
-      mkOverlayfsRunner,
-      mkGraphicalCheck,
       self',
       ...
     }:
@@ -12,13 +10,8 @@
       createPackage =
         name:
         let
-          inherit (self'.packages) wine;
-
-          pkg = mkOverlayfsRunner {
-            name = lib.toLower name;
-            package = wine;
-            args = ''"WINEPREFIX/drive_c/Program Files/Affinity/${name} 2/${name}.exe"'';
-            pre_run = lib.getExe (mkGraphicalCheck name);
+          pkg = self'.packages.runner.override {
+            inherit name;
           };
 
           desktop = pkgs.callPackage ./desktopItems.nix {
@@ -27,23 +20,33 @@
 
           icons = pkgs.callPackage ./icons.nix { };
           icon-package = icons.mkIconPackageFor name;
+
+          # last version of affinity v2 released
+          lastV2Version = "2.6.5";
         in
         pkgs.symlinkJoin {
-          name = "Affinity ${name}";
+          name = "affinity-${name}-${lastV2Version}";
           pname = "affinity-${lib.toLower name}";
           paths = [
             pkg
             desktop.${lib.toLower name}
             icon-package
           ];
-          meta.mainProgram = "af-overlay-${lib.toLower name}";
+          meta = {
+            mainProgram = "affinity-${lib.toLower name}";
+
+            description = "Affinity ${name} ${lastV2Version}";
+            license = lib.licenses.unfree;
+            homepage = "https://affinity.serif.com/";
+            platforms = [ "x86_64-linux" ];
+          };
         };
     in
     {
-      _module.args = {
-        directPhoto = createPackage "Photo";
-        directDesigner = createPackage "Designer";
-        directPublisher = createPackage "Publisher";
+      packages = {
+        photo = createPackage "Photo";
+        designer = createPackage "Designer";
+        publisher = createPackage "Publisher";
       };
     };
 }

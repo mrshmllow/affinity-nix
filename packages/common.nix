@@ -6,7 +6,6 @@
       lib,
       stdShellArgs,
       self',
-      mkPrefixBase,
       ...
     }:
     {
@@ -83,9 +82,9 @@
           '';
 
         mkGraphicalCheck =
-          name:
+          v3:
           let
-            check = mkCheck (name == "v3");
+            check = mkCheck v3;
           in
           pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
             ${stdShellArgs}
@@ -111,36 +110,6 @@
 
                 exit 1
             fi
-          '';
-
-        mkOverlayfsRunner =
-          {
-            name,
-            package,
-            args,
-            pre_run,
-          }:
-          let
-            prefixBase = mkPrefixBase (name == "v3");
-          in
-          pkgs.writeShellScriptBin "af-overlay-${lib.toLower name}" ''
-            set -x
-            ${stdShellArgs}
-
-            verbose="true"
-
-            if [ "$1" != "--verbose" ]; then
-                verbose="false"
-            else
-                shift
-            fi
-
-            ${lib.getExe self'.packages.runner} \
-                --lower="${prefixBase}" ${
-                  lib.optionalString (!(builtins.isNull pre_run)) "--pre-run ${pre_run}"
-                } \
-                --verbose=$verbose ${lib.optionalString (name == "v3") "--v3"} \
-                --command="${lib.getExe package}" -- ${args} "$@"
           '';
       };
     };
