@@ -38,9 +38,6 @@ struct Arguments {
     lower: PathBuf,
 
     #[arg(long)]
-    v3: bool,
-
-    #[arg(long)]
     pre_run: Option<PathBuf>,
 
     /// binary to execute once checking & mounting is complete
@@ -540,8 +537,12 @@ fn main() -> anyhow::Result<()> {
 
     let args = Arguments::parse();
 
-    let base = BaseDir::new(if args.v3 { "affinity-v3" } else { "affinity" })
-        .expect("obtaining xdg basedir failed");
+    let base = BaseDir::new(if cfg!(feature = "v3") {
+        "affinity-v3"
+    } else {
+        "affinity"
+    })
+    .expect("obtaining xdg basedir failed");
 
     let paths = Paths {
         lower: &args.lower,

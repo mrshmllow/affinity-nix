@@ -31,16 +31,26 @@
           ];
         };
 
-      runner = craneLib.buildPackage (
-        commonArgs
-        // {
-          inherit cargoArtifacts;
-          pname = "runner";
-          cargoExtraArgs = "-p runner";
-          src = fileSetForCrate ../../crates/runner;
-          meta.mainProgram = "runner";
-        }
-      );
+      runner =
+        lib.makeOverridable
+          (
+            {
+              v3,
+            }:
+            craneLib.buildPackage (
+              commonArgs
+              // {
+                inherit cargoArtifacts;
+                pname = "runner";
+                cargoExtraArgs = "-p runner" + (lib.optionalString v3 " --features v3");
+                src = fileSetForCrate ../../crates/runner;
+                meta.mainProgram = "runner";
+              }
+            )
+          )
+          {
+            v3 = true;
+          };
     in
     {
       _module.args = {

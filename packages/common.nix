@@ -135,11 +135,17 @@
                 shift
             fi
 
-            ${lib.getExe self'.packages.runner} \
+            ${
+              lib.getExe (
+                self'.packages.runner.override {
+                  v3 = name == "v3";
+                }
+              )
+            } \
                 --lower="${prefixBase}" ${
                   lib.optionalString (!(builtins.isNull pre_run)) "--pre-run ${pre_run}"
                 } \
-                --verbose=$verbose ${lib.optionalString (name == "v3") "--v3"} \
+                --verbose=$verbose \
                 --command="${lib.getExe package}" -- ${args} "$@"
           '';
       };
