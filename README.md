@@ -148,15 +148,22 @@ Each package (`v3|photo|designer|publisher`) has the following usage:
 
 ```sh
 $ affinity-v3 --help
-Usage: affinity-v3 [COMMAND] [OPTIONS]
+Usage: affinity-v3 [OPTIONS] [AFFINITY_ARGUMENTS]... [COMMAND]
 
 Commands:
-  wine
-  winetricks
-  wineboot
-  wineserver
-  help                    Show this
-  (nothing)               Launch Affinity v3
+  wine        Run wine within sandbox
+  winetricks  Run winetricks within sandbox
+  wineboot    Run wineboot within sandbox
+  wineserver  Run wineserver within sandbox
+  help        Print this message or the help of the given subcommand(s)
+
+Arguments:
+  [AFFINITY_ARGUMENTS]...  Arguments for affinity application
+
+Options:
+      --verbose  Make Wine far more verbose
+  -h, --help     Print help
+  -V, --version  Print version
 
 ```
 
