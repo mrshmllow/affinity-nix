@@ -21,3 +21,5 @@ v3 = []
 photo = []
 designer = []
 publisher = []
+
+flatpak = []
