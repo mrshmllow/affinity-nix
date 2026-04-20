@@ -4,3 +4,7 @@ result
 *.AppImage
 *.exe
 /target
+.flatpak-builder
+builddir
+repo
+zone.althaea.Affinity.yml

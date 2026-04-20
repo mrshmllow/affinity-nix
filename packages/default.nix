@@ -6,6 +6,7 @@
     ./affinity-v3
     ./apl
     ./runner
+    ./flatpak.nix
   ];
   perSystem =
     {

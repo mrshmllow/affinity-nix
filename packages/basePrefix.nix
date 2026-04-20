@@ -1,9 +1,11 @@
 {
   linkFarm,
   fetchurl,
+  fetchzip,
   writeText,
   runCommand,
   callPackage,
+  zstd,
   xvfb-run,
   lib,
   inputs,
@@ -72,6 +74,14 @@ let
       };
     }
   ];
+
+  registry-patches = callPackage ./registry-patches.nix { };
+
+  vkd3d = fetchzip {
+    url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0b/vkd3d-proton-3.0b.tar.zst";
+    nativeBuildInputs = [ zstd ];
+    hash = "sha256-/W5gmh+RrvCytjIL0CkqOepygrz2wHn2pJf0VAGj1Hs=";
+  };
 
   layer_1 = runCommand "base-prefix-1" { } ''
     set -x -e
@@ -180,6 +190,11 @@ runCommand "base-prefix-3"
     cp -R ${inputs.corefonts}/*.exe /tmp/cache/winetricks/corefonts
 
     xvfb-run ${lib.getExe winetricks} -q -f "''${verbs[@]}"
+
+    cp ${vkd3d}/x64/d3d12.dll "$WINEPREFIX/drive_c/windows/system32"
+    cp ${vkd3d}/x64/d3d12core.dll "$WINEPREFIX/drive_c/windows/system32"
+
+    ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
 
     ${lib.getExe wineserver} -w
   ''

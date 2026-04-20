@@ -10,13 +10,7 @@ use anyhow::Context;
 use clap::{Parser, Subcommand};
 use duct::cmd;
 use mutually_exclusive_features::exactly_one_of;
-use nix::{
-    libc::{self, S_IWUSR},
-    mount::{MsFlags, mount, umount},
-    sched::{CloneFlags, unshare},
-    sys::wait::{WaitStatus, waitpid},
-    unistd::{ForkResult, fork},
-};
+use nix::libc::S_IWUSR;
 use tracing::{Level, error, info, instrument};
 use tracing_subscriber::FmtSubscriber;
 use walkdir::WalkDir;
@@ -25,16 +19,23 @@ use xdgdir::BaseDir;
 use crate::check::{perform_migrations, sync_v2_settings};
 
 mod check;
+#[cfg(feature = "flatpak")]
+mod flatpak;
 mod migrate;
 
 exactly_one_of!("v3", "photo", "designer", "publisher");
 
+#[cfg(not(feature = "flatpak"))]
 const MOUNT_FAIL_STATUS: i32 = 111;
 
 pub(crate) const WINE: &str = env!("WINE");
 pub(crate) const WINESERVER: &str = env!("WINESERVER");
 pub(crate) const WINETRICKS: &str = env!("WINETRICKS");
+pub(crate) const RSYNC: &str = env!("RSYNC");
+
+#[cfg(not(feature = "flatpak"))]
 pub(crate) const FUSE_OVERLAYFS: &str = env!("FUSE_OVERLAYFS");
+
 pub(crate) const GNUTAR: &str = env!("GNUTAR");
 pub(crate) const ZENITY: &str = env!("ZENITY");
 
@@ -93,24 +94,28 @@ enum ProgramToExecute {
 #[derive(Debug)]
 struct Paths {
     upper: PathBuf,
+    #[cfg(not(feature = "flatpak"))]
     work: PathBuf,
     wine_prefix: PathBuf,
 }
 
 impl Paths {
     fn ensure_created(&self) -> anyhow::Result<()> {
-        let work_dir = self.work.join("work");
+        #[cfg(not(feature = "flatpak"))]
+        {
+            let work_dir = self.work.join("work");
 
-        if work_dir.is_dir() {
-            let mut perms = fs::metadata(&work_dir)?.permissions();
-            perms.set_mode(0o700);
-            fs::set_permissions(&work_dir, perms).context("set workdir permissions")?;
+            if work_dir.is_dir() {
+                let mut perms = fs::metadata(&work_dir)?.permissions();
+                perms.set_mode(0o700);
+                fs::set_permissions(&work_dir, perms).context("set workdir permissions")?;
 
-            fs::remove_dir_all(&work_dir).context("delete workdir")?;
+                fs::remove_dir_all(&work_dir).context("delete workdir")?;
+            }
+
+            fs::create_dir_all(&self.work).context("creating work")?;
         }
-
         fs::create_dir_all(&self.upper).context("creating upper")?;
-        fs::create_dir_all(&self.work).context("creating work")?;
         fs::create_dir_all(&self.wine_prefix).context("creating wine_prefix")?;
 
         Ok(())
@@ -243,7 +248,11 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
     let application_handle = match program {
         ProgramToExecute::Affinity { arguments } => {
             let exe_suffix = if cfg!(feature = "v3") {
-                "Affinity/AffinityHook.exe"
+                if cfg!(feature = "flatpak") {
+                    "Affinity/Affinity.exe"
+                } else {
+                    "Affinity/AffinityHook.exe"
+                }
             } else if cfg!(feature = "photo") {
                 "Photo 2/Photo.exe"
             } else if cfg!(feature = "publisher") {
@@ -337,6 +346,7 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 }
 
 #[instrument(skip_all, ret)]
+#[cfg(not(feature = "flatpak"))]
 fn make_mount_options(paths: &Paths) -> String {
     format!(
         "lowerdir={},upperdir={},workdir={}",
@@ -347,6 +357,7 @@ fn make_mount_options(paths: &Paths) -> String {
 }
 
 #[instrument(skip(paths))]
+#[cfg(not(feature = "flatpak"))]
 fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
     let fusermount3 = cmd!(
         "/usr/bin/env",
@@ -405,6 +416,7 @@ fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
 }
 
 #[instrument(skip_all)]
+#[cfg(not(feature = "flatpak"))]
 fn mount_run_unprivileged(
     paths: &Paths,
     program: &ProgramToExecute,
@@ -456,7 +468,10 @@ fn mount_run_unprivileged(
 }
 
 #[instrument(skip(paths))]
+#[cfg(not(feature = "flatpak"))]
 fn cleanup_privileged(paths: &Paths) {
+    use nix::mount::umount;
+
     let _ = umount(&paths.wine_prefix)
         .inspect_err(|err| error!(error = ?err, "failed to unmount wine_prefix"));
     let _ = fs::remove_dir(&paths.wine_prefix)
@@ -464,7 +479,11 @@ fn cleanup_privileged(paths: &Paths) {
 }
 
 #[instrument(skip_all)]
+#[cfg(not(feature = "flatpak"))]
 fn mount_execute_privileged(paths: &Paths, program: &ProgramToExecute, verbose: bool) {
+    use nix::mount::MsFlags;
+    use nix::mount::mount;
+
     match mount(
         Some("overlay"),
         &paths.wine_prefix,
@@ -489,12 +508,18 @@ fn mount_execute_privileged(paths: &Paths, program: &ProgramToExecute, verbose: 
 }
 
 #[instrument(skip_all)]
+#[cfg(not(feature = "flatpak"))]
 fn mount_run_privileged(
     paths: &Paths,
     ids: (u32, u32),
     program: &ProgramToExecute,
     verbose: bool,
 ) -> anyhow::Result<()> {
+    use nix::{
+        sys::wait::{WaitStatus, waitpid},
+        unistd::{ForkResult, fork},
+    };
+
     if let Err(err) = fs::write("/proc/self/setgroups", b"deny\n") {
         error!(error = ?err, "failed to write setgroups");
         mount_run_unprivileged(paths, program, verbose)?;
@@ -566,11 +591,15 @@ fn main() -> anyhow::Result<()> {
 
     let paths = Paths {
         upper: base.data,
-        work: base.state,
-        wine_prefix: base
-            .runtime
-            .unwrap_or_else(std::env::temp_dir)
-            .join(format!("affinity-nix-prefix-{}", std::process::id())),
+        #[cfg(not(feature = "flatpak"))]
+        work: base.state.clone(),
+        wine_prefix: if cfg!(feature = "flatpak") {
+            base.state
+        } else {
+            base.runtime
+                .unwrap_or_else(std::env::temp_dir)
+                .join(format!("affinity-nix-prefix-{}", std::process::id()))
+        },
     };
 
     info!(paths = ?paths);
@@ -579,12 +608,6 @@ fn main() -> anyhow::Result<()> {
         .ensure_created()
         .context("setting up tmp directories")?;
     migrate::migrate(&paths).context("migrating to new overlayfs runner")?;
-
-    let uid = unsafe { libc::getuid() };
-    let gid = unsafe { libc::getgid() };
-
-    let unshare =
-        unshare(CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID);
 
     let program = if let Some(subcommand) = args.subcommand {
         ProgramToExecute::Other(subcommand)
@@ -596,13 +619,32 @@ fn main() -> anyhow::Result<()> {
 
     info!(program = ?program);
 
-    match unshare {
-        Ok(()) => mount_run_privileged(&paths, (uid, gid), &program, args.verbose),
-        Err(err) => {
-            error!(errorno = ?err, "Unshare failed.");
-            mount_run_unprivileged(&paths, &program, args.verbose)?;
+    #[cfg(feature = "flatpak")]
+    {
+        use crate::flatpak::execute_flatpak;
 
-            Ok(())
+        execute_flatpak(&paths, program, args.verbose).context("executing under a flatpak")
+    }
+
+    #[cfg(not(feature = "flatpak"))]
+    {
+        use nix::libc::{self};
+        use nix::sched::{CloneFlags, unshare};
+
+        let uid = unsafe { libc::getuid() };
+        let gid = unsafe { libc::getgid() };
+
+        let unshare =
+            unshare(CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID);
+
+        match unshare {
+            Ok(()) => mount_run_privileged(&paths, (uid, gid), &program, args.verbose),
+            Err(err) => {
+                error!(errorno = ?err, "Unshare failed.");
+                mount_run_unprivileged(&paths, &program, args.verbose)?;
+
+                Ok(())
+            }
         }
     }
 }

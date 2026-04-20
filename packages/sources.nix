@@ -21,11 +21,14 @@ let
         msiextract -C $out ./*
       '';
 in
-{
+rec {
+  v3-url = "https://web.archive.org/web/20260418054031/https://downloads.affinity.studio/Affinity%20x64.exe";
+  v3-segment = ".rsrc/2057/BIN/135";
+
   v3 = mkExtract (pkgs.fetchurl {
-    url = "https://web.archive.org/web/20260418054031/https://downloads.affinity.studio/Affinity%20x64.exe";
+    url = v3-url;
     hash = "sha256-h2zK4cEJpD3FPmhpxjf3Rm3MFcWoRaUjSY4saBfUgL4=";
-  }) ".rsrc/2057/BIN/135";
+  }) v3-segment;
 
   photo = mkExtract (pkgs.fetchurl {
     url = "https://web.archive.org/web/20251103235343/https://d1gl0nrskhax8d.cloudfront.net/windows/photo2/2.6.5/affinity-photo-msi-2.6.5.exe?Expires=1762217451&Signature=sQNwe~q1Na-2UVWhAC5ySq8vJrEgQf7uPvv2-Ju5vDm~X34rMiyJTqoy~Lwu47uEcRTPE9FbaZa7lHn5x04aFcDGj-vy~H06P6Y0RZhLY25yL2l-1XcCOfcKew8Dvfo1n-KM9bsKdYG0m5yL4pT4NBXz66PBhg-yMlx0VpVnRTIBPH-HghwiNn4PdXStisrbLDgqbbSexay~Ovy5EOHvCOJshIbKYZFoWQw1Nf3TTKlXSCNEKY43QT0Lj-t0SrBSkJLwgoWPqyCBAmvzQTGDH~OhidxwRR8zhQ9NgqBIopR2ZmKD~U2GeGu1lUA5X~0CD3PByJ5c2Tt8dpiwDCgC7g__&Key-Pair-Id=APKAIMMPYSI7GSVTEAAQ";

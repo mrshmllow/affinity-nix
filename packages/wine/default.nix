@@ -16,8 +16,7 @@
 
       _module.args = {
         inherit (wine-packages) wineUnwrapped;
-
-        wine-packages = wine-packages;
+        inherit wine-packages;
       };
     };
 }
