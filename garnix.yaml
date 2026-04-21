@@ -7,7 +7,6 @@ builds:
     - packages.x86_64-linux.bootstrap
     - packages.x86_64-linux.d2d1
     - packages.x86_64-linux.wine
-    - packages.x86_64-linux.wine
     - checks.x86_64-linux.pre-commit
     - checks.x86_64-linux.treefmt
     - formatter.x86_64-linux
