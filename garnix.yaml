@@ -1,16 +1,13 @@
+# these are carefully picked as to not cache the wrong files
 builds:
   include:
-    - '*.x86_64-linux.*'
-    - defaultPackage.x86_64-linux
-    - devShell.x86_64-linux
-    - homeConfigurations.*
-    - darwinConfigurations.*
-    - nixosConfigurations.*
-  exclude:
-    - packages.x86_64-linux.runner
-    - packages.x86_64-linux.v3
-    - packages.x86_64-linux.photo
-    - packages.x86_64-linux.publisher
-    - packages.x86_64-linux.designer
-    - checks.x86_64-linux.test-affinity-v2
-    - checks.x86_64-linux.test-affinity-v3
+    - packages.x86_64-linux.apl
+    - packages.x86_64-linux.apl-combined
+    - packages.x86_64-linux.base-prefix-pre-affinity
+    - packages.x86_64-linux.bootstrap
+    - packages.x86_64-linux.d2d1
+    - packages.x86_64-linux.wine
+    - packages.x86_64-linux.wine
+    - checks.x86_64-linux.pre-commit
+    - checks.x86_64-linux.treefmt
+    - formatter.x86_64-linux
