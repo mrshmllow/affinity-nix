@@ -2,7 +2,6 @@
   perSystem =
     {
       pkgs,
-      lib,
       self',
       ...
     }:
