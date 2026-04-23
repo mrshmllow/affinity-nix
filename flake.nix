@@ -55,6 +55,7 @@
         ./nix/shells.nix
         ./packages
         ./tests/default.nix
+        ./overlay.nix
       ];
       systems = [
         "x86_64-linux"

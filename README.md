@@ -78,10 +78,9 @@ $ nix profile install github:mrshmllow/affinity-nix#affinity-publisher
 
 #### Install on NixOS / Home Manager
 
-<details>
-<summary>Install on NixOS</summary>
+Installing via an overlay is recommended, as the package will become `unfree` in the future.
 
-The following is an example. **Installing this package does not differ to installing a package from any other flake.**
+Install with NixOS:
 
 ```nix
 {
@@ -99,21 +98,18 @@ The following is an example. **Installing this package does not differ to instal
       specialArgs = {inherit inputs;};
       modules = [
         # ...
-        {
-          environment.systemPackages = [affinity-nix.packages.x86_64-linux.affinity-v3];
-        }
+        ({ pkgs, ... }: {
+          nixpkgs.overlays = [ affinity-nix.overlays.default ];
+
+          environment.systemPackages = [ pkgs.affinity-v3 ];
+        })
       ];
     };
   }
 }
 ```
 
-</details>
-
-<details>
-<summary>Install with Home Manager</summary>
-
-The following is an example. **Installing this package does not differ to installing a package from any other flake.**
+Install with Home Manager:
 
 ```nix
 {
@@ -131,16 +127,16 @@ The following is an example. **Installing this package does not differ to instal
       extraSpecialArgs = {inherit inputs;};
       modules = [
         # ...
-        {
-          home.packages = [affinity-nix.packages.x86_64-linux.affinity-v3];
-        }
+        ({ pkgs, ... }: {
+          nixpkgs.overlays = [ affinity-nix.overlays.default ];
+
+          home.packages = [ pkgs.affinity-v3 ];
+        })
       ];
     };
   }
 }
 ```
-
-</details>
 
 ### Troubleshooting, winetricks, wineboot, and more
 
