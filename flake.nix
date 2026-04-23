@@ -44,7 +44,6 @@
       flake-parts,
       git-hooks,
       treefmt-nix,
-      crane,
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -76,7 +75,7 @@
             };
 
             toolchain = inputs'.fenix.packages.complete;
-            craneLib = (crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
+            craneLib = (inputs.crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
           };
         };
     };

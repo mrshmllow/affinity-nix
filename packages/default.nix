@@ -1,22 +1,28 @@
+{ inputs, ... }:
 {
   imports = [
     ./wine
     ./affinity
     ./affinity-v3
     ./apl
-    ./basePrefix.nix
     ./runner
   ];
   perSystem =
     {
-      lib,
       pkgs,
-      stdPath,
+      wine-packages,
       ...
     }:
     {
+      # this function builds the prefix right up until the affinity sources
+      # are used. this separation exists for build caching, as the affinity sources
+      # should never be exposed to a cache
+      packages.base-prefix-pre-affinity = pkgs.callPackage ./basePrefix.nix {
+        inherit inputs wine-packages;
+      };
+
       _module.args = {
-        stdPath = [
+        stdPath = pkgs: [
           pkgs.zenity
           pkgs.curl
 
@@ -28,12 +34,6 @@
 
           pkgs.busybox
         ];
-
-        stdShellArgs = ''
-          export LC_ALL="C"
-          export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-          export PATH=${lib.makeBinPath stdPath}
-        '';
       };
     };
 }
