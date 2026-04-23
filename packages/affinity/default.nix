@@ -1,7 +1,10 @@
+{ inputs, ... }:
 {
   perSystem =
     {
       pkgs,
+      lib,
+      stdPath,
       self',
       ...
     }:
@@ -15,15 +18,15 @@
       packages = {
         affinity-photo = pkgs.callPackage ./package.nix {
           name = "Photo";
-          runner = self'.packages.runner;
+          inherit inputs stdPath;
         };
         affinity-designer = pkgs.callPackage ./package.nix {
           name = "Designer";
-          runner = self'.packages.runner;
+          inherit inputs stdPath;
         };
         affinity-publisher = pkgs.callPackage ./package.nix {
           name = "Publisher";
-          runner = self'.packages.runner;
+          inherit inputs stdPath;
         };
 
         photo = makeDeprecated "photo";

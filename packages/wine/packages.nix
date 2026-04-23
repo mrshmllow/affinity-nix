@@ -2,17 +2,16 @@
   stdenv,
   callPackage,
   pkgs,
-  nixpkgs-wine,
-  src,
+  inputs,
   stdPath,
 }:
 let
   wineUnstable =
-    (nixpkgs-wine.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full.override {
+    (inputs.nixpkgs-wine.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full.override {
       wineRelease = "unstable";
     }).overrideAttrs
       {
-        inherit src;
+        src = inputs.elemental-wine-source;
         version = "9.13-part3";
       };
 

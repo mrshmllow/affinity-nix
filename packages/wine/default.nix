@@ -8,9 +8,7 @@
     }:
     let
       wine-packages = pkgs.callPackage ./packages.nix {
-        src = inputs.elemental-wine-source;
-        nixpkgs-wine = inputs.nixpkgs-wine;
-        inherit stdPath;
+        inherit stdPath inputs;
       };
     in
     {
@@ -19,7 +17,7 @@
       _module.args = {
         inherit (wine-packages) wineUnwrapped;
 
-        wine-stuff = wine-packages;
+        wine-packages = wine-packages;
       };
     };
 }
