@@ -63,7 +63,7 @@ pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
         ))?;
 
         for line in rsync.lines() {
-            info!("rsync {app} settings sync: {line}");
+            info!(app = ?app, "{line}");
         }
     }
 
