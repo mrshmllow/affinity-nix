@@ -6,13 +6,16 @@
       lib,
       stdPath,
       self',
+      warnUnfree,
       ...
     }:
     {
       packages = {
-        affinity-v3 = pkgs.callPackage ./package.nix {
-          inherit inputs stdPath;
-        };
+        affinity-v3 = warnUnfree (
+          pkgs.callPackage ./package.nix {
+            inherit inputs stdPath;
+          }
+        );
 
         default = self'.packages.affinity-v3;
 

@@ -10,6 +10,7 @@
   perSystem =
     {
       pkgs,
+      lib,
       wine-packages,
       ...
     }:
@@ -34,6 +35,10 @@
 
           pkgs.busybox
         ];
+
+        warnUnfree =
+          pkg:
+          lib.warn "For users of affinity-nix through NixOS, Home Manager, nix-darwin, or similar: please switch to consuming this package through the `affinity-nix.overlays.default` overlay. It will become `unfree` in the future, making it impossible to declaratively consume without an overlay." pkg;
       };
     };
 }
