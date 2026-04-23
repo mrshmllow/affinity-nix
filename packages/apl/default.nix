@@ -20,6 +20,10 @@
 
           projectFile = "AffinityPluginLoader.sln";
 
+          patches = [
+            ./no-login.patch
+          ];
+
           nugetDeps = ./deps.json;
 
           postInstall = ''
@@ -64,32 +68,11 @@
           '';
         };
 
-        d2d1 = pkgs.stdenv.mkDerivation rec {
-          src = "${inputs.plugin-loader-src}/WineFix/lib/d2d1";
-          pname = "d2d1";
-          inherit version;
-
-          nativeBuildInputs = [ pkgs.wine64 ];
-
-          TARGET = "x86_64-unix";
-
-          env.NIX_CFLAGS_COMPILE = toString [
-            "-Wno-error=incompatible-pointer-types"
-            "-Wno-error=discarded-qualifiers"
-          ];
-
-          installPhase = ''
-            mkdir -p $out/lib/AffinityPluginLoader
-            cp build/${TARGET}/d2d1.dll.so $out/lib/AffinityPluginLoader/d2d1.dll
-          '';
-        };
-
         apl-combined = pkgs.symlinkJoin {
           pname = "apl-combined";
           inherit version;
           paths = [
             self'.packages.apl
-            self'.packages.d2d1
             self'.packages.bootstrap
           ];
 

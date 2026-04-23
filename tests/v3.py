@@ -10,6 +10,14 @@ if TYPE_CHECKING:
 machine.start()
 machine.wait_for_x()
 
-machine.succeed("affinity-v3 >&2 &")
+machine.succeed("cp /etc/file $HOME/file.af")
+
+machine.succeed("affinity-v3 $HOME/file.af >&2 &")
 machine.wait_for_window(r"^Affinity$")
-machine.screenshot("screenshot")
+
+machine.screenshot("screenshot-1")
+
+machine.wait_for_text(r"MAGIC", 500)
+machine.wait_for_text(r"STRING", 100)
+
+machine.screenshot("screenshot-3")

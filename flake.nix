@@ -12,7 +12,7 @@
     };
 
     plugin-loader-src = {
-      url = "github:noahc3/AffinityPluginLoader/v0.3.0";
+      url = "github:noahc3/AffinityPluginLoader/fix-document-path-cli-arg-handler";
       flake = false;
     };
 
