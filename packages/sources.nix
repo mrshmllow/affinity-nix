@@ -12,7 +12,7 @@ let
     source: segment:
     pkgs.runCommand "affinity-extracted-sources"
       {
-        buildInputs = [
+        nativeBuildInputs = [
           pkgs._7zz
           pkgs.msitools
         ];

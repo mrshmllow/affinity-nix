@@ -109,7 +109,7 @@ let
   layer_2 =
     runCommand "base-prefix-2"
       {
-        buildInputs = [
+        nativeBuildInputs = [
           xvfb-run
         ];
       }
@@ -151,7 +151,7 @@ let
 in
 runCommand "base-prefix-3"
   {
-    buildInputs = [
+    nativeBuildInputs = [
       xvfb-run
     ];
   }
