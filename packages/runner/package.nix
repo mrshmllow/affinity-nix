@@ -30,31 +30,31 @@ let
         (craneLib.fileset.commonCargoSources crate)
       ];
     };
+
+  env = {
+    LOWER_DIR = prefixBase;
+    WINE = lib.getExe wine-packages.wine;
+    WINEBOOT = lib.getExe wine-packages.wineboot;
+    WINESERVER = lib.getExe wine-packages.wineserver;
+    WINETRICKS = lib.getExe wine-packages.winetricks;
+    FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
+    GNUTAR = lib.getExe pkgs.gnutar;
+    ZENITY = lib.getExe pkgs.zenity;
+    RSYNC = lib.getExe pkgs.rsync;
+    REGISTRY_PATCHES = registry-patches;
+    ON_LINUX = inputs.on-linux.outPath;
+  };
 in
 {
   package = craneLib.buildPackage (
     commonArgs
     // {
-      inherit cargoArtifacts;
+      inherit cargoArtifacts env;
 
       pname = "affinity-${lib.toLower name}";
 
       cargoExtraArgs = "-p runner --no-default-features --features ${lib.toLower name}";
       src = fileSetForCrate ../../crates/runner;
-
-      env = {
-        LOWER_DIR = prefixBase;
-        WINE = lib.getExe wine-packages.wine;
-        WINEBOOT = lib.getExe wine-packages.wineboot;
-        WINESERVER = lib.getExe wine-packages.wineserver;
-        WINETRICKS = lib.getExe wine-packages.winetricks;
-        FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
-        GNUTAR = lib.getExe pkgs.gnutar;
-        ZENITY = lib.getExe pkgs.zenity;
-        RSYNC = lib.getExe pkgs.rsync;
-        REGISTRY_PATCHES = registry-patches;
-        ON_LINUX = inputs.on-linux.outPath;
-      };
 
       meta.mainProgram = "affinity-${lib.toLower name}";
 
@@ -67,7 +67,7 @@ in
   package-clippy = craneLib.cargoClippy (
     commonArgs
     // {
-      inherit cargoArtifacts;
+      inherit cargoArtifacts env;
       cargoClippyExtraArgs = "--all-targets -- --deny warnings";
     }
   );
