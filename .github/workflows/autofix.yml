@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: /tmp/.uv-cache
-          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          key: uv-${{ runner.os }}-${{ hashFiles('tests/uv.lock') }}
           restore-keys: |
-            uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+            uv-${{ runner.os }}-${{ hashFiles('tests/uv.lock') }}
             uv-${{ runner.os }}
       - name: nix fmt
         run: nix develop --print-build-logs -v --command pre-commit run --all-files
