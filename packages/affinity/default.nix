@@ -14,27 +14,20 @@
         name:
         lib.warn "the `${name}` package is deprecated, please use `affinity-${name}` instead."
           self'.packages."affinity-${name}";
+
+      makeV2Package =
+        name:
+        warnUnfree (
+          pkgs.callPackage ./package.nix {
+            inherit inputs stdPath name;
+          }
+        );
     in
     {
       packages = {
-        affinity-photo = warnUnfree (
-          pkgs.callPackage ./package.nix {
-            name = "Photo";
-            inherit inputs stdPath;
-          }
-        );
-        affinity-designer = warnUnfree (
-          pkgs.callPackage ./package.nix {
-            name = "Designer";
-            inherit inputs stdPath;
-          }
-        );
-        affinity-publisher = warnUnfree (
-          pkgs.callPackage ./package.nix {
-            name = "Publisher";
-            inherit inputs stdPath;
-          }
-        );
+        affinity-photo = makeV2Package "Photo";
+        affinity-designer = makeV2Package "Designer";
+        affinity-publisher = makeV2Package "Publisher";
 
         photo = makeDeprecated "photo";
         designer = makeDeprecated "designer";
