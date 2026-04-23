@@ -17,7 +17,7 @@
           pkgs.callPackage ../prefixWithAffinity.nix {
             inherit inputs wine-packages;
             apl-combined = self'.packages.apl-combined;
-            v3 = false;
+            v3 = true;
           }
         );
         name = "v3";
