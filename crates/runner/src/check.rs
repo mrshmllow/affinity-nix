@@ -82,11 +82,7 @@ pub fn write_revision(wine_prefix: &Path) -> Result<()> {
 
 #[instrument(skip_all)]
 pub fn perform_migrations(wine_prefix: &Path) -> Result<()> {
-    let Some(revision) = crate::check::read_revision(wine_prefix)? else {
-        info!("revision does not exist, skipping migration");
-        write_revision(wine_prefix).context("writing default revision")?;
-        return Ok(());
-    };
+    let revision = crate::check::read_revision(wine_prefix)?.unwrap_or(0);
 
     if revision < 10 {
         let migration = make_env(
