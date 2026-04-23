@@ -25,21 +25,10 @@ fn make_message(backup_location: &Path) -> String {
 
 #[instrument(skip_all)]
 pub(crate) fn migrate(paths: &Paths) -> anyhow::Result<()> {
-    let revision_file = paths.upper.join(".revision");
-
-    if !revision_file.is_file() {
-        info!("revision file does not exist, skipping backup");
+    let Some(revision) = crate::check::read_revision(&paths.upper)? else {
+        info!("revision does not exist, skipping backup");
         return Ok(());
-    }
-
-    let revision: u32 = fs::read_to_string(revision_file)
-        .context("reading revision file")?
-        .split_whitespace()
-        .collect::<String>()
-        .parse()
-        .context("parsing revision to u32")?;
-
-    info!(revision = %revision);
+    };
 
     if revision >= 9 {
         info!("revision more than or equal to 9, skipping backup");

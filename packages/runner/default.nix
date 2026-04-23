@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   perSystem =
     {
@@ -7,7 +8,6 @@
       wine-stuff,
       runnerEnv,
       mkPrefixBase,
-      mkGraphicalCheck,
       self',
       ...
     }:
@@ -51,7 +51,6 @@
 
                 env = runnerEnv // {
                   LOWER_DIR = mkPrefixBase (name == "v3");
-                  CHECK_SCRIPT = lib.getExe (mkGraphicalCheck (name == "v3"));
                 };
 
                 postInstall = ''
@@ -74,9 +73,11 @@
           FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
           GNUTAR = lib.getExe pkgs.gnutar;
           ZENITY = lib.getExe pkgs.zenity;
+          RSYNC = lib.getExe pkgs.rsync;
+          REGISTRY_PATCHES = (pkgs.callPackage ../registry-patches.nix { }).combined;
+          ON_LINUX = inputs.on-linux.outPath;
 
           LOWER_DIR = "";
-          CHECK_SCRIPT = "";
         };
       };
 
