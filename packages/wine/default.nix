@@ -7,38 +7,19 @@
       ...
     }:
     let
-      wineUnstable =
-        (
-          inputs.nixpkgs-wine.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wineWow64Packages.full.override
-          {
-            wineRelease = "unstable";
-          }
-        ).overrideAttrs
-          {
-            src = inputs.elemental-wine-source;
-            version = "9.13-part3";
-          };
-
-      symlink = pkgs.callPackage ./symlink.nix { };
-      wineUnwrapped = symlink {
-        wine = wineUnstable;
-      };
-
-      wrapWithPrefix = pkgs.callPackage ./wrapWithPrefix.nix {
-        inherit wineUnwrapped stdPath;
+      wine-packages = pkgs.callPackage ./packages.nix {
+        src = inputs.elemental-wine-source;
+        nixpkgs-wine = inputs.nixpkgs-wine;
+        inherit stdPath;
       };
     in
     {
-      packages.wine = wrapWithPrefix wineUnwrapped "wine";
+      packages.wine = wine-packages.wine;
 
       _module.args = {
-        inherit wineUnwrapped;
+        inherit (wine-packages) wineUnwrapped;
 
-        wine-stuff = {
-          winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
-          wineboot = wrapWithPrefix wineUnwrapped "wineboot";
-          wineserver = wrapWithPrefix wineUnwrapped "wineserver";
-        };
+        wine-stuff = wine-packages;
       };
     };
 }
