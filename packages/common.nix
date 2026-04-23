@@ -4,7 +4,6 @@
     {
       pkgs,
       lib,
-      stdShellArgs,
       self',
       ...
     }:
@@ -78,37 +77,6 @@
                         "${inputs.on-linux}/Auxiliary/Settings/$app/2.0/" \
                         "$WINEPREFIX/drive_c/users/$USER/AppData/Roaming/Affinity/$app/2.0/"
                 done
-            fi
-          '';
-
-        mkGraphicalCheck =
-          v3:
-          let
-            check = mkCheck v3;
-          in
-          pkgs.writeShellScriptBin "affinity-v3-gui-check" ''
-            ${stdShellArgs}
-
-            FIFO=$(mktemp -u)
-
-            mkfifo "$FIFO"
-
-            zenity --progress \
-                --pulsate \
-                --no-cancel \
-                --auto-close \
-                --title="Affinity" \
-                --text="Preparing the wine prefix\n\nThis can take a while.\n" \
-                < $FIFO &
-
-            zenity_pid=$!
-
-            ${lib.getExe check} > $FIFO
-
-            if [ ! $? -eq 0 ]; then
-                zenity --error --text="Preparing the wine prefix failed."
-
-                exit 1
             fi
           '';
       };

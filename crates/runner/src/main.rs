@@ -22,6 +22,9 @@ use tracing_subscriber::FmtSubscriber;
 use walkdir::WalkDir;
 use xdgdir::BaseDir;
 
+use crate::check::{perform_migrations, sync_v2_settings};
+
+mod check;
 mod migrate;
 
 exactly_one_of!("v3", "photo", "designer", "publisher");
@@ -35,8 +38,6 @@ pub(crate) const WINETRICKS: &str = env!("WINETRICKS");
 pub(crate) const FUSE_OVERLAYFS: &str = env!("FUSE_OVERLAYFS");
 pub(crate) const GNUTAR: &str = env!("GNUTAR");
 pub(crate) const ZENITY: &str = env!("ZENITY");
-
-pub(crate) const CHECK_SCRIPT: &str = env!("CHECK_SCRIPT");
 
 pub(crate) static LOWER_DIR: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("LOWER_DIR")));
 
@@ -215,39 +216,6 @@ fn wineboot_update(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
 }
 
 #[instrument(skip_all)]
-fn pre_run(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
-    let handle = make_env(
-        cmd!(CHECK_SCRIPT).stderr_to_stdout().unchecked(),
-        wine_prefix,
-        verbose,
-    )
-    .reader()?;
-
-    let lines = BufReader::new(&handle).lines();
-
-    for line in lines {
-        let line = line?;
-        println!("{line}");
-    }
-
-    match handle.try_wait()? {
-        Some(output) => {
-            if !output.status.success() {
-                return Err(anyhow::anyhow!(
-                    "wine prefix pre-check failed: {:?}",
-                    output.status
-                ));
-            }
-        }
-        None => {
-            error!("check script child is still running in some way.");
-        }
-    }
-
-    Ok(())
-}
-
-#[instrument(skip_all)]
 fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::Result<()> {
     let user = std::env::var("USER")?;
 
@@ -263,7 +231,11 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
     info!("finished warming & wineboot");
 
-    pre_run(&paths.wine_prefix, verbose)?;
+    perform_migrations(&paths.wine_prefix, verbose).context("performing migrations")?;
+
+    if cfg!(not(feature = "v3")) {
+        sync_v2_settings(&paths.wine_prefix, &user).context("sync v2 settings")?;
+    }
 
     info!("finished pre-check");
 
@@ -393,7 +365,7 @@ fn cleanup_fuse(paths: &Paths) -> anyhow::Result<()> {
             }
         }
         Err(err) => {
-            error!(error = %err, "`fusermount3` failed");
+            error!(error = ?err, "`fusermount3` failed");
             false
         }
     };
@@ -466,7 +438,7 @@ fn mount_run_unprivileged(
     }
 
     if let Err(err) = execute(paths, program, verbose) {
-        error!(error = %err, "Running with fuse failed.");
+        error!(error = ?err, "Running with fuse failed.");
         let _ = cleanup_fuse(paths);
         return Err(anyhow::anyhow!(
             "failed to run application with `fuse-overlayfs`: {:?}",
@@ -498,13 +470,13 @@ fn mount_execute_privileged(paths: &Paths, program: &ProgramToExecute, verbose: 
     ) {
         Ok(_) => {
             if let Err(err) = execute(paths, program, verbose) {
-                error!(error = %err, "Running privileged failed.");
+                error!(error = ?err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
             };
         }
         Err(err) => {
-            error!(errorno = %err, "Mount failed.");
+            error!(errorno = ?err, "Mount failed.");
             std::process::exit(MOUNT_FAIL_STATUS);
         }
     }
@@ -567,7 +539,7 @@ fn mount_run_privileged(
             std::process::exit(0);
         }
         Err(err) => {
-            error!(errorno = %err, "Fork failed.");
+            error!(errorno = ?err, "Fork failed.");
             info!("Falling back on unprivileged");
             mount_run_unprivileged(paths, program, verbose)?;
         }
@@ -623,7 +595,7 @@ fn main() -> anyhow::Result<()> {
     match unshare {
         Ok(()) => mount_run_privileged(&paths, (uid, gid), &program, args.verbose),
         Err(err) => {
-            error!(errorno = %err, "Unshare failed.");
+            error!(errorno = ?err, "Unshare failed.");
             mount_run_unprivileged(&paths, &program, args.verbose)?;
 
             Ok(())
