@@ -8,6 +8,8 @@ permissions:
 jobs:
   autofix:
     runs-on: ubuntu-latest
+    env:
+      UV_CACHE_DIR: /tmp/.uv-cache
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -18,7 +20,17 @@ jobs:
           extra_nix_config: |
             trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://cache.garnix.io https://cache.nixos.org
+      - name: Restore uv cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: /tmp/.uv-cache
+          key: uv-${{ runner.os }}-${{ hashFiles('tests/uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ hashFiles('tests/uv.lock') }}
+            uv-${{ runner.os }}
       - name: nix fmt
         run: nix develop --print-build-logs -v --command pre-commit run --all-files
         continue-on-error: true
+      - name: Minimize uv cache
+        run: nix develop --print-build-logs -v --command uv cache prune --ci
       - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8
