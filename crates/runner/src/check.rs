@@ -62,7 +62,7 @@ pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
             "syncing {app} settings with rsync: dst {app_settings_dst:?}, src {app_settings_src:?}"
         ))?;
 
-        for line in rsync.lines() {
+        for line in rsync.lines().filter(|x| !x.is_empty()) {
             info!(app = ?app, "{line}");
         }
     }
