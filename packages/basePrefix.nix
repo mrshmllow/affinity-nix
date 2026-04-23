@@ -6,7 +6,6 @@
       lib,
       wine-stuff,
       wineUnwrapped,
-      mkInjectPluginLoader,
       self',
       ...
     }:
@@ -199,7 +198,6 @@
           let
             layer_3 = self'.packages.base-prefix-pre-affinity;
 
-            injectPluginLoader = mkInjectPluginLoader;
             installers = pkgs.callPackage ./sources.nix { };
             registry-patches = pkgs.callPackage ./registry-patches.nix { };
 
@@ -227,7 +225,10 @@
 
               ${lib.optionalString v3 ''
                 ${lib.getExe pkgs.lndir} ${installers.v3} "$WINEPREFIX/drive_c/Program Files/"
-                ${lib.getExe injectPluginLoader}
+
+                pushd "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
+                cp -r "${self'.packages.apl-combined}/." .
+                popd
               ''}
 
               ${lib.optionalString (!v3) ''
