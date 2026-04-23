@@ -26,7 +26,7 @@
           enableOCR = true;
           inherit defaults;
 
-          nodes.machine.environment.systemPackages = [ self'.packages.v3 ];
+          nodes.machine.environment.systemPackages = [ self'.packages.affinity-v3 ];
 
           testScript = stripTyping (builtins.readFile ./v3.py);
         };
@@ -37,9 +37,9 @@
           inherit defaults;
 
           nodes = {
-            photo.environment.systemPackages = [ self'.packages.photo ];
-            publisher.environment.systemPackages = [ self'.packages.publisher ];
-            designer.environment.systemPackages = [ self'.packages.designer ];
+            photo.environment.systemPackages = [ self'.packages.affinity-photo ];
+            publisher.environment.systemPackages = [ self'.packages.affinity-publisher ];
+            designer.environment.systemPackages = [ self'.packages.affinity-designer ];
           };
 
           testScript = ''

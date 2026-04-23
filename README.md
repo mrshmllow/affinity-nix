@@ -53,13 +53,13 @@ graph LR;
 ### Running Ad-hoc
 
 ```bash
-$ nix run github:mrshmllow/affinity-nix#v3
+$ nix run github:mrshmllow/affinity-nix#affinity-v3
 
 -- v2 versions:
 
-$ nix run github:mrshmllow/affinity-nix#photo
-$ nix run github:mrshmllow/affinity-nix#designer
-$ nix run github:mrshmllow/affinity-nix#publisher
+$ nix run github:mrshmllow/affinity-nix#affinity-photo
+$ nix run github:mrshmllow/affinity-nix#affinity-designer
+$ nix run github:mrshmllow/affinity-nix#affinity-publisher
 ```
 
 ### Installing the applications on your system (Optional)
@@ -67,13 +67,13 @@ $ nix run github:mrshmllow/affinity-nix#publisher
 #### Install with nix-profile
 
 ```bash
-$ nix profile install github:mrshmllow/affinity-nix#v3
+$ nix profile install github:mrshmllow/affinity-nix#affinity-v3
 
 -- v2 versions:
 
-$ nix profile install github:mrshmllow/affinity-nix#photo
-$ nix profile install github:mrshmllow/affinity-nix#designer
-$ nix profile install github:mrshmllow/affinity-nix#publisher
+$ nix profile install github:mrshmllow/affinity-nix#affinity-photo
+$ nix profile install github:mrshmllow/affinity-nix#affinity-designer
+$ nix profile install github:mrshmllow/affinity-nix#affinity-publisher
 ```
 
 #### Install on NixOS / Home Manager
@@ -100,7 +100,7 @@ The following is an example. **Installing this package does not differ to instal
       modules = [
         # ...
         {
-          environment.systemPackages = [affinity-nix.packages.x86_64-linux.v3];
+          environment.systemPackages = [affinity-nix.packages.x86_64-linux.affinity-v3];
         }
       ];
     };
@@ -132,7 +132,7 @@ The following is an example. **Installing this package does not differ to instal
       modules = [
         # ...
         {
-          home.packages = [affinity-nix.packages.x86_64-linux.v3];
+          home.packages = [affinity-nix.packages.x86_64-linux.affinity-v3];
         }
       ];
     };
