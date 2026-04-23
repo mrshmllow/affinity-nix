@@ -231,7 +231,7 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
     info!("finished warming & wineboot");
 
-    perform_migrations(&paths.wine_prefix, verbose).context("performing migrations")?;
+    perform_migrations(&paths.wine_prefix).context("performing migrations")?;
 
     if cfg!(not(feature = "v3")) {
         sync_v2_settings(&paths.wine_prefix, &user).context("sync v2 settings")?;

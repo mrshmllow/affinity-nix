@@ -81,7 +81,7 @@ pub fn write_revision(wine_prefix: &Path) -> Result<()> {
 }
 
 #[instrument(skip_all)]
-pub fn perform_migrations(wine_prefix: &Path, verbose: bool) -> Result<()> {
+pub fn perform_migrations(wine_prefix: &Path) -> Result<()> {
     let Some(revision) = crate::check::read_revision(wine_prefix)? else {
         info!("revision does not exist, skipping migration");
         write_revision(wine_prefix).context("writing default revision")?;
@@ -97,7 +97,7 @@ pub fn perform_migrations(wine_prefix: &Path, verbose: bool) -> Result<()> {
                 REGISTRY_PATCHES.join("one.reg")
             ),
             wine_prefix,
-            verbose,
+            true,
         )
         .stderr_to_stdout()
         .read()
