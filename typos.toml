@@ -1,3 +1,6 @@
 [type.nix.extend-words]
 # this is a 7zz argument...
 tpe = "tpe"
+
+[type.md.extend-words]
+Canva = "Canva"
