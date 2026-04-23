@@ -36,7 +36,7 @@ pub(crate) fn read_revision(wine_prefix: &Path) -> Result<Option<u32>> {
 }
 
 #[instrument(skip_all)]
-pub fn sync_v2_settings(wine_prefix: &Path, user: &String) -> Result<()> {
+pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
     for app in ["Photo", "Designer", "Publisher"] {
         let app_settings_dst = wine_prefix.join(format!(
             "drive_c/users/{user}/AppData/Roaming/Affinity/{app}/2.0/"
