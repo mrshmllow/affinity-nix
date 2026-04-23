@@ -41,12 +41,21 @@
             platforms = [ "x86_64-linux" ];
           };
         };
+
+      makeDeprecated =
+        name:
+        lib.warn "the `${name}` package is deprecated, please use `affinity-${name}` instead."
+          self'.packages."affinity-${name}";
     in
     {
       packages = {
-        photo = createPackage "Photo";
-        designer = createPackage "Designer";
-        publisher = createPackage "Publisher";
+        affinity-photo = createPackage "Photo";
+        affinity-designer = createPackage "Designer";
+        affinity-publisher = createPackage "Publisher";
+
+        photo = makeDeprecated "photo";
+        designer = makeDeprecated "designer";
+        publisher = makeDeprecated "publisher";
       };
     };
 }
