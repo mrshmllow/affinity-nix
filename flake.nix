@@ -65,7 +65,6 @@
           inputs',
           config,
           pkgs,
-          system,
           ...
         }:
         {
