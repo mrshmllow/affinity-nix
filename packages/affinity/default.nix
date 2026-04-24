@@ -4,7 +4,6 @@
     {
       pkgs,
       lib,
-      stdPath,
       self',
       ...
     }:
@@ -17,7 +16,7 @@
       makeV2Package =
         name:
         (pkgs.callPackage ./package.nix {
-          inherit inputs stdPath name;
+          inherit inputs name;
         });
     in
     {
