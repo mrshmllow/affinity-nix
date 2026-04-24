@@ -70,11 +70,6 @@
         }:
         {
           _module.args = {
-            pkgs = import inputs.nixpkgs {
-              inherit system;
-              config.allowUnfree = true;
-            };
-
             toolchain = inputs'.fenix.packages.complete;
             craneLib = (inputs.crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
           };
