@@ -5,6 +5,7 @@ build-flatpak:
 
     flatpak-builder --force-clean \
         --user \
+        --ccache \
         --install-deps-from=flathub \
         --repo=repo \
         --install \
