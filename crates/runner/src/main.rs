@@ -32,7 +32,6 @@ exactly_one_of!("v3", "photo", "designer", "publisher");
 const MOUNT_FAIL_STATUS: i32 = 111;
 
 pub(crate) const WINE: &str = env!("WINE");
-pub(crate) const WINEBOOT: &str = env!("WINEBOOT");
 pub(crate) const WINESERVER: &str = env!("WINESERVER");
 pub(crate) const WINETRICKS: &str = env!("WINETRICKS");
 pub(crate) const FUSE_OVERLAYFS: &str = env!("FUSE_OVERLAYFS");
@@ -185,7 +184,9 @@ fn warmup_prefix_registry(destination: &PathBuf, user: &String) -> io::Result<()
 #[instrument(skip_all)]
 fn wineboot_update(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
     let handle = make_env(
-        cmd!(WINEBOOT, "--update").stderr_to_stdout().unchecked(),
+        cmd!(WINE, "wineboot", "--update")
+            .stderr_to_stdout()
+            .unchecked(),
         wine_prefix,
         verbose,
     )
@@ -268,7 +269,12 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
         }
         ProgramToExecute::Other(Program::Wine { arguments }) => cmd(WINE, arguments),
         ProgramToExecute::Other(Program::Winetricks { arguments }) => cmd(WINETRICKS, arguments),
-        ProgramToExecute::Other(Program::Wineboot { arguments }) => cmd(WINEBOOT, arguments),
+        ProgramToExecute::Other(Program::Wineboot { arguments }) => {
+            let mut cmd_arguments = vec!["wineboot".to_string()];
+            cmd_arguments.extend(arguments.clone());
+
+            cmd(WINE, cmd_arguments)
+        }
         ProgramToExecute::Other(Program::Wineserver { arguments }) => cmd(WINESERVER, arguments),
     };
 

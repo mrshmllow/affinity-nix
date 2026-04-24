@@ -26,7 +26,6 @@
 
         env = {
           WINE = lib.getExe self'.packages.wine;
-          WINEBOOT = lib.getExe wine-packages.wineboot;
           WINESERVER = lib.getExe wine-packages.wineserver;
           WINETRICKS = lib.getExe wine-packages.winetricks;
           FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
