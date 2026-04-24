@@ -31,6 +31,5 @@ in
 
   wine = wrapWithPrefix wineUnwrapped "wine";
   winetricks = wrapWithPrefix pkgs.winetricks "winetricks";
-  wineboot = wrapWithPrefix wineUnwrapped "wineboot";
   wineserver = wrapWithPrefix wineUnwrapped "wineserver";
 }
