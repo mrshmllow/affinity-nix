@@ -4,7 +4,6 @@
     {
       pkgs,
       lib,
-      stdPath,
       self',
       warnUnfree,
       ...
@@ -13,7 +12,7 @@
       packages = {
         affinity-v3 = warnUnfree (
           pkgs.callPackage ./package.nix {
-            inherit inputs stdPath;
+            inherit inputs;
           }
         );
 

@@ -4,7 +4,6 @@
     {
       pkgs,
       lib,
-      stdPath,
       self',
       warnUnfree,
       ...
@@ -19,7 +18,7 @@
         name:
         warnUnfree (
           pkgs.callPackage ./package.nix {
-            inherit inputs stdPath name;
+            inherit inputs name;
           }
         );
     in

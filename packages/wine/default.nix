@@ -3,12 +3,11 @@
   perSystem =
     {
       pkgs,
-      stdPath,
       ...
     }:
     let
       wine-packages = pkgs.callPackage ./packages.nix {
-        inherit stdPath inputs;
+        inherit inputs;
       };
     in
     {
