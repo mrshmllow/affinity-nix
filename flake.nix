@@ -60,7 +60,6 @@
           inputs',
           config,
           pkgs,
-          system,
           ...
         }:
         {
