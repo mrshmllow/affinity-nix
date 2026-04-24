@@ -262,13 +262,17 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
             info!("using exe {exe_path:?}");
 
-            cmd(WINE, std::iter::once(exe_path).chain(arguments.iter().cloned()))
+            cmd(
+                WINE,
+                std::iter::once(exe_path).chain(arguments.iter().cloned()),
+            )
         }
         ProgramToExecute::Other(Program::Wine { arguments }) => cmd(WINE, arguments),
         ProgramToExecute::Other(Program::Winetricks { arguments }) => cmd(WINETRICKS, arguments),
-        ProgramToExecute::Other(Program::Wineboot { arguments }) => {
-            cmd(WINE, std::iter::once("wineboot".to_string()).chain(arguments.iter().cloned()))
-        }
+        ProgramToExecute::Other(Program::Wineboot { arguments }) => cmd(
+            WINE,
+            std::iter::once("wineboot".to_string()).chain(arguments.iter().cloned()),
+        ),
         ProgramToExecute::Other(Program::Wineserver { arguments }) => cmd(WINESERVER, arguments),
     };
 
