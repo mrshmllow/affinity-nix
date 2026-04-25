@@ -44,7 +44,7 @@ let
   lastV2Version = "2.6.5";
 in
 symlinkJoin {
-  name = "affinity-${name}-${lastV2Version}";
+  name = "affinity-${lib.toLower name}-${lastV2Version}";
   pname = "affinity-${lib.toLower name}";
   paths = [
     runner.package
