@@ -70,4 +70,6 @@ in
       cargoClippyExtraArgs = "--all-targets -- --deny warnings";
     }
   );
+
+  package-artifacts = cargoArtifacts;
 }

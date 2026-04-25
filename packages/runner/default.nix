@@ -30,6 +30,9 @@
         runner-clippy = runner.package-clippy;
       };
 
-      packages.runner = runner.package;
+      packages = {
+        runner = runner.package;
+        runner-artifacts = runner.package-artifacts;
+      };
     };
 }

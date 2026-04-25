@@ -4,6 +4,7 @@ builds:
     - packages.x86_64-linux.apl-combined
     - packages.x86_64-linux.base-prefix-pre-affinity
     - packages.x86_64-linux.wine
+    - packages.x86_64-linux.runner-artifacts
     - checks.x86_64-linux.pre-commit
     - checks.x86_64-linux.treefmt
     - formatter.x86_64-linux
