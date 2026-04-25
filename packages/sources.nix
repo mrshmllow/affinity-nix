@@ -24,7 +24,7 @@ in
 {
   v3 = mkExtract (pkgs.fetchurl {
     url = "https://web.archive.org/web/20260418054031/https://downloads.affinity.studio/Affinity%20x64.exe";
-    hash = "sha256-h2zK4cEJpD3FPmhpxjf3Rm3MFcWoRaUjSY4saBfUgL4=";
+    hash = "sha256-xVzeLd2726tcXKzDMim2k/38z7QWlhO+3Dt6nYTbmuo=";
   }) ".rsrc/2057/BIN/135";
 
   photo = mkExtract (pkgs.fetchurl {
