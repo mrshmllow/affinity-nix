@@ -22,6 +22,8 @@
           cfg.settings.package
 
           pkgs.uv
+          pkgs.flatpak-builder
+          pkgs.just
         ];
 
         env = {

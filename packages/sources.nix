@@ -21,11 +21,14 @@ let
         msiextract -C $out ./*
       '';
 in
-{
+rec {
+  v3-url = "https://web.archive.org/web/20260418054031/https://downloads.affinity.studio/Affinity%20x64.exe";
+  v3-segment = ".rsrc/2057/BIN/135";
+
   v3 = mkExtract (pkgs.fetchurl {
-    url = "https://web.archive.org/web/20260418054031/https://downloads.affinity.studio/Affinity%20x64.exe";
+    url = v3-url;
     hash = "sha256-h2zK4cEJpD3FPmhpxjf3Rm3MFcWoRaUjSY4saBfUgL4=";
-  }) ".rsrc/2057/BIN/135";
+  }) v3-segment;
 
   photo = mkExtract (pkgs.fetchurl {
     name = "affinity-photo-msi-2.6.5.exe";

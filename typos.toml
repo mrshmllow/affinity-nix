@@ -1,6 +1,8 @@
 [type.nix.extend-words]
 # this is a 7zz argument...
 tpe = "tpe"
+# 7zz source contains this file extension
+mak = "mak"
 
 [type.md.extend-words]
 Canva = "Canva"
