@@ -65,7 +65,22 @@
         sdk-extensions = [
           "org.freedesktop.Sdk.Extension.rust-stable"
           "org.freedesktop.Sdk.Extension.vala"
+
+          # non-64-bit-only wine
+          "org.freedesktop.Sdk.Extension.toolchain-i386"
         ];
+
+        platform-extensions = [
+          # non-64-bit-only wine
+          # "org.freedesktop.Platform.Compat.i386"
+        ];
+
+        add-extensions = {
+          "org.freedesktop.Platform.Compat.i386" = {
+            directory = "lib/i386-linux-gnu";
+            version = "25.08";
+          };
+        };
 
         build-options = {
           append-path = "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/vala/bin";
@@ -74,6 +89,7 @@
 
         finish-args = [
           "--share=ipc"
+          "--share=network"
           "--socket=x11"
           "--socket=pulseaudio"
           "--device=dri"
@@ -89,12 +105,33 @@
         ];
 
         modules = [
+          # {
+          #   name = "wine";
+          #   buildsystem = "autotools";
+          #   config-opts = [
+          #     "--enable-win64"
+          #     "CC=gcc -std=gnu17"
+          #   ];
+          #   sources = [
+          #     {
+          #       type = "archive";
+          #       path = mkTar "wine-source" inputs.elemental-wine-source;
+          #     }
+          #   ];
+          # }
           {
             name = "wine";
-            buildsystem = "autotools";
-            config-opts = [
-              "--enable-win64"
-              "CC=gcc -std=gnu17"
+            buildsystem = "simple";
+            # config-opts = [
+            #   "--enable-win64"
+            #   "CC=gcc -std=gnu17"
+            # ];
+            build-commands = [
+              "mkdir build64 build32"
+              ''cd build64 && CC="gcc -std=gnu17" ../configure --prefix=/app --enable-win64 && make -j$FLATPAK_BUILDER_N_JOBS''
+              ''cd build32 && export PATH="/usr/lib/sdk/toolchain-i386/bin:$PATH" && export PKG_CONFIG_LIBDIR="/usr/lib/i386-linux-gnu/pkgconfig:/usr/share/pkgconfig" && CC="gcc -m32 -std=gnu17" CXX="g++ -m32" LDFLAGS="-L/usr/lib/i386-linux-gnu" ../configure --prefix=/app --with-wine64=../build64 && make -j$FLATPAK_BUILDER_N_JOBS''
+              "cd build32 && make install"
+              "cd build64 && make install"
             ];
             sources = [
               {
