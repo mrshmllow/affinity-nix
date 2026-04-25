@@ -29,9 +29,11 @@
               -czhf $out -C ./src-tmp .
         '';
 
+      stripNewline = builtins.replaceStrings [ "\n" ] [ "" ];
+
       mkDirHash =
         dir:
-        builtins.replaceStrings [ "\n" ] [ "" ] (
+        stripNewline (
           builtins.readFile (
             pkgs.runCommand "hash-directory" { } ''
               cat ${dir}/* | sha256sum | cut -d' ' -f1 > $out
@@ -222,8 +224,18 @@
               {
                 type = "extra-data";
                 url = installers.v3-url;
-                sha256 = "c55cde2dddbbdbab5c5cacc33229b693fdfccfb4169613bedc3b7a9d84db9aea";
-                size = 643911240;
+                sha256 = builtins.replaceStrings [ "\n" ] [ "" ] (
+                  builtins.readFile (
+                    pkgs.runCommand "get-affinity-hash" { } "sha256sum ${installers.v3-file} | cut -d' ' -f1 > $out"
+                  )
+                );
+                size = lib.strings.toInt (
+                  stripNewline (
+                    builtins.readFile (
+                      pkgs.runCommand "get-affinity-bytes" { } "wc --bytes < ${installers.v3-file} > $out"
+                    )
+                  )
+                );
                 filename = "Affinity.exe";
               }
               {
