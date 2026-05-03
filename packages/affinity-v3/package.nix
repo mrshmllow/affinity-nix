@@ -3,13 +3,12 @@
   callPackage,
   stdenv,
   inputs,
-  stdPath,
   lib,
   ...
 }:
 let
   wine-packages = callPackage ../wine/packages.nix {
-    inherit inputs stdPath;
+    inherit inputs;
   };
 
   apl-combined = callPackage ../apl/apl-combined.nix {
