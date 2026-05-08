@@ -13,13 +13,11 @@
         inherit toolchain inputs wine-packages;
 
         registry-patches = (pkgs.callPackage ../registry-patches.nix { }).combined;
-        prefixBase = (
-          pkgs.callPackage ../prefixWithAffinity.nix {
-            inherit inputs wine-packages;
-            apl-combined = self'.packages.apl-combined;
-            v3 = true;
-          }
-        );
+        prefixBase = pkgs.callPackage ../prefixWithAffinity.nix {
+          inherit inputs wine-packages;
+          inherit (self'.packages) apl-combined;
+          v3 = true;
+        };
         name = "v3";
       };
     in

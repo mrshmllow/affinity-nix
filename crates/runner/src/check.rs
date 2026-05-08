@@ -13,7 +13,6 @@ use crate::make_env;
 pub(crate) static REGISTRY_PATCHES: LazyLock<PathBuf> =
     LazyLock::new(|| PathBuf::from(env!("REGISTRY_PATCHES")));
 pub(crate) static ON_LINUX: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("ON_LINUX")));
-pub(crate) const RSYNC: &str = env!("RSYNC");
 
 const LATEST_REVISION: u32 = 10;
 
@@ -48,7 +47,7 @@ pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
         ))?;
 
         let rsync = cmd!(
-            RSYNC,
+            crate::RSYNC,
             "-v",
             "--ignore-existing",
             "--chmod=D755,F644",
