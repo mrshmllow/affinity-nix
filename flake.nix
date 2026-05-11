@@ -12,7 +12,7 @@
     };
 
     plugin-loader-src = {
-      url = "github:noahc3/AffinityPluginLoader/v0.3.0";
+      url = "github:noahc3/AffinityPluginLoader/1d7956d5b791bd6a213e8b28c1e25e1f4bcc6166";
       flake = false;
     };
 

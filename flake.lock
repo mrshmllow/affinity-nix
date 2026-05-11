@@ -257,17 +257,17 @@
     "plugin-loader-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1775508798,
-        "narHash": "sha256-cD2G3M83wCEXVMMl9YoHMLxPIvbXeESgQTkXiM+lzns=",
+        "lastModified": 1776972538,
+        "narHash": "sha256-2EvrOYQCB2Z2YXhcPnjR67KoOCvwTVW3TfLcmU3//ak=",
         "owner": "noahc3",
         "repo": "AffinityPluginLoader",
-        "rev": "bd93bbf9f84735d8ba6538596620bbe8d8b90efd",
+        "rev": "1d7956d5b791bd6a213e8b28c1e25e1f4bcc6166",
         "type": "github"
       },
       "original": {
         "owner": "noahc3",
-        "ref": "v0.3.0",
         "repo": "AffinityPluginLoader",
+        "rev": "1d7956d5b791bd6a213e8b28c1e25e1f4bcc6166",
         "type": "github"
       }
     },
