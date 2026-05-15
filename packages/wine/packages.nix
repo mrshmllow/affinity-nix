@@ -3,7 +3,7 @@
   callPackage,
   pkgs,
   inputs,
-  stdPath,
+  ...
 }:
 let
   wineUnstable =
@@ -23,7 +23,6 @@ let
 
   wrapWithPrefix = callPackage ./wrapWithPrefix.nix {
     inherit wineUnwrapped;
-    stdPath = stdPath pkgs;
   };
 in
 {
