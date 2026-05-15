@@ -21,9 +21,9 @@ let
   registry-patches = callPackage ./registry-patches.nix { };
 
   vkd3d = fetchzip {
-    url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0b/vkd3d-proton-3.0b.tar.zst";
+    url = "https://github.com/HansKristian-Work/vkd3d-proton/releases/download/v3.0.1/vkd3d-proton-3.0.1.tar.zst";
     nativeBuildInputs = [ zstd ];
-    hash = "sha256-/W5gmh+RrvCytjIL0CkqOepygrz2wHn2pJf0VAGj1Hs=";
+    hash = "sha256-xHJFtVDD/ZHVHF2Fn7TEEX0fMUWJvujNyNt2Xyw9F7o=";
   };
 
   inherit (wine-packages) wine wineserver;
