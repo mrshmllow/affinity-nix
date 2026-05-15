@@ -7,7 +7,7 @@
 }:
 let
   wineUnstable =
-    (inputs.nixpkgs-wine.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full.override {
+    (inputs.nixpkgs.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full.override {
       wineRelease = "unstable";
     }).overrideAttrs
       {
