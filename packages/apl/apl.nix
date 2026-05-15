@@ -11,6 +11,8 @@ buildDotnetModule rec {
 
   projectFile = "AffinityPluginLoader.sln";
 
+  patches = [ ./no-login.patch ];
+
   nugetDeps = ./deps.json;
 
   postInstall = ''
