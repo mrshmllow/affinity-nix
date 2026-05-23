@@ -6,14 +6,7 @@
   stdPath,
 }:
 let
-  wineUnstable =
-    (inputs.nixpkgs-wine.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full.override {
-      wineRelease = "unstable";
-    }).overrideAttrs
-      {
-        src = inputs.elemental-wine-source;
-        version = "9.13-part3";
-      };
+  wineUnstable = inputs.nixpkgs.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full;
 
   symlink = callPackage ./symlink.nix { };
 
