@@ -1,3 +1,6 @@
+[files]
+extend-exclude = ["packages/apl/no-login.patch"]
+
 [type.nix.extend-words]
 # this is a 7zz argument...
 tpe = "tpe"
