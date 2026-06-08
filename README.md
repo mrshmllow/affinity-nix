@@ -138,6 +138,25 @@ Install with Home Manager:
 }
 ```
 
+Install without flakes:
+
+```nixos
+{ config, pkgs, ... }:
+
+let
+  affinity = import (fetchTarball "https://github.com/mrshmllow/affinity-nix/archive/refs/heads/main.tar.gz");
+in
+{
+  nixpkgs.overlays = [
+      affinity.overlays.default
+  ];
+
+  users.users.my-user.packages = with pkgs; [
+      affinity-photo
+  ];
+}
+```
+
 ### Troubleshooting, winetricks, wineboot, and more
 
 Each package (`v3|photo|designer|publisher`) has the following usage:
