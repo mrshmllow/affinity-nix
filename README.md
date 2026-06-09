@@ -78,7 +78,8 @@ $ nix profile install github:mrshmllow/affinity-nix#affinity-publisher
 
 #### Install on NixOS / Home Manager
 
-Installing via an overlay is recommended, as the package will become `unfree` in the future.
+Installing via an overlay is recommended, as the package is `unfree` 
+making it difficult to use directly.
 
 Install with NixOS:
 
