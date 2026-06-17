@@ -10,6 +10,9 @@ Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, a
 
 We also install https://github.com/noahc3/AffinityPluginLoader for a far more pleasant experience.
 
+> [!WARNING]
+> Affinity on Wine is far from perfect and you will likely experience bugs and issues. Please have patience and [report any issues you experience](https://github.com/mrshmllow/affinity-nix/issues/new/choose).
+
 ## Support
 
 Thank you to my GitHub sponsors!
