@@ -12,14 +12,11 @@ We also install https://github.com/noahc3/AffinityPluginLoader for a far more pl
 
 There is a sister project which allows you to run these packages on any Linux distro through AppImages, [affinity-everywhere](https://github.com/mrshmllow/affinity-everywhere).
 
-## Recent Breaking Changes
+## Support
 
-With the release of v3, there has been some changes:
+Thank you to my GitHub sponsors!
 
-- Packages `{wine,wineboot,wineserver,winetricks}` have been removed. There are instructions below to access these binaries.
-- Packages `{update,direct}*` have been removed. There are instructions below to update the apps.
-- Since v3 was unified into a single application, `{photo,designer,publisher}` remain the way to access v2 affinity, with `v3` becoming the package to access the v3 application.
-- Additionally, the `default` package now points to v3.
+![Supporter Graph](./.github/graph.png)
 
 ## Preamble
 
