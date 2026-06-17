@@ -10,8 +10,6 @@ Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, a
 
 We also install https://github.com/noahc3/AffinityPluginLoader for a far more pleasant experience.
 
-There is a sister project which allows you to run these packages on any Linux distro through AppImages, [affinity-everywhere](https://github.com/mrshmllow/affinity-everywhere).
-
 ## Support
 
 Thank you to my GitHub sponsors!
