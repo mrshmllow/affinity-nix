@@ -73,7 +73,7 @@ $ nix profile install github:mrshmllow/affinity-nix#affinity-designer
 $ nix profile install github:mrshmllow/affinity-nix#affinity-publisher
 ```
 
-#### Install on NixOS / Home Manager
+#### Install on NixOS / Home Manager with Flakes
 
 Installing via an overlay is recommended, as the package is `unfree` 
 making it difficult to use directly.
@@ -81,6 +81,7 @@ making it difficult to use directly.
 Install with NixOS:
 
 ```nix
+# flake.nix
 {
   inputs = {
     affinity-nix.url = "github:mrshmllow/affinity-nix";
@@ -110,6 +111,7 @@ Install with NixOS:
 Install with Home Manager:
 
 ```nix
+# flake.nix
 {
   inputs = {
     affinity-nix.url = "github:mrshmllow/affinity-nix";
@@ -136,9 +138,12 @@ Install with Home Manager:
 }
 ```
 
+#### Install on NixOS without Flakes
+
 Install without flakes:
 
 ```nixos
+# configuration.nix
 { config, pkgs, ... }:
 
 let
