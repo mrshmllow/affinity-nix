@@ -31,28 +31,40 @@ let
     {
       name = "vcrun2022/vc_redist.x64.exe";
       path = fetchurl {
-        url = "https://web.archive.org/web/20260405052133/https://aka.ms/vs/17/release/vc_redist.x64.exe";
+        urls = [
+          "https://web.archive.org/web/20260405052133/https://aka.ms/vs/17/release/vc_redist.x64.exe"
+          "https://download.visualstudio.microsoft.com/download/pr/7ebf5fdb-36dc-4145-b0a0-90d3d5990a61/CC0FF0EB1DC3F5188AE6300FAEF32BF5BEEBA4BDD6E8E445A9184072096B713B/VC_redist.x64.exe"
+        ];
         hash = "sha256-zA/w6x3D9RiK5jAPrvMr9b7rpL3W6ORFqRhAcglrcTs=";
       };
     }
     {
       name = "vcrun2022/vc_redist.x86.exe";
       path = fetchurl {
-        url = "https://web.archive.org/web/20260330091736/https://aka.ms/vs/17/release/vc_redist.x86.exe";
+        urls = [
+          "https://web.archive.org/web/20260330091736/https://aka.ms/vs/17/release/vc_redist.x86.exe"
+          "https://download.visualstudio.microsoft.com/download/pr/7ebf5fdb-36dc-4145-b0a0-90d3d5990a61/0C09F2611660441084CE0DF425C51C11E147E6447963C3690F97E0B25C55ED64/VC_redist.x86.exe"
+        ];
         hash = "sha256-DAnyYRZgRBCEzg30JcUcEeFH5kR5Y8NpD5fgslxV7WQ=";
       };
     }
     {
       name = "dotnet48/ndp48-x86-x64-allos-enu.exe";
       path = fetchurl {
-        url = "https://web.archive.org/web/20260313001348/https://download.visualstudio.microsoft.com/download/pr/7afca223-55d2-470a-8edc-6a1739ae3252/abd170b4b0ec15ad0222a809b761a036/ndp48-x86-x64-allos-enu.exe";
+        urls = [
+          "https://web.archive.org/web/20260313001348/https://download.visualstudio.microsoft.com/download/pr/7afca223-55d2-470a-8edc-6a1739ae3252/abd170b4b0ec15ad0222a809b761a036/ndp48-x86-x64-allos-enu.exe"
+          "https://download.visualstudio.microsoft.com/download/pr/7afca223-55d2-470a-8edc-6a1739ae3252/abd170b4b0ec15ad0222a809b761a036/ndp48-x86-x64-allos-enu.exe"
+        ];
         hash = "sha256-lYidbePyBwwHeQrWzyAA0z2aG9/Go4FyWrgqscMU/VM=";
       };
     }
     {
       name = "dotnet40/dotNetFx40_Full_x86_x64.exe";
       path = fetchurl {
-        url = "https://web.archive.org/web/20260319080641/https://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe";
+        urls = [
+          "https://web.archive.org/web/20260319080641/https://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe"
+          "https://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe"
+        ];
         hash = "sha256-ZeBkJY8uQYgWswT2Rv+eh68QHkyVUqsGS7dNKBw4ZZ8=";
       };
     }
@@ -66,7 +78,10 @@ let
     {
       name = "dotnet20/NetFx64.exe";
       path = fetchurl {
-        url = "https://web.archive.org/web/20060509045320/https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe";
+        urls = [
+          "https://web.archive.org/web/20060509045320/https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe"
+          "https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe"
+        ];
         hash = "sha256-fqhtyo7q7cqkoXNwVHyizqnptndJcrjgPSyx+w55hmk=";
       };
     }
