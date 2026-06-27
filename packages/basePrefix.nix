@@ -33,7 +33,7 @@ let
       path = fetchurl {
         urls = [
           "https://web.archive.org/web/20260405052133/https://aka.ms/vs/17/release/vc_redist.x64.exe"
-          "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+          "https://download.visualstudio.microsoft.com/download/pr/7ebf5fdb-36dc-4145-b0a0-90d3d5990a61/CC0FF0EB1DC3F5188AE6300FAEF32BF5BEEBA4BDD6E8E445A9184072096B713B/VC_redist.x64.exe"
         ];
         hash = "sha256-zA/w6x3D9RiK5jAPrvMr9b7rpL3W6ORFqRhAcglrcTs=";
       };
@@ -43,7 +43,7 @@ let
       path = fetchurl {
         urls = [
           "https://web.archive.org/web/20260330091736/https://aka.ms/vs/17/release/vc_redist.x86.exe"
-          "https://aka.ms/vs/17/release/vc_redist.x86.exe"
+          "https://download.visualstudio.microsoft.com/download/pr/7ebf5fdb-36dc-4145-b0a0-90d3d5990a61/0C09F2611660441084CE0DF425C51C11E147E6447963C3690F97E0B25C55ED64/VC_redist.x86.exe"
         ];
         hash = "sha256-DAnyYRZgRBCEzg30JcUcEeFH5kR5Y8NpD5fgslxV7WQ=";
       };
