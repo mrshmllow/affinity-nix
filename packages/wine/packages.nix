@@ -3,7 +3,7 @@
   callPackage,
   pkgs,
   inputs,
-  stdPath,
+  ...
 }:
 let
   wineUnstable = inputs.nixpkgs.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full;
@@ -16,7 +16,6 @@ let
 
   wrapWithPrefix = callPackage ./wrapWithPrefix.nix {
     inherit wineUnwrapped;
-    stdPath = stdPath pkgs;
   };
 in
 {
