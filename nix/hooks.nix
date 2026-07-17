@@ -33,6 +33,14 @@
                 ''
               );
             };
+            actionlint = {
+              enable = true;
+              files = "^\\.github/workflows/.*\\.(yml|yaml)$";
+            };
+            yamllint = {
+              enable = true;
+              settings.configPath = ".yamllint.yaml";
+            };
           };
         };
       };
