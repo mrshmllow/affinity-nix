@@ -10,7 +10,6 @@
   perSystem =
     {
       pkgs,
-      lib,
       wine-packages,
       ...
     }:
