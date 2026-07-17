@@ -6,7 +6,6 @@
       lib,
       stdPath,
       self',
-      warnUnfree,
       ...
     }:
     let
@@ -17,11 +16,9 @@
 
       makeV2Package =
         name:
-        warnUnfree (
-          pkgs.callPackage ./package.nix {
-            inherit inputs stdPath name;
-          }
-        );
+        (pkgs.callPackage ./package.nix {
+          inherit inputs stdPath name;
+        });
     in
     {
       packages = {
