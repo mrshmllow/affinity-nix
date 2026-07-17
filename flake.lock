@@ -200,11 +200,11 @@
     "on-linux": {
       "flake": false,
       "locked": {
-        "lastModified": 1772699425,
-        "narHash": "sha256-xhqkN2I5r+Ty2k8HEsLg5e8Eaazb0Qyioqjs87BQOnY=",
+        "lastModified": 1783797218,
+        "narHash": "sha256-oNQ6gvcibxa7OKPSeAtd+I7BsVLrJbEr7l8DqvZu3pU=",
         "owner": "seapear",
         "repo": "AffinityOnLinux",
-        "rev": "a0c4421946709c24c3f371fcbf15a45b814f188c",
+        "rev": "794bb88175f9d43b23f1e023cf0f0bc534639e21",
         "type": "github"
       },
       "original": {
