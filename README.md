@@ -22,7 +22,7 @@ Thank you to my GitHub sponsors!
 ## Preamble
 
 > [!TIP]
-> [Add garnix as a substituter](https://garnix.io/docs/ci/caching/) to avoid compiling yourself.
+> We provide a binary cache for this repo. Please [add cache.forall.systems as a substituter](https://cache.forall.systems/) to avoid compiling yourself.
 
 > [!NOTE]
 > This repo does not attempt to redistribute affinity archives. Any instance of caching Canva IP should be reported as a bug.

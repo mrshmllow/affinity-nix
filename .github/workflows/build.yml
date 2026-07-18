@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: "Build"
+on:
+  pull_request:
+  push:
+jobs:
+  pre-job:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@04a1aebece824b56e6ad6a401d015479cd1c50b3
+        with:
+          concurrent_skipping: "same_content_newer"
+          cancel_others: "true"
+  build:
+    needs: pre-job
+    strategy:
+      matrix:
+        package: [apl-combined, base-prefix-pre-affinity, runner-artifacts, wine]
+        arch:
+          - id: x86_64-linux
+            runner: ubuntu-latest
+            # has no aarch packages but if it ever got one uncomment this
+            # - id: aarch64-linux
+            #   runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.arch.runner }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: Mic92/niks3-action@12d3e320b2a99b7938f9634bd337cd9fec104609
+        with:
+          server-url: https://niks3.forall.systems
+      - name: Build
+        run: |
+          nix build -L --print-out-paths \
+            .#packages."${ARCH}"."${MATRIX_PACKAGE}"
+        env:
+          MATRIX_PACKAGE: ${{ matrix.package }}
+          ARCH: ${{ matrix.arch.id }}
