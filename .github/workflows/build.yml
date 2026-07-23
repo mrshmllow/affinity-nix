@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
         with:
           persist-credentials: false
-      - uses: cachix/install-nix-action@96951a368ba55167b55f1c916f7d416bac6505fe
+      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - uses: Mic92/niks3-action@12d3e320b2a99b7938f9634bd337cd9fec104609
