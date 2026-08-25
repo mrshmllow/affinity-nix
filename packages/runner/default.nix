@@ -4,7 +4,6 @@
     {
       pkgs,
       wine-packages,
-      self',
       ...
     }:
     let
