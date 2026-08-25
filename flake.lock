@@ -179,11 +179,11 @@
     "on-linux": {
       "flake": false,
       "locked": {
-        "lastModified": 1785546009,
-        "narHash": "sha256-G1l+Byd3a0DMtwm84D2bXIKigMugYteh4ke+Mt1UZd8=",
+        "lastModified": 1787365621,
+        "narHash": "sha256-aRS0sZ6p7YJagjFaZFrS1zuvN3PVKNBJOze1Ek/bOi8=",
         "owner": "seapear",
         "repo": "AffinityOnLinux",
-        "rev": "916140f3677bf06f3552949e69f926ee0e50606c",
+        "rev": "0fe210754999a2ace3039c11fbbd11b45b5ee399",
         "type": "github"
       },
       "original": {
