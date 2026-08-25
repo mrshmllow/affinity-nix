@@ -28,10 +28,6 @@
     };
 
     crane.url = "github:ipetkov/crane";
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -57,15 +53,12 @@
       ];
       perSystem =
         {
-          inputs',
-          config,
           pkgs,
           ...
         }:
         {
           _module.args = {
-            toolchain = inputs'.fenix.packages.complete;
-            craneLib = (inputs.crane.mkLib pkgs).overrideToolchain config._module.args.toolchain.toolchain;
+            craneLib = inputs.crane.mkLib pkgs;
           };
         };
     };

@@ -3,7 +3,6 @@
   callPackage,
   lib,
   name,
-  stdenv,
   inputs,
   stdPath,
   ...
@@ -30,7 +29,6 @@ let
       name
       ;
     registry-patches = (callPackage ../registry-patches.nix { }).combined;
-    toolchain = inputs.fenix.packages.${stdenv.hostPlatform.system}.complete;
   };
 
   desktop = callPackage ./desktopItems.nix {
