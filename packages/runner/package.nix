@@ -2,7 +2,6 @@
   pkgs,
   lib,
 
-  toolchain,
   inputs,
   registry-patches,
   wine-packages,
@@ -11,7 +10,7 @@
   ...
 }:
 let
-  craneLib = (inputs.crane.mkLib pkgs).overrideToolchain toolchain.toolchain;
+  craneLib = inputs.crane.mkLib pkgs;
   src = craneLib.cleanCargoSource ../..;
   commonArgs = {
     inherit src;

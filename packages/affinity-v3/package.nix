@@ -1,7 +1,6 @@
 {
   symlinkJoin,
   callPackage,
-  stdenv,
   inputs,
   stdPath,
   lib,
@@ -23,7 +22,6 @@ let
   runner = callPackage ../runner/package.nix {
     inherit prefixBase inputs wine-packages;
     registry-patches = (callPackage ../registry-patches.nix { }).combined;
-    toolchain = inputs.fenix.packages.${stdenv.hostPlatform.system}.complete;
     name = "v3";
   };
 

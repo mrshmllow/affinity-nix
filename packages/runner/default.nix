@@ -3,14 +3,13 @@
   perSystem =
     {
       pkgs,
-      toolchain,
       wine-packages,
       self',
       ...
     }:
     let
       runner = pkgs.callPackage ./package.nix {
-        inherit toolchain inputs wine-packages;
+        inherit inputs wine-packages;
 
         registry-patches = (pkgs.callPackage ../registry-patches.nix { }).combined;
         prefixBase = pkgs.callPackage ../prefixWithAffinity.nix {
