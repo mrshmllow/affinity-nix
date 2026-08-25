@@ -12,12 +12,7 @@
         inherit inputs wine-packages;
 
         registry-patches = (pkgs.callPackage ../registry-patches.nix { }).combined;
-        prefixBase = pkgs.callPackage ../prefixWithAffinity.nix {
-          inherit inputs wine-packages;
-          inherit (self'.packages) apl-combined;
-
-          v3 = true;
-        };
+        prefixBase = "/non-functional-runner";
         name = "v3";
       };
     in

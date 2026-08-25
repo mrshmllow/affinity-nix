@@ -5,7 +5,7 @@
   inputs,
   registry-patches,
   wine-packages,
-  prefixBase,
+  prefixBase ? null,
   name,
   ...
 }:
@@ -31,7 +31,6 @@ let
     };
 
   env = {
-    LOWER_DIR = prefixBase;
     WINE = lib.getExe wine-packages.wine;
     WINESERVER = lib.getExe wine-packages.wineserver;
     WINETRICKS = lib.getExe wine-packages.winetricks;
@@ -42,25 +41,40 @@ let
     REGISTRY_PATCHES = registry-patches;
     ON_LINUX = inputs.on-linux.outPath;
   };
-in
-{
-  package = craneLib.buildPackage (
+
+  executableName = "affinity-${lib.toLower name}";
+
+  executable = craneLib.buildPackage (
     commonArgs
     // {
       inherit cargoArtifacts env;
 
-      pname = "affinity-${lib.toLower name}";
+      pname = executableName;
 
       cargoExtraArgs = "-p runner --no-default-features --features ${lib.toLower name}";
       src = fileSetForCrate ../../crates/runner;
 
-      meta.mainProgram = "affinity-${lib.toLower name}";
+      meta.mainProgram = executableName;
 
       postInstall = ''
         mv $out/bin/runner $out/bin/affinity-${lib.toLower name}
       '';
     }
   );
+in
+{
+  package =
+    pkgs.runCommand executableName
+      {
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+      }
+      ''
+        mkdir -p $out/bin
+        cp ${lib.getExe executable} $out/bin/${executableName}
+
+        wrapProgram $out/bin/${executableName} \
+            --set "LOWER_DIR" "${prefixBase}" \
+      '';
 
   package-clippy = craneLib.cargoClippy (
     commonArgs
