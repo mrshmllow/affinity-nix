@@ -5,7 +5,7 @@
   inputs,
   registry-patches,
   wine-packages,
-  prefixBase ? null,
+  prefixBase,
   name,
   ...
 }:

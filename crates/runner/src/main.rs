@@ -577,12 +577,9 @@ fn main() -> anyhow::Result<()> {
 
     info!(paths = ?paths, lower = ?LOWER_DIR.display());
 
-    if !LOWER_DIR
-        .try_exists()
-        .expect("failed to see if LOWER_DIR exists")
-    {
+    if !LOWER_DIR.is_dir() {
         return Err(anyhow::anyhow!(
-            "{} does not exist! If $LOWER_DIR does not exist, you are likely using the wrong package, refer to affinity-nix's readme for correct usage.",
+            "{} does not exist or is not a directory! If $LOWER_DIR does not exist, you are likely using the wrong package, refer to affinity-nix's readme for correct usage.",
             LOWER_DIR.display()
         ));
     }
