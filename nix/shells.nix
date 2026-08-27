@@ -22,6 +22,7 @@
           cfg.settings.package
 
           pkgs.uv
+          pkgs.rust-analyzer
         ];
 
         env = {

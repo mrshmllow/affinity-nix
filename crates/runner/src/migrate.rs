@@ -24,7 +24,7 @@ fn make_message(backup_location: &Path) -> String {
 }
 
 #[instrument(skip_all)]
-pub(crate) fn migrate(paths: &Paths) -> anyhow::Result<()> {
+pub fn migrate(paths: &Paths) -> anyhow::Result<()> {
     let Some(revision) = crate::check::read_revision(&paths.upper)? else {
         info!("revision does not exist, skipping backup");
         return Ok(());

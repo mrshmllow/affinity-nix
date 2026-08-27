@@ -10,15 +10,15 @@ use tracing::{info, instrument};
 
 use crate::make_env;
 
-pub(crate) static REGISTRY_PATCHES: LazyLock<PathBuf> =
+pub static REGISTRY_PATCHES: LazyLock<PathBuf> =
     LazyLock::new(|| PathBuf::from(env!("REGISTRY_PATCHES")));
-pub(crate) static ON_LINUX: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("ON_LINUX")));
-pub(crate) const RSYNC: &str = env!("RSYNC");
+pub static ON_LINUX: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("ON_LINUX")));
+pub const RSYNC: &str = env!("RSYNC");
 
 const LATEST_REVISION: u32 = 10;
 
 #[instrument(skip_all, ret)]
-pub(crate) fn read_revision(wine_prefix: &Path) -> Result<Option<u32>> {
+pub fn read_revision(wine_prefix: &Path) -> Result<Option<u32>> {
     let revision_file = wine_prefix.join(".revision");
 
     if !revision_file.is_file() {
@@ -44,7 +44,8 @@ pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
         let app_settings_src = ON_LINUX.join(format!("Auxiliary/Settings/{app}/2.0/"));
 
         fs::create_dir_all(&app_settings_dst).context(format!(
-            "creating settings directory for {app} w/ user {user}: {app_settings_dst:?}"
+            "creating settings directory for {app} w/ user {user}: {}",
+            app_settings_dst.display()
         ))?;
 
         let rsync = cmd!(
@@ -59,7 +60,9 @@ pub fn sync_v2_settings(wine_prefix: &Path, user: &str) -> Result<()> {
         .stderr_to_stdout()
         .read()
         .context(format!(
-            "syncing {app} settings with rsync: dst {app_settings_dst:?}, src {app_settings_src:?}"
+            "syncing {app} settings with rsync: dst {}, src {}",
+            app_settings_dst.display(),
+            app_settings_src.display()
         ))?;
 
         for line in rsync.lines().filter(|x| !x.is_empty()) {
@@ -86,7 +89,7 @@ pub fn perform_migrations(wine_prefix: &Path) -> Result<()> {
 
     if revision < 10 {
         let migration = make_env(
-            cmd!(
+            &cmd!(
                 crate::WINE,
                 "regedit",
                 "/S",
