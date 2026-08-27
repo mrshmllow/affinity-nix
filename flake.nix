@@ -27,6 +27,11 @@
       flake = false;
     };
 
+    elemental-wine-source = {
+      url = "gitlab:ElementalWarrior/wine?host=gitlab.winehq.org&ref=affinity-photo3-wine9.13-part3";
+      flake = false;
+    };
+
     crane.url = "github:ipetkov/crane";
   };
 
