@@ -8,3 +8,7 @@ version = "0.1.0"
 
 [workspace.metadata.crane]
 name = "affinity-nix"
+
+[workspace.lints.clippy]
+pedantic = { level = "deny" }
+nursery = { level = "deny" }

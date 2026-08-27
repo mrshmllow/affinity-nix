@@ -53,7 +53,7 @@ struct Arguments {
 
     /// Arguments for affinity application
     #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-    affinity_arguments: Vec<String>,
+    affinity: Vec<String>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -125,7 +125,7 @@ fn init_tracing() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 }
 
-fn make_env(expression: duct::Expression, wine_prefix: &Path, verbose: bool) -> duct::Expression {
+fn make_env(expression: &duct::Expression, wine_prefix: &Path, verbose: bool) -> duct::Expression {
     let expression = expression.env("WINEPREFIX", wine_prefix.display().to_string());
 
     if verbose {
@@ -137,7 +137,10 @@ fn make_env(expression: duct::Expression, wine_prefix: &Path, verbose: bool) -> 
 
 #[instrument]
 fn warmup_prefix_directories(destination: &PathBuf) -> io::Result<()> {
-    for entry in WalkDir::new(&*LOWER_DIR).into_iter().filter_map(|e| e.ok()) {
+    for entry in WalkDir::new(&*LOWER_DIR)
+        .into_iter()
+        .filter_map(std::result::Result::ok)
+    {
         if !entry.file_type().is_dir() {
             continue;
         }
@@ -184,7 +187,7 @@ fn warmup_prefix_registry(destination: &PathBuf, user: &String) -> io::Result<()
 #[instrument(skip_all)]
 fn wineboot_update(wine_prefix: &Path, verbose: bool) -> anyhow::Result<()> {
     let handle = make_env(
-        cmd!(WINE, "wineboot", "--update")
+        &cmd!(WINE, "wineboot", "--update")
             .stderr_to_stdout()
             .unchecked(),
         wine_prefix,
@@ -224,10 +227,10 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
     if let Err(e) = warmup_prefix_directories(&paths.upper) {
         error!(error = %e, "warmup prefix directories failed (non-fatal)");
-    };
+    }
     if let Err(e) = warmup_prefix_registry(&paths.upper, &user) {
         error!(error = %e, "warmup prefix registry failed (non-fatal)");
-    };
+    }
     wineboot_update(&paths.wine_prefix, verbose)?;
 
     info!("finished warming & wineboot");
@@ -277,7 +280,7 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
     };
 
     let application_handle = make_env(
-        application_handle.stderr_to_stdout().unchecked(),
+        &application_handle.stderr_to_stdout().unchecked(),
         &paths.wine_prefix,
         verbose,
     )
@@ -292,13 +295,13 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
     match application_handle.try_wait()? {
         Some(output) => {
-            if !output.status.success() {
+            if output.status.success() {
+                info!(status = ?output.status, "application process ended cleanly");
+            } else {
                 return Err(anyhow::anyhow!(
                     "application process failed: {:?}",
                     output.status
                 ));
-            } else {
-                info!(status = ?output.status, "application process ended cleanly");
             }
         }
         None => {
@@ -307,7 +310,7 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
     }
 
     let wineserver_wait = make_env(
-        cmd!(WINESERVER, "-w").stderr_to_stdout().unchecked(),
+        &cmd!(WINESERVER, "-w").stderr_to_stdout().unchecked(),
         &paths.wine_prefix,
         verbose,
     )
@@ -322,10 +325,10 @@ fn execute(paths: &Paths, program: &ProgramToExecute, verbose: bool) -> anyhow::
 
     match wineserver_wait.try_wait()? {
         Some(output) => {
-            if !output.status.success() {
-                return Err(anyhow::anyhow!("wineserver -w failed: {:?}", output.status));
-            } else {
+            if output.status.success() {
                 info!(status = ?output.status, "wineserver -w exited cleanly");
+            } else {
+                return Err(anyhow::anyhow!("wineserver -w failed: {:?}", output.status));
             }
         }
         None => {
@@ -445,10 +448,9 @@ fn mount_run_unprivileged(
         error!(error = ?err, "Running with fuse failed.");
         let _ = cleanup_fuse(paths);
         return Err(anyhow::anyhow!(
-            "failed to run application with `fuse-overlayfs`: {:?}",
-            err
+            "failed to run application with `fuse-overlayfs`: {err:?}"
         ));
-    };
+    }
 
     cleanup_fuse(paths)?;
 
@@ -472,12 +474,12 @@ fn mount_execute_privileged(paths: &Paths, program: &ProgramToExecute, verbose: 
         MsFlags::empty(),
         Some(make_mount_options(paths).as_str()),
     ) {
-        Ok(_) => {
+        Ok(()) => {
             if let Err(err) = execute(paths, program, verbose) {
                 error!(error = ?err, "Running privileged failed.");
                 cleanup_privileged(paths);
                 std::process::exit(1);
-            };
+            }
         }
         Err(err) => {
             error!(errorno = ?err, "Mount failed.");
@@ -590,7 +592,7 @@ fn main() -> anyhow::Result<()> {
         ProgramToExecute::Other(subcommand)
     } else {
         ProgramToExecute::Affinity {
-            arguments: args.affinity_arguments,
+            arguments: args.affinity,
         }
     };
 
