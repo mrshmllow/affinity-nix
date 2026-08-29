@@ -35,8 +35,6 @@
           RSYNC = lib.getExe pkgs.rsync;
           REGISTRY_PATCHES = (pkgs.callPackage ../packages/registry-patches.nix { }).combined;
           ON_LINUX = inputs.on-linux.outPath;
-
-          LOWER_DIR = "";
         };
 
         shellHook = builtins.concatStringsSep "\n" [

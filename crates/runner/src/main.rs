@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::{self},
     io::{self, BufRead, BufReader},
     os::unix::fs::PermissionsExt,
@@ -38,7 +39,8 @@ pub(crate) const FUSE_OVERLAYFS: &str = env!("FUSE_OVERLAYFS");
 pub(crate) const GNUTAR: &str = env!("GNUTAR");
 pub(crate) const ZENITY: &str = env!("ZENITY");
 
-pub(crate) static LOWER_DIR: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("LOWER_DIR")));
+pub(crate) static LOWER_DIR: LazyLock<PathBuf> =
+    LazyLock::new(|| PathBuf::from(env::var("LOWER_DIR").expect("LOWER_DIR env var to exist")));
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -575,7 +577,14 @@ fn main() -> anyhow::Result<()> {
             .join(format!("affinity-nix-prefix-{}", std::process::id())),
     };
 
-    info!(paths = ?paths);
+    info!(paths = ?paths, lower = ?LOWER_DIR.display());
+
+    if !LOWER_DIR.is_dir() {
+        return Err(anyhow::anyhow!(
+            "{} does not exist or is not a directory! If $LOWER_DIR does not exist, you are likely using the wrong package, refer to affinity-nix's readme for correct usage.",
+            LOWER_DIR.display()
+        ));
+    }
 
     paths
         .ensure_created()
