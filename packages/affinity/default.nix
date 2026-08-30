@@ -3,8 +3,6 @@
   perSystem =
     {
       pkgs,
-      lib,
-      self',
       ...
     }:
     let
