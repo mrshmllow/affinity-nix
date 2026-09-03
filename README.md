@@ -71,6 +71,17 @@ $ nix run github:rastarr/affinity-nix#affinity-designer
 $ nix run github:rastarr/affinity-nix#affinity-publisher
 ```
 
+> [!IMPORTANT]
+> The package is `unfree` (it contains Affinity binaries). A user-profile
+> install does not inherit your NixOS `allowUnfree` setting, so pass it
+> explicitly:
+>
+> ```bash
+> $ NIXPKGS_ALLOW_UNFREE=1 nix profile install github:rastarr/affinity-nix#affinity-v3 --impure
+> ```
+>
+> (`nix run` needs the same environment: `NIXPKGS_ALLOW_UNFREE=1 nix run ... --impure`.)
+
 ### Installing the applications on your system (Optional)
 
 #### Install with nix-profile
