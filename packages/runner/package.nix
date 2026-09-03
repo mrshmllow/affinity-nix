@@ -67,6 +67,9 @@ in
     pkgs.runCommand executableName
       {
         nativeBuildInputs = [ pkgs.makeWrapper ];
+
+        # lib.getExe (used by desktopItems) needs meta.mainProgram on this derivation
+        meta.mainProgram = executableName;
       }
       ''
         mkdir -p $out/bin
