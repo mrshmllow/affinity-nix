@@ -204,3 +204,30 @@ Or `winecfg`:
 ```sh
 $ affinity-v3 wine winecfg
 ```
+
+### Startup crash: `.NET Runtime` internal error (exit 80131506)
+
+Some Affinity v3 launches crash during startup with the APL plugin loader:
+
+```
+err:eventlog: "The process was terminated due to an internal error in the
+.NET Runtime ... with exit code 80131506"
+err:seh: Unhandled exception code c0000005
+Affinity exited with code -1073741819
+```
+
+This is a startup race between the plugin loader's CLR-initialisation wait
+and Affinity itself (see [#97](https://github.com/mrshmllow/affinity-nix/issues/97)
+and [#276](https://github.com/mrshmllow/affinity-nix/issues/276)). If you hit
+it, launch with the hook's wait loop disabled — the bootstrap still injects,
+but Affinity is not poked while the CLR is coming up:
+
+```sh
+$ APLHOOK_DETACH=1 affinity-v3
+```
+
+To make the launcher/desktop entry use it:
+
+```sh
+$ env APLHOOK_DETACH=1 affinity-v3 %U
+```
