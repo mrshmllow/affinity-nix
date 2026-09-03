@@ -6,6 +6,17 @@
 
 Affinity v3 & v2 packaged with Nix!
 
+> [!NOTE]
+> **This is a fork** of [mrshmllow/affinity-nix](https://github.com/mrshmllow/affinity-nix).
+> It carries two changes not yet in upstream ([PR #280](https://github.com/mrshmllow/affinity-nix/pull/280) pending):
+>
+> 1. `meta.mainProgram` fix — removes the `getExe` evaluation warning on install (#276).
+> 2. Documented workaround for the intermittent Affinity v3 startup crash
+>    (CLR error 80131506): launch with `APLHOOK_DETACH=1 affinity-v3`
+>    (see [Troubleshooting](#startup-crash-net-runtime-internal-error-exit-80131506)).
+>
+> All commands below reference this fork.
+
 Based on https://github.com/lf-/affinity-crimes and https://affinity.liz.pet/, and uses [ElementalWarrior's wine](https://gitlab.winehq.org/ElementalWarrior/wine).
 
 We also install https://github.com/noahc3/AffinityPluginLoader for a far more pleasant experience.
@@ -51,13 +62,13 @@ graph LR;
 ### Running Ad-hoc
 
 ```bash
-$ nix run github:mrshmllow/affinity-nix#affinity-v3
+$ nix run github:rastarr/affinity-nix#affinity-v3
 
 -- v2 versions:
 
-$ nix run github:mrshmllow/affinity-nix#affinity-photo
-$ nix run github:mrshmllow/affinity-nix#affinity-designer
-$ nix run github:mrshmllow/affinity-nix#affinity-publisher
+$ nix run github:rastarr/affinity-nix#affinity-photo
+$ nix run github:rastarr/affinity-nix#affinity-designer
+$ nix run github:rastarr/affinity-nix#affinity-publisher
 ```
 
 ### Installing the applications on your system (Optional)
@@ -65,13 +76,13 @@ $ nix run github:mrshmllow/affinity-nix#affinity-publisher
 #### Install with nix-profile
 
 ```bash
-$ nix profile install github:mrshmllow/affinity-nix#affinity-v3
+$ nix profile install github:rastarr/affinity-nix#affinity-v3
 
 -- v2 versions:
 
-$ nix profile install github:mrshmllow/affinity-nix#affinity-photo
-$ nix profile install github:mrshmllow/affinity-nix#affinity-designer
-$ nix profile install github:mrshmllow/affinity-nix#affinity-publisher
+$ nix profile install github:rastarr/affinity-nix#affinity-photo
+$ nix profile install github:rastarr/affinity-nix#affinity-designer
+$ nix profile install github:rastarr/affinity-nix#affinity-publisher
 ```
 
 #### Install on NixOS / Home Manager with Flakes
@@ -85,7 +96,7 @@ Install with NixOS:
 # flake.nix
 {
   inputs = {
-    affinity-nix.url = "github:mrshmllow/affinity-nix";
+    affinity-nix.url = "github:rastarr/affinity-nix";
     # ...
   };
 
@@ -115,7 +126,7 @@ Install with Home Manager:
 # flake.nix
 {
   inputs = {
-    affinity-nix.url = "github:mrshmllow/affinity-nix";
+    affinity-nix.url = "github:rastarr/affinity-nix";
     # ...
   };
 
@@ -148,7 +159,7 @@ Install without flakes:
 { config, pkgs, ... }:
 
 let
-  affinity = import (fetchTarball "https://github.com/mrshmllow/affinity-nix/archive/refs/heads/main.tar.gz");
+  affinity = import (fetchTarball "https://github.com/rastarr/affinity-nix/archive/refs/heads/main.tar.gz");
 in
 {
   nixpkgs.overlays = [
