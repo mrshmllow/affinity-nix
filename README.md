@@ -11,8 +11,9 @@ Affinity v3 & v2 packaged with Nix!
 > It carries two changes not yet in upstream ([PR #280](https://github.com/mrshmllow/affinity-nix/pull/280) pending):
 >
 > 1. `meta.mainProgram` fix — removes the `getExe` evaluation warning on install (#276).
-> 2. Documented workaround for the intermittent Affinity v3 startup crash
->    (CLR error 80131506): launch with `APLHOOK_DETACH=1 affinity-v3`
+> 2. Documented workaround for the Affinity v3 startup crash
+>    (CLR error 80131506): launch without the plugin loader via
+>    `affinity-v3 wine "C:\Program Files\Affinity\Affinity\Affinity.exe"`
 >    (see [Troubleshooting](#startup-crash-net-runtime-internal-error-exit-80131506)).
 >
 > All commands below reference this fork.
@@ -238,18 +239,28 @@ err:seh: Unhandled exception code c0000005
 Affinity exited with code -1073741819
 ```
 
-This is a startup race between the plugin loader's CLR-initialisation wait
-and Affinity itself (see [#97](https://github.com/mrshmllow/affinity-nix/issues/97)
-and [#276](https://github.com/mrshmllow/affinity-nix/issues/276)). If you hit
-it, launch with the hook's wait loop disabled — the bootstrap still injects,
-but Affinity is not poked while the CLR is coming up:
+This is a startup race between the plugin loader's bootstrap injection and
+Affinity's .NET CLR initialisation (see
+[#97](https://github.com/mrshmllow/affinity-nix/issues/97) and
+[#276](https://github.com/mrshmllow/affinity-nix/issues/276)). The crash is
+intermittent — the same launch can succeed on a retry — but on some systems
+it becomes near-deterministic, and `APLHOOK_DETACH=1 affinity-v3` (which skips
+the hook's CLR wait loop) only reduces the odds rather than removing the race.
+
+#### Reliable workaround: launch without the plugin loader
+
+Bypass the hook entirely and run Affinity directly under the sandboxed wine:
 
 ```sh
-$ APLHOOK_DETACH=1 affinity-v3
+$ affinity-v3 wine "C:\Program Files\Affinity\Affinity\Affinity.exe"
 ```
 
-To make the launcher/desktop entry use it:
+This starts Affinity with no runtime patching. Verified stable on a machine
+where the APL-hook path crashed 11/11 times. Trade-offs to be aware of:
 
-```sh
-$ env APLHOOK_DETACH=1 affinity-v3 %U
-```
+- **Decline any in-app update prompt** (e.g. 3.2.3) — unpatched Affinity will
+  offer to self-update, and newer builds are untested under this wine.
+- Without the loader's login patches the Canva sign-in flow must run in the
+  embedded browser, which may not work under wine; if you rely on those
+  patches, prefer retrying the normal `APLHOOK_DETACH=1 affinity-v3` launch
+  a few times instead.
