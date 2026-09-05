@@ -39,6 +39,7 @@ symlinkJoin {
     desktop.affinity-v3
     icon-package
   ];
+
   meta = {
     mainProgram = "affinity-v3";
 

@@ -67,6 +67,8 @@ in
     pkgs.runCommand executableName
       {
         nativeBuildInputs = [ pkgs.makeWrapper ];
+
+        meta.mainProgram = executableName;
       }
       ''
         mkdir -p $out/bin
