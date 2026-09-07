@@ -28,6 +28,13 @@
     };
 
     crane.url = "github:ipetkov/crane";
+
+    windows-rs = {
+      # a known-working commit of the Windows.winmd file. this file has been moved and has had many
+      # non-descriptive git changes, so it's pinned to a version which atleast works.
+      url = "github:microsoft/windows-rs/628f84c51645217c7a06a20774ea1275dc7270ca";
+      flake = false;
+    };
   };
 
   outputs =

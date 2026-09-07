@@ -113,7 +113,7 @@ let
 
     ${lib.getExe winetricks} renderer=vulkan
 
-    install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${dependencies}/*.winmd
+    install -D -t "$WINEPREFIX/drive_c/windows/system32/WinMetadata/" ${inputs.windows-rs}/crates/libs/bindgen/default/Windows.winmd
 
     ${lib.getExe wineserver} -w
   '';
