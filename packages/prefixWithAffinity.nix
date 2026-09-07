@@ -28,7 +28,7 @@ let
 
   inherit (wine-packages) wine wineserver;
 in
-runCommand "base-prefix-4" { } ''
+runCommand "affinity-prefix-final" { } ''
   set -x -e
 
   mkdir -p $out
