@@ -2,7 +2,6 @@
   callPackage,
   fetchzip,
   runCommand,
-  fetchurl,
   lndir,
   zstd,
   lib,
@@ -27,10 +26,7 @@ let
     hash = "sha256-xHJFtVDD/ZHVHF2Fn7TEEX0fMUWJvujNyNt2Xyw9F7o=";
   };
 
-  wintypes_shim = fetchurl {
-    url = "https://github.com/ElementalWarrior/wine-wintypes.dll-for-affinity/raw/refs/heads/master/wintypes_shim.dll.so";
-    hash = "sha256-pcrlA48/FHpuHolzoa8JfaOP4ohp6/HalCQ9ZL/rv/Y=";
-  };
+  wintypes_shim = "${inputs.wintypes_shim}/wintypes_shim.dll.so";
 
   inherit (wine-packages) wine wineserver;
 in

@@ -28,6 +28,11 @@
     };
 
     crane.url = "github:ipetkov/crane";
+
+    wintypes_shim = {
+      url = "github:ElementalWarrior/wine-wintypes.dll-for-affinity";
+      flake = false;
+    };
   };
 
   outputs =
