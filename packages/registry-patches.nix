@@ -12,10 +12,23 @@ rec {
       "d3d12core"="native"
     '').outPath;
 
+  # wintypes was added in revision 11
+  two-wintypes =
+    (pkgs.writeText "wintypes-regedit-changes.reg" ''
+      Windows Registry Editor Version 5.00
+
+      [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
+      "wintypes"="native"
+    '').outPath;
+
   combined = pkgs.linkFarm "registry-patches-combined" [
     {
       name = "one.reg";
       path = one-vkd3d;
+    }
+    {
+      name = "two.reg";
+      path = two-wintypes;
     }
   ];
 }
