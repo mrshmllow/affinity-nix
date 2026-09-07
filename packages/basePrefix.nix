@@ -87,7 +87,7 @@ let
     }
   ];
 
-  layer_1 = runCommand "base-prefix-1" { } ''
+  layer_1 = runCommand "affinity-prefix-layer-1" { } ''
     set -x -e
     mkdir -p $out
     export WINEPREFIX="$out"
@@ -119,7 +119,7 @@ let
   '';
 
   layer_2 =
-    runCommand "base-prefix-2"
+    runCommand "affinity-prefix-layer-2-edgewebview"
       {
         nativeBuildInputs = [
           xvfb-run
@@ -161,7 +161,7 @@ let
         ${lib.getExe wineserver} -w
       '';
 in
-runCommand "base-prefix-3"
+runCommand "affinity-prefix-layer-3-winetricks"
   {
     nativeBuildInputs = [
       xvfb-run
