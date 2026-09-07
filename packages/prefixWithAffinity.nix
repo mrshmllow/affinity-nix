@@ -2,6 +2,7 @@
   callPackage,
   fetchzip,
   runCommand,
+  fetchurl,
   lndir,
   zstd,
   lib,
@@ -26,6 +27,11 @@ let
     hash = "sha256-xHJFtVDD/ZHVHF2Fn7TEEX0fMUWJvujNyNt2Xyw9F7o=";
   };
 
+  wintypes_shim = fetchurl {
+    url = "https://github.com/ElementalWarrior/wine-wintypes.dll-for-affinity/raw/refs/heads/master/wintypes_shim.dll.so";
+    hash = "sha256-pcrlA48/FHpuHolzoa8JfaOP4ohp6/HalCQ9ZL/rv/Y=";
+  };
+
   inherit (wine-packages) wine wineserver;
 in
 runCommand "base-prefix-4" { } ''
@@ -40,12 +46,14 @@ runCommand "base-prefix-4" { } ''
   cp ${vkd3d}/x64/d3d12core.dll "$WINEPREFIX/drive_c/windows/system32"
 
   ${lib.getExe wine} regedit /S "${registry-patches.one-vkd3d}"
+  ${lib.getExe wine} regedit /S "${registry-patches.two-wintypes}"
 
   ${lib.optionalString v3 ''
     ${lib.getExe lndir} ${installers.v3} "$WINEPREFIX/drive_c/Program Files/"
 
     pushd "$WINEPREFIX/drive_c/Program Files/Affinity/Affinity"
     cp -r "${apl-combined}/." .
+    cp ${wintypes_shim} wintypes.dll
     popd
   ''}
 
@@ -53,6 +61,10 @@ runCommand "base-prefix-4" { } ''
     ${lib.getExe lndir} ${installers.photo} "$WINEPREFIX/drive_c/Program Files/"
     ${lib.getExe lndir} ${installers.designer} "$WINEPREFIX/drive_c/Program Files/"
     ${lib.getExe lndir} ${installers.publisher} "$WINEPREFIX/drive_c/Program Files/"
+
+    cp ${wintypes_shim} "$WINEPREFIX/drive_c/Program Files/Affinity/Photo 2/wintypes.dll"
+    cp ${wintypes_shim} "$WINEPREFIX/drive_c/Program Files/Affinity/Publisher 2/wintypes.dll"
+    cp ${wintypes_shim} "$WINEPREFIX/drive_c/Program Files/Affinity/Designer 2/wintypes.dll"
   ''}
 
   ${lib.getExe wineserver} -w

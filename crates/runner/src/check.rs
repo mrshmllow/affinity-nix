@@ -15,7 +15,7 @@ pub static REGISTRY_PATCHES: LazyLock<PathBuf> =
 pub static ON_LINUX: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("ON_LINUX")));
 pub const RSYNC: &str = env!("RSYNC");
 
-const LATEST_REVISION: u32 = 10;
+const LATEST_REVISION: u32 = 11;
 
 #[instrument(skip_all, ret)]
 pub fn read_revision(wine_prefix: &Path) -> Result<Option<u32>> {
@@ -100,13 +100,35 @@ pub fn perform_migrations(wine_prefix: &Path) -> Result<()> {
         )
         .stderr_to_stdout()
         .read()
-        .context("applying one.reg")?;
+        .context("applying revision 10 reg changes")?;
 
         for line in migration.lines() {
             info!("vkd3d migration: {line}");
         }
 
         info!("finished vkd3d migration.");
+    }
+
+    if revision < 11 {
+        let migration = make_env(
+            &cmd!(
+                crate::WINE,
+                "regedit",
+                "/S",
+                REGISTRY_PATCHES.join("two.reg")
+            ),
+            wine_prefix,
+            true,
+        )
+        .stderr_to_stdout()
+        .read()
+        .context("applying revision 11 reg changes")?;
+
+        for line in migration.lines() {
+            info!("wintypes migration: {line}");
+        }
+
+        info!("finished wintypes migration.");
     }
 
     write_revision(wine_prefix).context("writing revision")?;
