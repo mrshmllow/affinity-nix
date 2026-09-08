@@ -16,9 +16,18 @@ jobs:
         with:
           concurrent_skipping: "same_content_newer"
           cancel_others: "true"
-  build-wine:
+  build-independent:
     needs: pre-job
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [apl-combined, runner-artifacts, wine]
+        arch:
+          - id: x86_64-linux
+            runner: ubuntu-latest
+            # has no aarch packages but if it ever got one uncomment this
+            # - id: aarch64-linux
+            #   runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.arch.runner }}
     permissions:
       id-token: write
     steps:
@@ -34,12 +43,15 @@ jobs:
       - name: Build
         run: |
           nix build -L --print-out-paths \
-            .#packages.x86_64-linux.wine
+            .#packages."${ARCH}"."${MATRIX_PACKAGE}"
+        env:
+          MATRIX_PACKAGE: ${{ matrix.package }}
+          ARCH: ${{ matrix.arch.id }}
   build:
-    needs: [pre-job, build-wine]
+    needs: build-independent
     strategy:
       matrix:
-        package: [apl-combined, base-prefix-pre-affinity, runner-artifacts]
+        package: [base-prefix-pre-affinity]
         arch:
           - id: x86_64-linux
             runner: ubuntu-latest
