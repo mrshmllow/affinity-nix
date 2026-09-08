@@ -128,7 +128,9 @@ fn init_tracing() {
 }
 
 fn make_env(expression: &duct::Expression, wine_prefix: &Path, verbose: bool) -> duct::Expression {
-    let expression = expression.env("WINEPREFIX", wine_prefix.display().to_string());
+    let expression = expression
+        .env("WINEPREFIX", wine_prefix.display().to_string())
+        .env("WINE_FORCE_PORTAL", "1".to_string());
 
     if verbose {
         return expression;
@@ -505,14 +507,16 @@ fn mount_run_privileged(
         return Ok(());
     }
 
-    let uid_map = format!("0 {} 1\n", ids.0);
+    // identity map uid/gid into the namespace instead of remapping to 0.
+    // this is so that portals and dbus continue to work
+    let uid_map = format!("{} {} 1\n", ids.0, ids.0);
     if let Err(err) = fs::write("/proc/self/uid_map", uid_map) {
         error!(error = ?err, "failed to write uid_map");
         mount_run_unprivileged(paths, program, verbose)?;
         return Ok(());
     }
 
-    let gid_map = format!("0 {} 1\n", ids.1);
+    let gid_map = format!("{} {} 1\n", ids.1, ids.1);
     if let Err(err) = fs::write("/proc/self/gid_map", gid_map) {
         error!(error = ?err, "failed to write gid_map");
         mount_run_unprivileged(paths, program, verbose)?;
