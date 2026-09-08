@@ -6,7 +6,8 @@
   ...
 }:
 let
-  wineUnstable = inputs.nixpkgs.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.full;
+  wineUnstable =
+    inputs.nixpkgs.legacyPackages.${stdenv.hostPlatform.system}.wineWow64Packages.stagingFull;
 
   symlink = callPackage ./symlink.nix { };
 
