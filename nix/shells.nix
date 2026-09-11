@@ -1,4 +1,3 @@
-{ inputs, ... }:
 {
   perSystem =
     {
@@ -6,8 +5,6 @@
       lib,
       craneLib,
       pkgs,
-      self',
-      wine-packages,
       ...
     }:
     let
@@ -24,18 +21,6 @@
           pkgs.uv
           pkgs.rust-analyzer
         ];
-
-        env = {
-          WINE = lib.getExe self'.packages.wine;
-          WINESERVER = lib.getExe wine-packages.wineserver;
-          WINETRICKS = lib.getExe wine-packages.winetricks;
-          FUSE_OVERLAYFS = lib.getExe pkgs.fuse-overlayfs;
-          GNUTAR = lib.getExe pkgs.gnutar;
-          ZENITY = lib.getExe pkgs.zenity;
-          RSYNC = lib.getExe pkgs.rsync;
-          REGISTRY_PATCHES = (pkgs.callPackage ../packages/registry-patches.nix { }).combined;
-          ON_LINUX = inputs.on-linux.outPath;
-        };
 
         shellHook = builtins.concatStringsSep "\n" [
           cfg.installationScript
