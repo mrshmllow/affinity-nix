@@ -40,6 +40,7 @@ jobs:
       - uses: Mic92/niks3-action@f0743610fddd7d96239c78d9e457440fc15019e2
         with:
           server-url: https://niks3.forall.systems
+          debug: 'true'
       - name: Build
         run: |
           nix build -L --print-out-paths \
@@ -71,6 +72,7 @@ jobs:
       - uses: Mic92/niks3-action@f0743610fddd7d96239c78d9e457440fc15019e2
         with:
           server-url: https://niks3.forall.systems
+          debug: 'true'
       - name: Build
         run: |
           nix build -L --print-out-paths \
