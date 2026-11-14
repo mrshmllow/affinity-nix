@@ -12,7 +12,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'cachix/install-nix-action@v31.11.3'
         - 'fkirc/skip-duplicate-actions@4c5980e005e0ae8f7d9dff27ae88c605fe4c5ecc'
-        - 'mic92/niks3-action@v1.5.0'
+        - 'mic92/niks3-action@v1.7.0'
 dependencies:
     'actions/cache@v6.1.0':
         ref: 'v6.1.0'
@@ -39,8 +39,8 @@ dependencies:
         commit: 'sha1-4c5980e005e0ae8f7d9dff27ae88c605fe4c5ecc'
         owner_id: 17876666
         repo_id: 296902892
-    'mic92/niks3-action@v1.5.0':
-        ref: 'v1.5.0'
-        commit: 'sha1-6d24bc1d87acdfac8e5dc3266f7b28ae99051adf'
+    'mic92/niks3-action@v1.7.0':
+        ref: 'v1.7.0'
+        commit: 'sha1-6c79855e3e7d8e62ca74234519438a858003abe1'
         owner_id: 96200
         repo_id: 1234569622
