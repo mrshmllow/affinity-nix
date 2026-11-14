@@ -2,7 +2,7 @@
   description = "An attempt at packaging affinity photo for nix";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     on-linux = {
       url = "github:seapear/AffinityOnLinux";
