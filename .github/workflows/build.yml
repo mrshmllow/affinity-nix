@@ -37,7 +37,7 @@ jobs:
       - uses: cachix/install-nix-action@v31.11.3
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - uses: Mic92/niks3-action@v1.5.0
+      - uses: Mic92/niks3-action@v1.7.0
         with:
           server-url: https://niks3.forall.systems
           debug: 'true'
@@ -69,7 +69,7 @@ jobs:
       - uses: cachix/install-nix-action@v31.11.3
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - uses: Mic92/niks3-action@v1.5.0
+      - uses: Mic92/niks3-action@v1.7.0
         with:
           server-url: https://niks3.forall.systems
           debug: 'true'
