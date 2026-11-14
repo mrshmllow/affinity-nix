@@ -33,6 +33,7 @@ in
 runCommand "affinity-prefix-final" { } ''
   set -x -e
 
+  mkdir -p ~/.cache/fontconfig
   mkdir -p $out
   cp -a ${layer_3}/. $out
   chmod -R +w $out
