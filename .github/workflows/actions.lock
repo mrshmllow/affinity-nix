@@ -7,10 +7,10 @@ workflows:
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'autofix-ci/action@v1.3.4'
-        - 'cachix/install-nix-action@v31.11.3'
+        - 'cachix/install-nix-action@v31.11.5'
     '.github/workflows/build.yml':
         - 'actions/checkout@v7.0.1'
-        - 'cachix/install-nix-action@v31.11.3'
+        - 'cachix/install-nix-action@v31.11.5'
         - 'fkirc/skip-duplicate-actions@4c5980e005e0ae8f7d9dff27ae88c605fe4c5ecc'
         - 'mic92/niks3-action@v1.7.0'
 dependencies:
@@ -29,9 +29,9 @@ dependencies:
         commit: 'sha1-c5b2d67aa2274e7b5a18224e8171550871fc7e4a'
         owner_id: 114818642
         repo_id: 544055925
-    'cachix/install-nix-action@v31.11.3':
-        ref: 'v31.11.3'
-        commit: 'sha1-75c75c31ebece974e48ebc36b4ad125bd97bd97b'
+    'cachix/install-nix-action@v31.11.5':
+        ref: 'v31.11.5'
+        commit: 'sha1-3dc140bfc76c49fbd4dd958429132e3746bcb086'
         owner_id: 36824654
         repo_id: 212301524
     'fkirc/skip-duplicate-actions@4c5980e005e0ae8f7d9dff27ae88c605fe4c5ecc':
