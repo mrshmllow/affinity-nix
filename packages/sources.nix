@@ -4,25 +4,14 @@
   ...
 }:
 let
+
   mkExtract =
     source: segment:
     pkgs.runCommand "affinity-extracted-sources"
       {
         nativeBuildInputs = [
           pkgs._7zz
-
-          # See https://github.com/mrshmllow/affinity-nix/issues/315
-          # Patch taken from https://github.com/NixOS/nixpkgs/pull/582240
-          # Remove once fixed in nixpkgs.
-          (pkgs.msitools.overrideAttrs (old: {
-            patches = (old.patches or [ ]) ++ [
-              (pkgs.fetchpatch2 {
-                name = "libmsi-open-0-byte-streams-with-libgsf-1.14.59.patch";
-                url = "https://gitlab.gnome.org/GNOME/msitools/-/commit/fc2daea77a1186a946304c930727223333266a1b.patch?full_index=1";
-                hash = "sha256-SomD7V5pb8Ai9io7FLS7W3MnqsRxMsPwLlNVBwmgerY=";
-              })
-            ];
-          }))
+          pkgs.msitools
         ];
 
         meta.license = lib.licenses.unfree;
