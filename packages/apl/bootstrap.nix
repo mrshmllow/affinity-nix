@@ -4,7 +4,7 @@
   src,
   ...
 }:
-pkgs.pkgsCross.mingwW64.stdenv.mkDerivation {
+pkgs.pkgsCross.mingw-msvcrt-x86_64.stdenv.mkDerivation {
   pname = "affinity-bootstrap";
 
   inherit version;
